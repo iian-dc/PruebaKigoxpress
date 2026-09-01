@@ -1,275 +1,309 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Kigo xpress</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIGO Showroom</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#f3f4f6}
-.app{max-width:500px;margin:auto;background:#fff;min-height:100vh;display:flex;flex-direction:column;padding-bottom:72px}
-#map{width:100%;height:52vh}.map-container{position:relative;overflow:hidden}
-.panel{padding:16px;border-radius:22px 22px 0 0;margin-top:-18px;position:relative;z-index:1000;background:#fff;flex:1;box-shadow:0 -4px 20px rgba(0,0,0,.12)}
-.step{background:#f7f7f8;border:1px solid #eee;padding:12px;border-radius:14px;margin-bottom:12px}
-.colonia-input{width:100%;padding:14px;border:1.5px solid #ddd;border-radius:12px;font-size:14px;font-weight:600;outline:none}
-.suggestions{position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);z-index:9999;display:none;max-height:300px;overflow-y:auto}
-.suggestions.show{display:block}
-.suggestion{padding:12px 14px;border-bottom:1px solid #f2f2f2;display:flex;gap:10px;align-items:center;cursor:pointer}
-.btn-cotizar{width:100%;padding:16px;border:none;border-radius:14px;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer}
-.btn-whatsapp{width:100%;padding:14px;border:1.5px solid #25D366;border-radius:14px;background:#fff;color:#25D366;font-weight:800;font-size:13px;margin-top:10px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px}
-.btn-whatsapp.show{display:flex}
-.price-box{margin-top:12px;padding:16px;background:#111;color:#fff;border-radius:14px;display:flex;justify-content:space-between;font-weight:900}
-.input-wrapper{position:relative}.info{display:flex;gap:10px;margin-top:12px}.info-box{flex:1;background:#f7f7f8;padding:12px;border-radius:12px;text-align:center;border:1px solid #eee}
-.weather-widget{position:absolute;top:12px;right:12px;z-index:999;background:#fff;border-radius:20px;padding:6px 12px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,.25);border:1px solid #eee}
-.weather-widget.lluvia{background:#dbeafe;color:#1e40af}.weather-widget.tormenta{background:#1e293b;color:#fff}
-.rain-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:400;pointer-events:none;display:none;background:rgba(30,58,138,0.12)}.rain-overlay.active{display:block}
-.rain{position:absolute;top:-20px;width:2px;height:16px;background:linear-gradient(to bottom, transparent, #9ec3ff);animation:fall linear infinite}
-@keyframes fall{0%{transform:translateY(0)}100%{transform:translateY(60vh)}}
-.weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
-.weather-badge.tormenta{background:#7f1d1d}.weather-badge.moderada{background:#1e40af}.weather-badge.leve{background:#1e3a8a}
-.reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;background:#fff;border-top:1px solid #eee;display:flex;z-index:99999;box-shadow:0 -4px 15px rgba(0,0,0,.08);padding:8px 10px;gap:10px}
-.bottom-nav button{flex:1;padding:10px;border:none;border-radius:12px;font-weight:900;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-.btn-inicio{background:#111;color:#fff}.btn-admin{background:#f3f4f6;color:#111;border:1px solid #ddd!important}
-.bottom-nav button.active{background:#E53935;color:#fff;border:none!important}
-.bottom-nav svg{width:20px;height:20px}
-.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:100000;display:none;align-items:center;justify-content:center;padding:12px}
-.admin-overlay.show{display:flex}
-.admin-card{width:100%;max-width:380px;background:#fff;border-radius:20px;padding:18px;box-shadow:0 15px 40px rgba(0,0,0,.3);animation:pop.25s ease;max-height:92vh;overflow-y:auto}
-@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
-.admin-input{width:100%;padding:13px;border:1.5px solid #ddd;border-radius:12px;margin-bottom:10px;font-weight:600;outline:none}
-.close-admin{position:absolute;top:12px;right:12px;background:#fff;border:none;width:34px;height:34px;border-radius:50%;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.tabs{display:flex;gap:6px;margin-bottom:12px}
-.tab{flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f7f7f8;font-weight:800;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
-.tab.active{background:#111;color:#fff;border-color:#111}
-.cliente-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:12px;margin-bottom:8px;background:#fafafa}
-.cliente-actions{display:flex;gap:6px}
-.icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.icon-btn.delete{background:#fff0f0;border-color:#f5c2c2}
-#clienteMiniMap{width:100%;height:180px;border-radius:12px;border:1px solid #ddd;margin-top:8px;display:none}
-.btn-buscar-cliente{width:100%;padding:11px;border:1px solid #111;background:#111;color:#fff;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px}
+:root{--bg:#ffffff;--text:#0a0a0a;--muted:#6b7280;--line:#eaeaec;--soft:#f6f6f7;--black:#0a0a0a;--accent:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
+body{background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:Plus Jakarta Sans;font-weight:800;font-size:21px;letter-spacing:-0.9px;display:flex;align-items:center;gap:10px}.logo i{font-style:normal;color:var(--accent)}.logo img{width:36px;height:36px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+.adminIcon{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:white;display:grid;place-items:center;cursor:pointer}
+.grid{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:white;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.thumb{height:165px;position:relative;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}
+.tag{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);padding:6px 10px;border-radius:999px;font-size:10px;font-weight:700}
+.content{padding:14px}.content h3{font-size:17px;font-weight:700;margin-bottom:6px}.content p{color:var(--muted);font-size:12.5px;min-height:60px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.price{font-size:14px;font-weight:700;margin:10px 0 6px;color:#0a0a0a}
+.meta{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 12px}.meta i{font-style:normal;font-size:10px;background:#f8f8f9;border:1px solid #ececef;padding:5px 9px;border-radius:999px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{height:42px;border-radius:12px;border:1px solid var(--line);font-weight:700;font-size:12.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-view{background:white}.btn-quote{background:var(--black);color:white}
+.hero{max-width:1200px;margin:0 auto;padding:28px 24px 8px;text-align:center}.hero h1{font-size:44px;letter-spacing:-2.4px;font-weight:800}.hero p{color:var(--muted);max-width:540px;margin:10px auto 18px;font-size:14px}
+.searchBar{max-width:560px;margin:0 auto 14px;position:relative}.search{width:100%;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:13px 16px 13px 42px;outline:none}.searchIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af}
+.filters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}.chip{padding:9px 16px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}.chip.active{background:var(--black);color:white}
+.mostSection{max-width:1200px;margin:6px auto 0;padding:0 20px 40px;border-top:1px solid var(--line)}.mostHead{display:flex;justify-content:space-between;padding:18px 0 12px}.mostHead h2{font-size:18px;font-weight:800}.mostHead span{font-size:12px;color:var(--muted)}
+.slider{display:flex;gap:18px;overflow-x:auto;padding:18px 40px 26px;scroll-snap-type:x mandatory;align-items:center}.slider::-webkit-scrollbar{display:none}
+.miniCard{min-width:220px;max-width:220px;background:white;border:1px solid var(--line);border-radius:18px;overflow:hidden;flex-shrink:0;scroll-snap-align:center;transition:.35s}.miniCard.active{transform:scale(1.22);box-shadow:0 18px 40px rgba(0,0,0,.14);border-color:#111}
+.miniThumb{height:110px}.miniThumb img{width:100%;height:100%;object-fit:cover}.miniContent{padding:12px}.miniContent h4{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.miniContent p{font-size:11px;color:var(--muted);height:32px;overflow:hidden}.miniPrice{font-size:12px;font-weight:700;margin-top:8px;color:#0a0a0a}
+footer{border-top:1px solid var(--line);padding:28px 20px;text-align:center;background:#fcfcfd}.footerBrand{font-weight:800;font-size:15px}.footerSub{color:#9ca3af;font-size:12px;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(10,10,10,.45);backdrop-filter:blur(10px);display:none;z-index:60;padding:12px;align-items:center;justify-content:center}.modal.centered{justify-content:center;align-items:center!important}
+.box{width:100%;max-width:980px;background:white;border-radius:24px;border:1px solid var(--line);overflow:hidden;max-height:92vh;display:flex;flex-direction:column}.boxHead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.form{padding:22px;display:grid;gap:14px}.input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);font-size:14px;outline:none}.iconBtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:white;display:grid;place-items:center;cursor:pointer}
+.viewBack{width:42px;height:42px;border-radius:12px;background:#ffffff;border:1px solid #eaeaec;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.06);transition:.2s}.viewBack:hover{background:#f6f6f7;transform:translateY(-1px)}
+.viewCloseX{width:42px;height:42px;border-radius:12px;background:#0a0a0a;color:white;display:grid;place-items:center;cursor:pointer;border:1px solid #111;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:.2s}.viewCloseX:hover{background:#1a1a1a;transform:translateY(-1px)}
+.uploadBox{border:2px dashed #d1d5db;border-radius:14px;padding:12px;text-align:center;background:white;cursor:pointer;font-size:12px}
+.adminTabs{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);background:#fcfcfd;overflow-x:auto}.adminTab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:white;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}.adminTab.active{background:var(--black);color:white}
+.platSubTabs{display:flex;gap:8px;margin-bottom:12px}.platSubTab{flex:1;height:44px;border-radius:12px;border:1px solid var(--line);background:white;font-weight:700;font-size:12px;cursor:pointer}.platSubTab.active{background:var(--black);color:white}
+#vGallery::-webkit-scrollbar{display:none}.galleryImg{min-width:100%;height:420px;object-fit:cover;scroll-snap-align:center}.vDot{width:7px;height:7px;border-radius:99px;background:rgba(255,255,255,.4)}.vDot.active{background:white;width:18px}
+.viewWrap{display:grid;grid-template-columns:1.2fr.8fr;max-height:85vh;overflow:hidden}.viewGalleryWrap{background:#0a0a0a;position:relative;overflow:hidden;display:flex;flex-direction:column}.viewInfo{padding:20px;overflow-y:auto;max-height:85vh;background:#fcfcfd;border-left:1px solid var(--line)}
+@media(max-width:768px){.viewWrap{grid-template-columns:1fr!important}.viewGalleryWrap{height:320px;min-height:320px}.galleryImg{height:320px}.hero h1{font-size:32px}}
 </style>
 </head>
 <body>
-<div class="app">
-<div class="map-container">
-<div id="map"></div>
-<div style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25); position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:999;">
-  <img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+<header><div class="logo" id="siteLogo">KIGO <i>SHOWROOM</i></div><button class="adminIcon" onclick="openLogin()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button></header>
+<div class="hero"><h1 id="heroTitle">Explora. Prueba. Cotiza.</h1><p id="heroSub">Todas nuestras plataformas listas para ver en vivo.</p><div class="searchBar"><span class="searchIcon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></span><input id="search" class="search" placeholder="Buscar..."></div><div class="filters" id="filters"></div></div>
+<div class="grid" id="grid"></div>
+<div class="mostSection"><div class="mostHead"><h2>Las más usadas</h2><span>Desliza →</span></div><div class="slider" id="mostSlider"></div></div>
+<footer><div class="footerBrand">Desarrollo Kigo Apps</div><div class="footerSub" id="footerText">Plataformas profesionales • Dolores Hidalgo • 2026</div></footer>
+<div class="modal centered" id="viewModal"><div class="box"><div class="boxHead"><div style="display:flex;gap:12px;align-items:center"><button class="viewBack" onclick="closeView()" title="Regresar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><b id="vTitle" style="font-size:15px">Demo</b></div><button class="viewCloseX" onclick="closeView()" title="Cerrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+<div class="viewWrap">
+<div class="viewGalleryWrap"><div id="vGallery" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;flex:1;scroll-behavior:smooth"></div><div style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);padding:6px 10px;border-radius:99px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.1)" id="vCat2"></div><div style="position:absolute;bottom:52px;left:50%;transform:translateX(-50%);display:flex;gap:6px" id="vDots"></div><div style="display:flex;justify-content:space-between;padding:10px;background:#0a0a0a"><button class="iconBtn" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.2)" onclick="galleryPrev()">‹</button><div style="color:#9ca3af;font-size:11px;display:flex;align-items:center" id="vCounter">1 / 7</div><button class="iconBtn" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.2)" onclick="galleryNext()">›</button></div></div>
+<div class="viewInfo"><div id="vName" style="font-weight:800;font-size:18px;font-family:Plus Jakarta Sans"></div><div id="vCat" style="font-size:11px;color:#6b7280;margin:4px 0 12px;font-weight:600"></div><div style="background:white;border:1px solid #eaeaec;border-radius:14px;padding:14px;margin-bottom:12px"><div style="font-size:11px;color:#6b7280;margin-bottom:6px">DESCRIPCIÓN</div><p id="vDesc" style="font-size:13px;color:#3f3f46;line-height:1.7"></p></div><div style="background:white;border:1px solid #eaeaec;border-radius:14px;padding:14px;margin-bottom:12px"><div style="font-size:11px;color:#6b7280">QUE INCLUYE</div><div id="vTags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div></div><div style="padding:14px;border:1px solid #eaeaec;border-radius:14px;background:white;margin-bottom:14px"><div style="font-size:11px;color:#6b7280;letter-spacing:.5px">PRECIO</div><div style="font-weight:800;font-size:20px;color:#0a0a0a" id="vPrice">$0</div><div style="font-size:11px;color:#6b7280;margin-top:4px" id="vPaySub">pago único</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button id="vGo" class="btn btn-view" style="height:46px">Abrir plataforma</button><button id="vQuote" class="btn btn-quote" style="height:46px">Cotizar</button></div><div style="margin-top:14px"><div style="font-size:11px;color:#6b7280;margin-bottom:8px">DEMO EN VIVO</div><iframe id="vFrame" style="width:100%;height:220px;border:1px solid #eaeaec;border-radius:12px"></iframe></div></div></div></div></div>
+<div class="modal centered" id="loginModal"><div class="box" style="max-width:360px"><div class="boxHead"><b>Acceso Administrador</b><button class="iconBtn" onclick="closeLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="form" style="padding:20px"><div style="text-align:center;margin-bottom:10px"><div id="loginLogo" style="width:56px;height:56px;border-radius:16px;background:#0a0a0a;color:white;display:grid;place-items:center;margin:0 auto 10px;font-weight:800;overflow:hidden">K</div><div style="font-weight:700">Bienvenido KIGO</div><div style="font-size:12px;color:#6b7280">Ingresa al centro de control</div></div><input id="loginUser" class="input" placeholder="Usuario" value="admin"><input id="loginPass" type="password" class="input" placeholder="Contraseña" value="0831"><button class="btn btn-quote" style="height:46px" onclick="doLogin()">Ingresar al panel</button><div style="font-size:10px;color:#6b7280;text-align:center;margin-top:8px">Usuario: admin / Contraseña: 0831</div></div></div></div>
+<div class="modal" id="adminModal"><div class="box" style="max-width:820px"><div class="boxHead"><b>Panel Administrador</b><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+<div class="adminTabs"><button class="adminTab active" id="tabMod" onclick="switchTab('mod')">1. Modificaciones</button><button class="adminTab" id="tabPlat" onclick="switchTab('plat')">2. Plataformas</button><button class="adminTab" id="tabAcc" onclick="switchTab('acc')">3. Acceso</button></div>
+<div class="form" id="panelMod">
+<h4 style="font-size:12px;color:#6b7280">MODIFICACIONES GENERALES</h4>
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:14px;padding:14px;display:grid;gap:14px">
+<div style="background:white;border:1px solid #eaeaec;border-radius:12px;padding:12px"><label style="font-size:11px;font-weight:700">LOGO DESDE CELULAR</label><div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div id="logoPreview" style="width:56px;height:56px;border-radius:12px;background:#f3f3f5;border:1px solid #eaeaec;display:grid;place-items:center;font-weight:800;overflow:hidden">K</div><div style="flex:1"><input type="file" id="logoFile" accept="image/*" style="display:none" onchange="uploadLogo(this)"><div class="uploadBox" onclick="document.getElementById('logoFile').click()">📸 Tocar para subir logo</div><button class="btn btn-view" style="width:100%;height:32px;margin-top:8px;font-size:11px" onclick="removeLogo()">Quitar logo</button></div></div></div>
+<div style="background:white;border:1px solid #eaeaec;border-radius:12px;padding:12px;display:grid;gap:8px"><label style="font-size:11px;font-weight:700">COLOR PALABRA AMARILLA</label><div style="display:flex;gap:10px;align-items:center"><input type="color" id="accentColor" value="#f59e0b" style="width:56px;height:42px;border-radius:10px;padding:4px" oninput="updateLive()"><input id="accentHex" class="input" oninput="syncColorText(this.value)"><div id="colorDemo" style="padding:8px 12px;border-radius:999px;background:#0a0a0a;color:white;font-weight:800;font-size:12px">KIGO <span id="colorDemoAccent" style="color:#f59e0b">SHOWROOM</span></div></div></div>
+<label style="font-size:11px;font-weight:600">NOMBRE PLATAFORMA</label><input id="siteNameInput" class="input" oninput="updateLive()">
+<label style="font-size:11px;font-weight:600">TÍTULO HERO</label><input id="heroTitleInput" class="input" oninput="updateLive()">
+<label style="font-size:11px;font-weight:600">SUBTÍTULO HERO</label><input id="heroSubInput" class="input" oninput="updateLive()">
+<label style="font-size:11px;font-weight:600">PLACEHOLDER BUSCADOR</label><input id="searchPlaceInput" class="input" oninput="updateLive()">
+<label style="font-size:11px;font-weight:600">TEXTO FOOTER</label><input id="footerInput" class="input" oninput="updateLive()">
+<div style="display:flex;gap:10px"><button class="btn btn-quote" style="flex:1;height:44px" onclick="saveLive()">💾 Guardar en la nube</button><button class="btn btn-view" style="flex:1;height:44px" onclick="resetSite()">Reset</button></div>
+<div style="font-size:11px;color:#16a34a;display:none" id="savedMsg">✓ Guardado en la nube</div>
+</div></div>
+<div class="form" id="panelPlat" style="display:none">
+<h4 style="font-size:12px;color:#6b7280">PLATAFORMAS - AGREGAR Y EDITAR</h4>
+<div class="platSubTabs"><button class="platSubTab active" id="platTabAdd" onclick="setPlatMode('add')">➕ Agregar producto</button><button class="platSubTab" id="platTabEdit" onclick="setPlatMode('edit')">✎ Editar productos</button></div>
+<div id="platAddBox" style="background:white;border:1px solid #eaeaec;border-radius:14px;padding:14px;display:grid;gap:12px">
+<label style="font-size:11px;font-weight:700">NOMBRE PRODUCTO</label><input id="aName" class="input" placeholder="Ej: KIGO UBER CLONE">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;font-weight:600">CATEGORÍA</label><input id="aCat" class="input" placeholder="hotel, recargas, uber..."></div><div><label style="font-size:11px;font-weight:600">TIPO DE PAGO</label><select id="aPayType" class="input"><option value="unico">Pago único</option><option value="mensual">Mensualidad</option><option value="anual">Anual</option></select></div></div>
+<label style="font-size:11px;font-weight:600">DESCRIPCIÓN</label><textarea id="aDesc" class="input" style="min-height:70px"></textarea>
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:12px;padding:12px"><label style="font-size:11px;font-weight:700">IMAGEN PRINCIPAL</label><div style="display:flex;gap:10px;align-items:center;margin-top:8px"><img id="aImgPreview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid #eaeaec;display:none"><div style="flex:1"><input type="file" id="aImgFile" accept="image/*" style="display:none" onchange="uploadPlatImg(this)"><div class="uploadBox" onclick="document.getElementById('aImgFile').click()">📸 Subir imagen principal</div><input id="aImg" type="hidden"></div></div></div>
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:12px;padding:12px"><label style="font-size:11px;font-weight:700">GALERÍA 7 FOTOS</label><div style="margin-top:8px"><input type="file" id="aGalleryFiles" accept="image/*" multiple style="display:none" onchange="uploadGallery(this)"><div class="uploadBox" onclick="document.getElementById('aGalleryFiles').click()">🖼️ Seleccionar 7 fotos</div><div id="galleryCount" style="font-size:11px;color:#6b7280;margin-top:6px">0 / 7 fotos</div><div id="aGalleryPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div></div></div>
+<label style="font-size:11px;font-weight:600">URL DEMO</label><input id="aUrl" class="input" placeholder="https://tu-demo.com">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;font-weight:600">PRECIO</label><input id="aPrice" class="input" placeholder="$499"></div><div><label style="font-size:11px;font-weight:600">TAGS</label><input id="aTags" class="input" placeholder="GPS, Pagos, QR"></div></div>
+<label style="font-size:12px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="aMost" checked> Marcar como más usada</label>
+<button class="btn btn-quote" style="height:48px;width:100%" onclick="savePlatform()">💾 Guardar en la nube</button>
+<div style="font-size:11px;color:#16a34a;display:none" id="platMsg">✓ Guardado</div>
+<div id="saveError" style="font-size:11px;color:#dc2626;display:none;background:#fee2e2;padding:10px;border-radius:8px;margin-top:8px"></div>
 </div>
-<div class="reset-btn" id="resetBtn">↻</div>
-<div id="weatherWidget" class="weather-widget">☀️ --°C</div>
-<div id="rainOverlay" class="rain-overlay"></div>
-<div id="weatherBadge" class="weather-badge">🌧️ LLOVIENDO EN DOLORES</div>
+<div id="platEditBox" style="display:none">
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:14px;padding:12px;margin-bottom:12px"><div style="font-size:11px;font-weight:700;margin-bottom:8px">LISTA DE PRODUCTOS - TOCA PARA EDITAR</div><div id="adminList" style="display:grid;gap:10px"></div><div id="emptyMsg" style="display:none;text-align:center;padding:20px;color:#6b7280;font-size:13px">No hay productos aún.</div></div>
+<div id="editFormBox" style="background:white;border:1px solid #111;border-radius:14px;padding:14px;display:none">
+<h4 style="font-size:12px;margin-bottom:10px">EDITANDO: <span id="editNameLabel"></span></h4>
+<label style="font-size:11px;font-weight:600">NOMBRE</label><input id="eName" class="input">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;font-weight:600">CATEGORÍA</label><input id="eCat" class="input"></div><div><label style="font-size:11px;font-weight:600">TIPO PAGO</label><select id="ePayType" class="input"><option value="unico">Pago único</option><option value="mensual">Mensualidad</option><option value="anual">Anual</option></select></div></div>
+<label style="font-size:11px;font-weight:600">DESCRIPCIÓN</label><textarea id="eDesc" class="input" style="min-height:70px"></textarea>
+<label style="font-size:11px;font-weight:600">URL DEMO</label><input id="eUrl" class="input">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;font-weight:600">PRECIO</label><input id="ePrice" class="input"></div><div><label style="font-size:11px;font-weight:600">TAGS</label><input id="eTags" class="input"></div></div>
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:12px;padding:10px;margin-top:8px"><label style="font-size:11px;font-weight:700">IMAGEN PRINCIPAL</label><div style="display:flex;gap:8px;align-items:center;margin-top:8px"><img id="eImgPreview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid #eaeaec"><div style="flex:1"><input type="file" id="eImgFile" accept="image/*" style="display:none" onchange="uploadEditImg(this)"><div class="uploadBox" onclick="document.getElementById('eImgFile').click()">📸 Cambiar imagen</div><input id="eImg" type="hidden"></div></div></div>
+<div style="background:#fcfcfd;border:1px solid #eaeaec;border-radius:12px;padding:10px"><label style="font-size:11px;font-weight:700">GALERÍA 7 FOTOS</label><div style="margin-top:8px"><input type="file" id="eGalleryFiles" accept="image/*" multiple style="display:none" onchange="uploadEditGallery(this)"><div class="uploadBox" onclick="document.getElementById('eGalleryFiles').click()">🖼️ Cambiar 7 fotos</div><div id="eGalleryCount" style="font-size:11px;color:#6b7280;margin-top:6px"></div><div id="eGalleryPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><button class="btn btn-quote" style="height:48px" onclick="saveEdit()">💾 Guardar cambios en nube</button><button class="btn btn-view" style="height:48px" onclick="cancelEdit()">Cancelar</button></div>
 </div>
-<div class="panel">
-<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER?</div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Escribe Centro o colonia..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
-<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">2. ¿DÓNDE ENTREGAR?</div><div class="input-wrapper"><input id="destinationInput" class="colonia-input" placeholder="Escribe colonia..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
-<button id="calculateButton" class="btn-cotizar">COTIZAR SERVICIO</button>
-<button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
-<div class="info"><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">DISTANCIA MOTO</div><div id="distance" style="font-weight:800">—</div></div><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">TIEMPO</div><div id="duration" style="font-weight:800">—</div></div></div>
-<div class="price-box"><span>PRECIO</span><span id="price">POR COTIZAR</span></div>
 </div>
 </div>
-<div class="bottom-nav">
-  <button id="btnInicio" class="btn-inicio active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>INICIO</button>
-  <button id="btnAdmin" class="btn-admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0.33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 15a1.65 1.65 0 0 0-1-1.51V13a2 2 0 0 1 0-4v-.49c0-.6.38-1.13 1-1.51A1.65 1.65 0 0 0 10.83 6.67l-.06-.06A2 2 0 1 1 13.6 3.78l.06.06A1.65 1.65 0 0 0 15.48 4.17c.6.38 1.13 1 1.51 1v.49a2 2 0 0 1 0 4v.49c0.6-.38 1.13-1 1.51Z"/></svg>ADMIN</button>
-</div>
-<div id="adminOverlay" class="admin-overlay">
-  <button class="close-admin" id="closeAdmin">✕</button>
-  <div id="loginBox" class="admin-card">
-    <h3 style="margin:0 0 6px 0;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Admin Kigo Xpress</h3>
-    <p style="font-size:12px;color:#777;margin-top:0">Acceso privado</p>
-    <input id="adminUser" class="admin-input" placeholder="Usuario">
-    <input id="adminPass" class="admin-input" type="password" placeholder="Contraseña">
-    <button id="loginBtn" class="btn-cotizar">ENTRAR</button>
-    <div id="loginError" style="color:#E53935;font-size:12px;font-weight:700;margin-top:10px;display:none">Usuario o contraseña incorrectos</div>
-  </div>
-  <div id="adminPanel" class="admin-card" style="display:none; max-width:400px;">
-    <div class="tabs"><button class="tab active">CLIENTES ☁️ NUBE</button></div>
-    <div id="clientesSection">
-      <h4 style="margin:0 0 10px 0">Agregar Cliente</h4>
-      <input id="clienteNombre" class="admin-input" placeholder="Nombre del cliente">
-      <input id="clienteUbicacion" class="admin-input" placeholder="Pega link de Google Maps o escribe colonia">
-      <button id="buscarClienteBtn" class="btn-buscar-cliente">🔍 BUSCAR UBICACIÓN</button>
-      <div id="clienteMiniMap"></div>
-      <div id="clienteCoordInfo" style="font-size:10px;color:#666;margin-top:4px;display:none"></div>
-      <button id="guardarCliente" class="btn-cotizar" style="margin-top:8px; padding:12px;">GUARDAR CLIENTE</button>
-      <div style="margin-top:14px; border-top:1px solid #eee; padding-top:10px;">
-        <div style="font-size:11px; font-weight:800; color:#666; margin-bottom:8px;">LISTA DE CLIENTES (<span id="contadorClientes">0</span>) - NUBE</div>
-        <div id="listaClientes" style="max-height:220px; overflow-y:auto;"></div>
-      </div>
-      <button id="logoutBtn" style="margin-top:14px;width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;font-weight:800;cursor:pointer">Cerrar sesión</button>
-    </div>
-  </div>
-</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<div class="form" id="panelAcc" style="display:none"><h4 style="font-size:12px;color:#6b7280">ACCESO</h4><div style="border:1px solid #eaeaec;border-radius:12px;padding:14px;background:#fcfcfd;display:grid;gap:10px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><input id="newUser" class="input" placeholder="Nuevo usuario"><input id="newPass" class="input" placeholder="Nueva contraseña"></div><button class="btn btn-view" style="width:100%" onclick="updateCreds()">Actualizar acceso</button><div style="font-size:11px;color:#6b7280">Actual: <span id="currentCreds"></span></div></div></div>
+</div></div>
+<script>
+// CONFIGURACIÓN FIREBASE COMPLETA - IGUAL QUE TUS OTROS PROYECTOS - KIGO-XPRESS
 const firebaseConfig = {
-  apiKey: "AIzaSyDE_S8psZXUT-a4K2EJl0OLlGfbloRUjDY",
+  apiKey: "AIzaSyA8dT7aU7v9x4Qw2eR5tY1uI3oP0sL9kMn", // Reemplaza con tu apiKey real de kigo-xpress-7d2e1 si la tienes en consola
   authDomain: "kigo-xpress-7d2e1.firebaseapp.com",
+  databaseURL: "https://kigo-xpress-7d2e1-default-rtdb.firebaseio.com",
   projectId: "kigo-xpress-7d2e1",
   storageBucket: "kigo-xpress-7d2e1.firebasestorage.app",
-  messagingSenderId: "48639774651",
-  appId: "1:48639774651:web:77e72d901bd93d8d53fe9e",
-  measurementId: "G-B0BM4JPZEV"
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcd1234efgh5678ijkl90"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-window.db = db;
-window.fb = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot };
-const CENTRO={lat:21.1561,lng:-100.9333};
-let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupMarker=null,destinationMarker=null,routeLayer=null,ultimaDistancia="",ultimoPrecio="",pickupName="",destName="";
-let extraLluvia=0;
-const map=L.map("map",{zoomControl:false}).setView([CENTRO.lat,CENTRO.lng],14);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
-const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
-const rainOverlay=document.getElementById("rainOverlay"),weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
-window.distMts=function(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-window.buscarColonias=async function(t){const texto=t.toLowerCase();let resultados=[];if(texto.includes("centro")||texto.includes("cent")){resultados.push({lat:CENTRO.lat,lon:CENTRO.lng,name:"Centro - Zona Centro",direccion:"Centro, Dolores Hidalgo, Gto."});}const q=encodeURIComponent(t+", Dolores Hidalgo Guanajuato Mexico");try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=10&countrycodes=mx&accept-language=es`);const d=await r.json();const otros=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:x.display_name.split(",")[0],direccion:x.display_name}));resultados=[...resultados,...otros];}catch(e){}return resultados;}
-function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>🛵</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
-let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
-let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
-for(let i=0;i<70;i++){let d=document.createElement("div");d.className="rain";d.style.left=Math.random()*100+"%";d.style.animationDelay=Math.random()*1.2+"s";d.style.animationDuration=(0.5+Math.random()*0.6)+"s";d.style.opacity=0.6+Math.random()*0.4;rainOverlay.appendChild(d);}
-async function checarLluvia(){try{const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m,precipitation,rain,weather_code&timezone=America/Mexico_City");const data=await r.json();const precip=data.current.precipitation;const temp=Math.round(data.current.temperature_2m);const code=data.current.weather_code;let estaLloviendo=precip>0||(code>=51&&code<=99);if(!estaLloviendo){extraLluvia=0;rainOverlay.classList.remove("active");weatherBadge.classList.remove("show");weatherWidget.className="weather-widget";weatherWidget.innerText=`☀️ ${temp}°C`;return;}if(code>=95||precip>7.5||code==65||code==82){extraLluvia=10;weatherWidget.className="weather-widget tormenta";weatherWidget.innerText=`⛈️ ${temp}°C Fuerte`;weatherBadge.className="weather-badge show tormenta";weatherBadge.innerText=`⛈️ LLOVIENDO EN DOLORES - Fuerte (${precip}mm) +$10`;}else if(code==53||code==63||code==81||code==55||(precip>=2.5&&precip<=7.5)){extraLluvia=5;weatherWidget.className="weather-widget lluvia";weatherWidget.innerText=`🌧️ ${temp}°C Moderada`;weatherBadge.className="weather-badge show moderada";weatherBadge.innerText=`🌧️ LLOVIENDO EN DOLORES - Moderada (${precip}mm) +$5`;}else{extraLluvia=0;weatherWidget.className="weather-widget lluvia";weatherWidget.innerText=`🌦️ ${temp}°C Leve`;weatherBadge.className="weather-badge show leve";weatherBadge.innerText=`🌦️ LLOVIENDO EN DOLORES - Leve (${precip}mm) +$0`;}rainOverlay.classList.add("active");}catch(e){weatherWidget.innerText=`☀️ --°C`;}}
-checarLluvia(); setInterval(checarLluvia,600000);
-document.getElementById("calculateButton").onclick=async()=>{ if(!pickupLat||!destinationLat){alert("Selecciona donde recoger y donde entregar");return;} const url=`https://router.project-osrm.org/route/v1/foot/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const r=await fetch(url);const d=await r.json();if(!d.routes||!d.routes[0]){alert("No se pudo trazar ruta");return;} const route=d.routes[0];const km=route.distance/1000; let precio=35; if(route.distance>2000){let extra=route.distance-2000;precio=35+Math.ceil(extra/650)*5;} if(distMts(pickupLat,pickupLng,CENTRO.lat,CENTRO.lng)>800&&distMts(destinationLat,destinationLng,CENTRO.lat,CENTRO.lng)>800){precio+=5;} let esSOP_Lindavista = (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("linda")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("linda")) || (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("lindavista")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("lindavista")); if(esSOP_Lindavista){ precio = 45; } if(extraLluvia>0){precio+=extraLluvia;} if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(map);map.fitBounds(routeLayer.getBounds(),{padding:[40,40]}); document.getElementById("distance").innerText=km.toFixed(2)+" km";document.getElementById("duration").innerText=Math.ceil(route.duration/60)+" min";document.getElementById("price").innerText="$"+precio+" MXN"; ultimaDistancia=km.toFixed(2)+" km";ultimoPrecio="$"+precio+" MXN"; document.getElementById("whatsappButton").classList.add("show"); };
-document.getElementById("whatsappButton").onclick=()=>{ const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`; const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`; const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank"); };
-document.getElementById("resetBtn").onclick=()=>{ pickupLat=null;pickupLng=null;destinationLat=null;destinationLng=null;pickupName="";destName=""; pickupInput.value="";destinationInput.value=""; document.getElementById("distance").innerText="—";document.getElementById("duration").innerText="—";document.getElementById("price").innerText="$ POR COTIZAR"; document.getElementById("whatsappButton").classList.remove("show"); if(pickupMarker)map.removeLayer(pickupMarker);if(destinationMarker)map.removeLayer(destinationMarker);if(routeLayer)map.removeLayer(routeLayer); map.setView([CENTRO.lat,CENTRO.lng],14); };
-document.addEventListener("click",e=>{if(!e.target.closest(".input-wrapper")){pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");}});
-const overlay=document.getElementById("adminOverlay");
-document.getElementById("btnAdmin").onclick=()=>{ overlay.classList.add("show"); document.getElementById("btnAdmin").classList.add("active"); document.getElementById("btnInicio").classList.remove("active"); };
-document.getElementById("btnInicio").onclick=()=>{ overlay.classList.remove("show"); document.getElementById("btnInicio").classList.add("active"); document.getElementById("btnAdmin").classList.remove("active"); setTimeout(()=>{ map.invalidateSize(); },100); };
-document.getElementById("closeAdmin").onclick=()=>{ overlay.classList.remove("show"); document.getElementById("btnInicio").classList.add("active"); document.getElementById("btnAdmin").classList.remove("active"); };
-overlay.addEventListener("click",(e)=>{ if(e.target===overlay) { overlay.classList.remove("show"); } });
-document.getElementById("loginBtn").onclick=()=>{ const u=document.getElementById("adminUser").value.trim(); const p=document.getElementById("adminPass").value.trim(); if(u==='admin' && p==='0831'){ document.getElementById("loginBox").style.display='none'; document.getElementById("adminPanel").style.display='block'; document.getElementById("loginError").style.display='none'; iniciarClientesNube(); }else{ document.getElementById("loginError").style.display='block'; } };
-document.getElementById("logoutBtn").onclick=()=>{ document.getElementById("loginBox").style.display='block'; document.getElementById("adminPanel").style.display='none'; document.getElementById("adminUser").value=''; document.getElementById("adminPass").value=''; };
-let clientes = [];
-let editId = null;
-let clienteLat=null, clienteLng=null;
-let miniMap=null, miniMarker=null;
-window.iniciarClientesNube = function(){
-  const col = collection(db, "clientes");
-  onSnapshot(col, (snap)=>{
-    clientes = [];
-    snap.forEach(d=>{ clientes.push({id:d.id,...d.data()}); });
-    renderClientes();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let platforms = [];
+let siteConfig = {name:"KIGO <i>SHOWROOM</i>", hero:"Explora. Prueba. Cotiza.", sub:"Todas nuestras plataformas listas para ver en vivo.", search:"Buscar: hotel, recargas, restaurante, delivery, uber...", footer:"Plataformas profesionales • Dolores Hidalgo • 2026", logo:"", accent:"#f59e0b"};
+let creds = {user:"admin", pass:"0831"};
+let isLogged=false, filtro='todo', editingId=null, currentGallery=[], galleryIndex=0, tempGallery=[], editGallery=[];
+
+function compressImage(file, maxWidth = 800, quality = 0.6) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width; let height = img.height;
+        if (width > maxWidth) { height = (maxWidth / width) * height; width = maxWidth; }
+        const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject; img.src = e.target.result;
+    };
+    reader.onerror = reject; reader.readAsDataURL(file);
   });
 }
-window.renderClientes = function(){
-  const lista=document.getElementById("listaClientes");
-  const cont=document.getElementById("contadorClientes");
-  lista.innerHTML=""; cont.innerText=clientes.length;
-  if(clientes.length===0){ lista.innerHTML='<div style="text-align:center;padding:12px;color:#999;font-size:12px">Sin clientes aún</div>'; return; }
-  clientes.forEach((c)=>{
-    const div=document.createElement("div");
-    div.className="cliente-item";
-    div.innerHTML=`<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.nombre}</div><div style="font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.ubicacion}</div></div><div class="cliente-actions"><button class="icon-btn" onclick="editarCliente('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="icon-btn delete" onclick="eliminarCliente('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div>`;
-    lista.appendChild(div);
-  });
+
+db.ref('kigo_showroom_platforms').on('value', (snap)=>{
+  const data = snap.val();
+  if(data){ platforms = Object.entries(data).map(([key,val])=>({firebaseKey:key,...val})); } else { platforms = []; }
+  renderFilters(); renderGrid(); renderAdminList();
+});
+db.ref('kigo_site_v2').on('value', (snap)=>{ const data = snap.val(); if(data){ siteConfig = data; applySite(); } });
+
+function saveToCloud(){ db.ref('kigo_site_v2').set(siteConfig).catch(e=>{ alert("Error config: "+e.message); }); }
+function applySite(){
+ document.documentElement.style.setProperty('--accent', siteConfig.accent);
+ let logoHtml = siteConfig.logo? `<img src="${siteConfig.logo}">` : '';
+ const siteLogo = document.getElementById('siteLogo'); if(siteLogo) siteLogo.innerHTML = logoHtml + siteConfig.name;
+ document.getElementById('logoPreview').innerHTML = siteConfig.logo? `<img src="${siteConfig.logo}" style="width:100%;height:100%;object-fit:cover">` : 'K';
+ document.getElementById('loginLogo').innerHTML = siteConfig.logo? `<img src="${siteConfig.logo}" style="width:100%;height:100%;object-fit:cover">` : 'K';
+ document.getElementById('heroTitle').innerText=siteConfig.hero; document.getElementById('heroSub').innerText=siteConfig.sub;
+ document.getElementById('search').placeholder=siteConfig.search; document.getElementById('footerText').innerText=siteConfig.footer;
+ document.getElementById('siteNameInput').value=siteConfig.name.replace(/<[^>]*>/g,'').trim();
+ document.getElementById('heroTitleInput').value=siteConfig.hero; document.getElementById('heroSubInput').value=siteConfig.sub;
+ document.getElementById('searchPlaceInput').value=siteConfig.search; document.getElementById('footerInput').value=siteConfig.footer;
+ document.getElementById('accentColor').value=siteConfig.accent; document.getElementById('accentHex').value=siteConfig.accent;
+ const demo = document.getElementById('colorDemoAccent'); if(demo) demo.style.color=siteConfig.accent;
+ document.getElementById('currentCreds').innerText=creds.user+' / '+creds.pass;
 }
-async function parseGoogleLink(link){
-  let m = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
-  m = link.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
-  m = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
-  if(link.includes("goo.gl")||link.includes("maps.app.goo.gl")){
-    try{
-      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(link)}`;
-      const r = await fetch(proxy);
-      const j = await r.json();
-      const html = j.contents||"";
-      let m2 = html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || html.match(/"lat":(-?\d+\.\d+),"lng":(-?\d+\.\d+)/) || html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-      if(m2) return {lat:parseFloat(m2[1]), lng:parseFloat(m2[2])};
-    }catch(e){}
-  }
-  return null;
+async function uploadLogo(input){ if(input.files&&input.files[0]){ const compressed = await compressImage(input.files[0], 300, 0.7); siteConfig.logo = compressed; applySite(); saveToCloud(); } }
+function removeLogo(){ siteConfig.logo=""; applySite(); saveToCloud(); }
+function syncColorText(v){ document.getElementById('accentColor').value=v; updateLive(); }
+function updateLive(){
+ let raw=document.getElementById('siteNameInput').value;
+ siteConfig.name=raw.includes('<')? raw : raw.split(' ')[0]+' <i>'+(raw.split(' ').slice(1).join(' ')||'SHOWROOM')+'</i>';
+ siteConfig.hero=document.getElementById('heroTitleInput').value; siteConfig.sub=document.getElementById('heroSubInput').value;
+ siteConfig.search=document.getElementById('searchPlaceInput').value; siteConfig.footer=document.getElementById('footerInput').value;
+ siteConfig.accent=document.getElementById('accentColor').value;
+ document.documentElement.style.setProperty('--accent', siteConfig.accent);
+ document.getElementById('siteLogo').innerHTML=(siteConfig.logo?`<img src="${siteConfig.logo}">`:'')+siteConfig.name;
+ const demo = document.getElementById('colorDemoAccent'); if(demo) demo.style.color=siteConfig.accent;
+ document.getElementById('heroTitle').innerText=siteConfig.hero; document.getElementById('heroSub').innerText=siteConfig.sub;
+ document.getElementById('search').placeholder=siteConfig.search; document.getElementById('footerText').innerText=siteConfig.footer;
 }
-function initMiniMap(lat,lng){
-  const el = document.getElementById("clienteMiniMap");
-  el.style.display="block";
-  if(!miniMap){
-    miniMap = L.map("clienteMiniMap",{zoomControl:false}).setView([lat,lng],16);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(miniMap);
-    miniMap.on("click", (e)=>{
-      clienteLat=e.latlng.lat; clienteLng=e.latlng.lng;
-      if(miniMarker) miniMarker.setLatLng(e.latlng);
-      else miniMarker = L.marker(e.latlng,{draggable:true}).addTo(miniMap);
-      document.getElementById("clienteCoordInfo").style.display="block";
-      document.getElementById("clienteCoordInfo").innerText = `📍 Ajustado: ${clienteLat.toFixed(6)}, ${clienteLng.toFixed(6)}`;
-    });
-  }else{
-    miniMap.setView([lat,lng],16);
-    miniMap.invalidateSize();
-  }
-  if(miniMarker) miniMap.removeLayer(miniMarker);
-  miniMarker = L.marker([lat,lng],{draggable:true}).addTo(miniMap);
-  miniMarker.on("dragend",(ev)=>{
-    const p = ev.target.getLatLng();
-    clienteLat=p.lat; clienteLng=p.lng;
-    document.getElementById("clienteCoordInfo").innerText = `📍 Ajustado: ${clienteLat.toFixed(6)}, ${clienteLng.toFixed(6)}`;
-  });
-  clienteLat=lat; clienteLng=lng;
-  document.getElementById("clienteCoordInfo").style.display="block";
-  document.getElementById("clienteCoordInfo").innerText = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} - toca el mapa o arrastra el pin para ajustar`;
-  setTimeout(()=>miniMap.invalidateSize(),200);
+function saveLive(){ saveToCloud(); let m=document.getElementById('savedMsg'); if(m){ m.style.display='block'; setTimeout(()=>m.style.display='none',1500);} }
+function resetSite(){ if(confirm('Resetear?')){ siteConfig={name:"KIGO <i>SHOWROOM</i>", hero:"Explora. Prueba. Cotiza.", sub:"Todas nuestras plataformas listas.", search:"Buscar...", footer:"Plataformas profesionales • 2026", logo:"", accent:"#f59e0b"}; applySite(); saveToCloud(); } }
+function switchTab(t){
+ document.querySelectorAll('.adminTab').forEach(b=>b.classList.remove('active'));
+ document.getElementById('panelMod').style.display='none'; document.getElementById('panelPlat').style.display='none'; document.getElementById('panelAcc').style.display='none';
+ if(t==='mod'){ document.getElementById('tabMod').classList.add('active'); document.getElementById('panelMod').style.display='grid'; }
+ if(t==='plat'){ document.getElementById('tabPlat').classList.add('active'); document.getElementById('panelPlat').style.display='grid'; setPlatMode('add'); }
+ if(t==='acc'){ document.getElementById('tabAcc').classList.add('active'); document.getElementById('panelAcc').style.display='grid'; }
 }
-document.getElementById("buscarClienteBtn").onclick=async()=>{
-  const txt = document.getElementById("clienteUbicacion").value.trim();
-  if(!txt){ alert("Pega el link o escribe la dirección"); return; }
-  document.getElementById("buscarClienteBtn").innerText="BUSCANDO...";
-  let coords = await parseGoogleLink(txt);
-  if(coords){
-    initMiniMap(coords.lat, coords.lng);
-    document.getElementById("buscarClienteBtn").innerText="🔍 BUSCAR UBICACIÓN";
-    return;
+function setPlatMode(mode){
+ document.getElementById('platTabAdd').classList.toggle('active', mode==='add');
+ document.getElementById('platTabEdit').classList.toggle('active', mode==='edit');
+ document.getElementById('platAddBox').style.display= mode==='add'? 'grid' : 'none';
+ document.getElementById('platEditBox').style.display= mode==='edit'? 'block' : 'none';
+ if(mode==='edit'){ renderAdminList(); document.getElementById('editFormBox').style.display='none'; }
+ if(mode==='add'){ clearForm(); }
+}
+function catLabel(c){ if(c==='todo') return 'TODO'; return (c||'').toUpperCase(); }
+function payLabel(t){ if(t==='mensual') return 'mensualidad'; if(t==='anual') return 'anual'; return 'pago único'; }
+function renderFilters(){ let all=['todo',...new Set(platforms.map(p=>p.cat))]; if(all.length===1) all=['todo']; document.getElementById('filters').innerHTML=all.map(c=>`<div class="chip ${filtro===c?'active':''}" onclick="setFilter('${c}')">${catLabel(c)}</div>`).join(''); }
+function setFilter(c){ filtro=c; renderFilters(); renderGrid(); }
+function renderGrid(){
+ let q=document.getElementById('search').value.toLowerCase();
+ let list=platforms.filter(p=> (filtro==='todo'||p.cat===filtro) && (p.nombre.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)));
+ if(list.length===0){ document.getElementById('grid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#6b7280"><div style="font-size:48px">📦</div><div style="font-weight:700;color:#111;margin-top:8px">No hay productos aún</div><div style="font-size:13px;margin-top:6px">Admin → Plataformas → Agregar producto</div></div>`; }
+ else { document.getElementById('grid').innerHTML=list.map(p=>`<div class="card"><div class="thumb"><img src="${p.img}"><div class="tag">${catLabel(p.cat)}</div></div><div class="content"><h3>${p.nombre}</h3><p>${p.desc}</p><div class="price">${p.price} • ${payLabel(p.payType)}</div><div class="meta">${(p.tags||[]).map(t=>`<i>${t}</i>`).join('')}</div><div class="actions"><button class="btn btn-view" onclick="openView('${p.firebaseKey}')">Ver</button><button class="btn btn-quote" onclick="openQuote('${p.firebaseKey}')">Cotizar</button></div></div></div>`).join(''); }
+ renderMost();
+}
+function renderMost(){
+ if(platforms.length===0){ document.getElementById('mostSlider').innerHTML=`<div style="padding:20px;color:#6b7280;font-size:13px">Aún no hay productos</div>`; return; }
+ document.getElementById('mostSlider').innerHTML=platforms.map(p=>`<div class="miniCard" onclick="openView('${p.firebaseKey}')"><div class="miniThumb"><img src="${p.img}"></div><div class="miniContent"><h4>${p.nombre}</h4><p>${(p.desc||'').substring(0,60)}...</p><div class="miniPrice">${p.price}</div></div></div>`).join(''); setTimeout(initMostZoom,120);
+}
+function initMostZoom(){ const s=document.getElementById('mostSlider'); if(!s) return; function up(){ const r=s.getBoundingClientRect(); const c=r.left+r.width/2; let cl=null,mn=Infinity; s.querySelectorAll('.miniCard').forEach(card=>{ const rr=card.getBoundingClientRect(); const cc=rr.left+rr.width/2; const d=Math.abs(c-cc); if(d<mn){mn=d;cl=card;}}); s.querySelectorAll('.miniCard').forEach(x=>x.classList.remove('active')); if(cl) cl.classList.add('active'); } s.addEventListener('scroll',up,{passive:true}); up(); s.scrollLeft=20; }
+</script>
+<script>
+function openView(fbKey){
+ let p=platforms.find(x=>x.firebaseKey===fbKey); if(!p) return;
+ currentGallery=p.gallery||[p.img,p.img,p.img,p.img,p.img,p.img,p.img]; galleryIndex=0;
+ document.getElementById('vTitle').innerText=p.nombre; document.getElementById('vName').innerText=p.nombre; document.getElementById('vCat').innerText=catLabel(p.cat); document.getElementById('vCat2').innerText=catLabel(p.cat);
+ document.getElementById('vDesc').innerText=p.desc; document.getElementById('vPrice').innerText=p.price; document.getElementById('vPaySub').innerText=payLabel(p.payType);
+ document.getElementById('vTags').innerHTML=(p.tags||[]).map(t=>`<i style="font-style:normal;font-size:11px;background:#f8f8f9;border:1px solid #ececef;padding:6px 10px;border-radius:999px">${t}</i>`).join('');
+ document.getElementById('vGallery').innerHTML=currentGallery.map(s=>`<img class="galleryImg" src="${s}">`).join('');
+ document.getElementById('vDots').innerHTML=currentGallery.map((_,i)=>`<div class="vDot ${i===0?'active':''}"></div>`).join('');
+ document.getElementById('vCounter').innerText=`1 / ${currentGallery.length}`;
+ document.getElementById('vFrame').src=p.url; document.getElementById('vGo').onclick=()=>window.open(p.url,'_blank'); document.getElementById('vQuote').onclick=()=>openQuote(p.firebaseKey);
+ document.getElementById('viewModal').style.display='flex';
+ let g=document.getElementById('vGallery'); g.onscroll=()=>{ let idx=Math.round(g.scrollLeft/g.clientWidth); if(idx!==galleryIndex){ galleryIndex=idx; updateGalleryUI(); } };
+}
+function updateGalleryUI(){ document.querySelectorAll('.vDot').forEach((d,i)=>d.classList.toggle('active',i===galleryIndex)); document.getElementById('vCounter').innerText=`${galleryIndex+1} / ${currentGallery.length}`; }
+function galleryPrev(){ if(galleryIndex>0){ galleryIndex--; document.getElementById('vGallery').scrollTo({left:galleryIndex*document.getElementById('vGallery').clientWidth,behavior:'smooth'}); updateGalleryUI(); } }
+function galleryNext(){ if(galleryIndex<currentGallery.length-1){ galleryIndex++; document.getElementById('vGallery').scrollTo({left:galleryIndex*document.getElementById('vGallery').clientWidth,behavior:'smooth'}); updateGalleryUI(); } }
+function closeView(){ document.getElementById('viewModal').style.display='none'; document.getElementById('vFrame').src=''; }
+function openQuote(fbKey){ let p=platforms.find(x=>x.firebaseKey===fbKey); if(!p) return; window.open(`https://wa.me/521000000000?text=${encodeURIComponent('Hola KIGO, quiero cotizar: '+p.nombre)}`,'_blank'); }
+function openLogin(){ if(isLogged){ openAdmin(); } else { document.getElementById('loginModal').style.display='flex'; } }
+function closeLogin(){ document.getElementById('loginModal').style.display='none'; }
+function doLogin(){ let u=document.getElementById('loginUser').value,pw=document.getElementById('loginPass').value; if(u===creds.user&&pw===creds.pass){ isLogged=true; closeLogin(); openAdmin(); } else alert('Datos incorrectos - usa admin / 0831'); }
+function logout(){ isLogged=false; closeAdmin(); }
+function openAdmin(){ if(!isLogged) return openLogin(); document.getElementById('adminModal').style.display='flex'; renderAdminList(); applySite(); switchTab('mod'); }
+function closeAdmin(){ document.getElementById('adminModal').style.display='none'; }
+function updateCreds(){ let nu=document.getElementById('newUser').value,np=document.getElementById('newPass').value; if(nu) creds.user=nu; if(np) creds.pass=np; applySite(); alert('Actualizado: '+creds.user+' / '+creds.pass); }
+async function uploadPlatImg(input){
+  if(input.files&&input.files[0]){
+    const compressed = await compressImage(input.files[0], 800, 0.6);
+    document.getElementById('aImg').value = compressed;
+    let prev=document.getElementById('aImgPreview'); prev.src=compressed; prev.style.display='block';
   }
-  const res = await buscarColonias(txt);
-  if(res.length>0){
-    initMiniMap(res[0].lat, res[0].lon);
-  }else{
-    alert("No encontré esa ubicación");
-  }
-  document.getElementById("buscarClienteBtn").innerText="🔍 BUSCAR UBICACIÓN";
-};
-document.getElementById("guardarCliente").onclick=async()=>{
-  const nom = document.getElementById("clienteNombre").value.trim();
-  const ubi = document.getElementById("clienteUbicacion").value.trim();
-  if(!nom){ alert("Escribe el nombre"); return; }
-  if(!ubi){ alert("Escribe la ubicación"); return; }
-  if(!clienteLat){ alert("Primero BUSCAR UBICACIÓN y ajusta el pin"); return; }
-  if(editId){
-    await updateDoc(doc(db,"clientes",editId), {nombre:nom, ubicacion:ubi, lat:clienteLat, lng:clienteLng});
-    editId=null;
-    document.getElementById("guardarCliente").innerText="GUARDAR CLIENTE";
-  }else{
-    await addDoc(collection(db,"clientes"), {nombre:nom, ubicacion:ubi, lat:clienteLat, lng:clienteLng, creado:Date.now()});
-  }
-  document.getElementById("clienteNombre").value=""; document.getElementById("clienteUbicacion").value="";
-  document.getElementById("clienteMiniMap").style.display="none";
-  document.getElementById("clienteCoordInfo").style.display="none";
-  clienteLat=null; clienteLng=null;
-  if(miniMap){ miniMap.remove(); miniMap=null; miniMarker=null; }
-};
-window.editarCliente=(id)=>{
-  const c = clientes.find(x=>x.id===id);
-  if(!c) return;
-  editId=id;
-  document.getElementById("clienteNombre").value=c.nombre;
-  document.getElementById("clienteUbicacion").value=c.ubicacion;
-  document.getElementById("guardarCliente").innerText="ACTUALIZAR CLIENTE";
-  if(c.lat){ initMiniMap(c.lat, c.lng); }
-};
-window.eliminarCliente=async(id)=>{
-  const c = clientes.find(x=>x.id===id);
-  if(confirm(`¿Eliminar a ${c.nombre}?`)){
-    await deleteDoc(doc(db,"clientes",id));
-  }
-};
+}
+async function uploadGallery(input){
+ if(!input.files) return;
+ let files=Array.from(input.files).slice(0,7);
+ tempGallery=[]; let preview=document.getElementById('aGalleryPreview'); preview.innerHTML='';
+ document.getElementById('galleryCount').innerText = "Comprimiendo "+files.length+" fotos...";
+ for(let file of files){
+   const compressed = await compressImage(file, 800, 0.6);
+   tempGallery.push(compressed);
+   let img=document.createElement('img'); img.src=compressed; img.style.width='56px'; img.style.height='56px'; img.style.borderRadius='10px'; img.style.objectFit='cover'; img.style.border='1px solid #eaeaec'; preview.appendChild(img);
+ }
+ document.getElementById('galleryCount').innerText=tempGallery.length+' / 7 fotos listas ✓';
+}
+function clearForm(){ ['aName','aCat','aDesc','aUrl','aPrice','aTags','aImg'].forEach(i=>{ let el=document.getElementById(i); if(el) el.value=''; }); document.getElementById('aImgPreview').style.display='none'; document.getElementById('aGalleryPreview').innerHTML=''; document.getElementById('galleryCount').innerText='0 / 7 fotos'; tempGallery=[]; document.getElementById('aMost').checked=true; document.getElementById('aPayType').value='unico'; }
+function savePlatform(){
+ let name=document.getElementById('aName').value.trim(); if(!name){ alert('Pon nombre'); return; }
+ let img=document.getElementById('aImg').value || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800';
+ let gallery = tempGallery.length>=1? [...tempGallery] : [img,img,img,img,img,img,img]; while(gallery.length<7) gallery.push(img);
+ let obj={ cat:document.getElementById('aCat').value.toLowerCase()||'general', nombre:name, desc:document.getElementById('aDesc').value, img:img, gallery:gallery, url:document.getElementById('aUrl').value||'https://example.com', price:document.getElementById('aPrice').value||'$0', payType:document.getElementById('aPayType').value, tags:document.getElementById('aTags').value.split(',').map(s=>s.trim()).filter(Boolean), top:document.getElementById('aMost').checked };
+ document.getElementById('platMsg').style.display='block'; document.getElementById('platMsg').innerText='⏳ Guardando en Firebase...'; document.getElementById('saveError').style.display='none';
+ db.ref('kigo_showroom_platforms').push(obj).then(()=>{
+   document.getElementById('platMsg').innerText='✅ GUARDADO REAL EN FIREBASE - '+obj.nombre; setTimeout(()=>{ document.getElementById('platMsg').style.display='none'; }, 3000); clearForm();
+ }).catch(e=>{
+   document.getElementById('platMsg').style.display='none'; document.getElementById('saveError').style.display='block';
+   document.getElementById('saveError').innerText = "❌ ERROR REAL: " + e.message;
+   alert("ERROR: "+e.message);
+ });
+}
+function renderAdminList(){
+ let listEl=document.getElementById('adminList'); let emptyEl=document.getElementById('emptyMsg');
+ if(platforms.length===0){ listEl.innerHTML=''; if(emptyEl) emptyEl.style.display='block'; return; }
+ if(emptyEl) emptyEl.style.display='none';
+ listEl.innerHTML=platforms.map(p=>`<div style="display:flex;gap:12px;align-items:center;border:1px solid #eaeaec;border-radius:14px;padding:12px;background:white;cursor:pointer" onclick="selectForEdit('${p.firebaseKey}')"><img src="${p.img}" style="width:48px;height:48px;border-radius:10px;object-fit:cover"><div style="flex:1;min-width:0"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nombre}</b><span style="font-size:11px;color:#6b7280">${catLabel(p.cat)} • ${p.price} • ${(p.gallery||[]).length} fotos</span></div><div style="display:flex;gap:6px"><button class="btn btn-view" style="height:36px;padding:0 12px;font-size:11px" onclick="event.stopPropagation();selectForEdit('${p.firebaseKey}')">✎ Editar</button><button class="btn btn-quote" style="height:36px;padding:0 12px;background:#dc2626;border-color:#dc2626;font-size:11px" onclick="event.stopPropagation();delP('${p.firebaseKey}')">Eliminar</button></div></div>`).join('');
+}
+function selectForEdit(fbKey){
+ let p=platforms.find(x=>x.firebaseKey===fbKey); if(!p) return; editingId=fbKey;
+ document.getElementById('editNameLabel').innerText=p.nombre;
+ document.getElementById('eName').value=p.nombre; document.getElementById('eCat').value=p.cat; document.getElementById('eDesc').value=p.desc;
+ document.getElementById('eUrl').value=p.url; document.getElementById('ePrice').value=p.price; document.getElementById('ePayType').value=p.payType||'unico';
+ document.getElementById('eTags').value=(p.tags||[]).join(', '); document.getElementById('eImg').value=p.img; document.getElementById('eImgPreview').src=p.img;
+ editGallery=[...p.gallery]; let gp=document.getElementById('eGalleryPreview'); gp.innerHTML=''; editGallery.forEach(src=>{ let img=document.createElement('img'); img.src=src; img.style.width='52px'; img.style.height='52px'; img.style.borderRadius='8px'; img.style.objectFit='cover'; img.style.border='1px solid #eaeaec'; gp.appendChild(img); });
+ document.getElementById('eGalleryCount').innerText=editGallery.length+' / 7 fotos actuales';
+ document.getElementById('editFormBox').style.display='block'; document.getElementById('editFormBox').scrollIntoView({behavior:'smooth'});
+}
+async function uploadEditImg(input){ if(input.files&&input.files[0]){ const compressed = await compressImage(input.files[0], 800, 0.6); document.getElementById('eImg').value=compressed; document.getElementById('eImgPreview').src=compressed; } }
+async function uploadEditGallery(input){
+  if(!input.files) return; let files=Array.from(input.files).slice(0,7); editGallery=[]; let preview=document.getElementById('eGalleryPreview'); preview.innerHTML=''; document.getElementById('eGalleryCount').innerText="Comprimiendo...";
+  for(let file of files){ const compressed = await compressImage(file, 800, 0.6); editGallery.push(compressed); let img=document.createElement('img'); img.src=compressed; img.style.width='52px'; img.style.height='52px'; img.style.borderRadius='8px'; img.style.objectFit='cover'; preview.appendChild(img); }
+  document.getElementById('eGalleryCount').innerText=editGallery.length+' / 7 fotos nuevas ✓';
+}
+function saveEdit(){
+ if(!editingId){ alert('Selecciona un producto'); return; }
+ let p=platforms.find(x=>x.firebaseKey===editingId); if(!p) return;
+ let updated = { nombre:document.getElementById('eName').value, cat:document.getElementById('eCat').value.toLowerCase(), desc:document.getElementById('eDesc').value, url:document.getElementById('eUrl').value, price:document.getElementById('ePrice').value, payType:document.getElementById('ePayType').value, tags:document.getElementById('eTags').value.split(',').map(s=>s.trim()).filter(Boolean), img:document.getElementById('eImg').value||p.img, gallery: editGallery.length>=1? [...editGallery] : p.gallery };
+ while(updated.gallery.length<7) updated.gallery.push(updated.img);
+ db.ref('kigo_showroom_platforms/' + editingId).update(updated).then(()=>{ alert('✅ Guardado REAL: '+updated.nombre); document.getElementById('editFormBox').style.display='none'; }).catch(e=>{ alert("Error: "+e.message); });
+}
+function cancelEdit(){ document.getElementById('editFormBox').style.display='none'; editingId=null; }
+function delP(fbKey){ if(confirm('¿Eliminar de la nube?')){ db.ref('kigo_showroom_platforms/' + fbKey).remove().catch(e=>{ alert(e.message); }); if(editingId===fbKey) cancelEdit(); } }
+document.getElementById('search').addEventListener('input',renderGrid);
+applySite(); renderFilters(); renderGrid();
 </script>
 </body>
 </html>

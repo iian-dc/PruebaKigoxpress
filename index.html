@@ -46,13 +46,15 @@
 .cliente-actions{display:flex;gap:6px}
 .icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .icon-btn.delete{background:#fff0f0;border-color:#f5c2c2}
+#clienteMiniMap{width:100%;height:180px;border-radius:12px;border:1px solid #ddd;margin-top:8px;display:none}
+.btn-buscar-cliente{width:100%;padding:11px;border:1px solid #111;background:#111;color:#fff;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="map-container">
 <div id="map"></div>
-<div class="map-message" style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25); position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:999;">
+<div style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25); position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:999;">
   <img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
 </div>
 <div class="reset-btn" id="resetBtn">↻</div>
@@ -84,22 +86,18 @@
     <div id="loginError" style="color:#E53935;font-size:12px;font-weight:700;margin-top:10px;display:none">Usuario o contraseña incorrectos</div>
   </div>
   <div id="adminPanel" class="admin-card" style="display:none; max-width:400px;">
-    <div class="tabs">
-      <button class="tab active" id="tabClientes"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>CLIENTES</button>
-    </div>
+    <div class="tabs"><button class="tab active">CLIENTES</button></div>
     <div id="clientesSection">
       <h4 style="margin:0 0 10px 0">Agregar Cliente</h4>
       <input id="clienteNombre" class="admin-input" placeholder="Nombre del cliente">
-      <div style="position:relative">
-        <input id="clienteUbicacion" class="admin-input" placeholder="Ubicación / Colonia" style="padding-right:38px">
-        <button id="btnVincularUbicacion" style="position:absolute; right:6px; top:6px; width:32px; height:32px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </button>
-      </div>
-      <button id="guardarCliente" class="btn-cotizar" style="margin-top:0; padding:12px;">GUARDAR CLIENTE</button>
+      <input id="clienteUbicacion" class="admin-input" placeholder="Pega link de Google Maps o escribe colonia">
+      <button id="buscarClienteBtn" class="btn-buscar-cliente"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> BUSCAR UBICACIÓN</button>
+      <div id="clienteMiniMap"></div>
+      <div id="clienteCoordInfo" style="font-size:10px;color:#666;margin-top:4px;display:none"></div>
+      <button id="guardarCliente" class="btn-cotizar" style="margin-top:8px; padding:12px;">GUARDAR CLIENTE</button>
       <div style="margin-top:14px; border-top:1px solid #eee; padding-top:10px;">
         <div style="font-size:11px; font-weight:800; color:#666; margin-bottom:8px;">LISTA DE CLIENTES (<span id="contadorClientes">0</span>)</div>
-        <div id="listaClientes" style="max-height:300px; overflow-y:auto;"></div>
+        <div id="listaClientes" style="max-height:220px; overflow-y:auto;"></div>
       </div>
       <button id="logoutBtn" style="margin-top:14px;width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;font-weight:800;cursor:pointer">Cerrar sesión</button>
     </div>
@@ -120,158 +118,125 @@ function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div st
 let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
 let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
 for(let i=0;i<70;i++){let d=document.createElement("div");d.className="rain";d.style.left=Math.random()*100+"%";d.style.animationDelay=Math.random()*1.2+"s";d.style.animationDuration=(0.5+Math.random()*0.6)+"s";d.style.opacity=0.6+Math.random()*0.4;rainOverlay.appendChild(d);}
-async function checarLluvia(){
-try{
-const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m,precipitation,rain,weather_code&timezone=America/Mexico_City");
-const data=await r.json();
-const precip=data.current.precipitation;
-const temp=Math.round(data.current.temperature_2m);
-const code=data.current.weather_code;
-let estaLloviendo=precip>0||(code>=51&&code<=99);
-if(!estaLloviendo){
-extraLluvia=0;
-rainOverlay.classList.remove("active");
-weatherBadge.classList.remove("show");
-weatherWidget.className="weather-widget";
-weatherWidget.innerText=`☀️ ${temp}°C`;
-return;
-}
-if(code>=95||precip>7.5||code==65||code==82){
-extraLluvia=10;
-weatherWidget.className="weather-widget tormenta";
-weatherWidget.innerText=`⛈️ ${temp}°C Fuerte`;
-weatherBadge.className="weather-badge show tormenta";
-weatherBadge.innerText=`⛈️ LLOVIENDO EN DOLORES - Fuerte (${precip}mm) +$10`;
-}else if(code==53||code==63||code==81||code==55||(precip>=2.5&&precip<=7.5)){
-extraLluvia=5;
-weatherWidget.className="weather-widget lluvia";
-weatherWidget.innerText=`🌧️ ${temp}°C Moderada`;
-weatherBadge.className="weather-badge show moderada";
-weatherBadge.innerText=`🌧️ LLOVIENDO EN DOLORES - Moderada (${precip}mm) +$5`;
-}else{
-extraLluvia=0;
-weatherWidget.className="weather-widget lluvia";
-weatherWidget.innerText=`🌦️ ${temp}°C Leve`;
-weatherBadge.className="weather-badge show leve";
-weatherBadge.innerText=`🌦️ LLOVIENDO EN DOLORES - Leve (${precip}mm) +$0`;
-}
-rainOverlay.classList.add("active");
-}catch(e){weatherWidget.innerText=`☀️ --°C`;}
-}
+async function checarLluvia(){try{const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m,precipitation,rain,weather_code&timezone=America/Mexico_City");const data=await r.json();const precip=data.current.precipitation;const temp=Math.round(data.current.temperature_2m);const code=data.current.weather_code;let estaLloviendo=precip>0||(code>=51&&code<=99);if(!estaLloviendo){extraLluvia=0;rainOverlay.classList.remove("active");weatherBadge.classList.remove("show");weatherWidget.className="weather-widget";weatherWidget.innerText=`☀️ ${temp}°C`;return;}if(code>=95||precip>7.5||code==65||code==82){extraLluvia=10;weatherWidget.className="weather-widget tormenta";weatherWidget.innerText=`⛈️ ${temp}°C Fuerte`;weatherBadge.className="weather-badge show tormenta";weatherBadge.innerText=`⛈️ LLOVIENDO EN DOLORES - Fuerte (${precip}mm) +$10`;}else if(code==53||code==63||code==81||code==55||(precip>=2.5&&precip<=7.5)){extraLluvia=5;weatherWidget.className="weather-widget lluvia";weatherWidget.innerText=`🌧️ ${temp}°C Moderada`;weatherBadge.className="weather-badge show moderada";weatherBadge.innerText=`🌧️ LLOVIENDO EN DOLORES - Moderada (${precip}mm) +$5`;}else{extraLluvia=0;weatherWidget.className="weather-widget lluvia";weatherWidget.innerText=`🌦️ ${temp}°C Leve`;weatherBadge.className="weather-badge show leve";weatherBadge.innerText=`🌦️ LLOVIENDO EN DOLORES - Leve (${precip}mm) +$0`;}rainOverlay.classList.add("active");}catch(e){weatherWidget.innerText=`☀️ --°C`;}}
 checarLluvia(); setInterval(checarLluvia,600000);
-document.getElementById("calculateButton").onclick=async()=>{
- if(!pickupLat||!destinationLat){alert("Selecciona donde recoger y donde entregar");return;}
- const url=`https://router.project-osrm.org/route/v1/foot/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`;
- const r=await fetch(url);const d=await r.json();if(!d.routes||!d.routes[0]){alert("No se pudo trazar ruta");return;}
- const route=d.routes[0];const km=route.distance/1000;
- let precio=35;
- if(route.distance>2000){let extra=route.distance-2000;precio=35+Math.ceil(extra/650)*5;}
- if(distMts(pickupLat,pickupLng,CENTRO.lat,CENTRO.lng)>800&&distMts(destinationLat,destinationLng,CENTRO.lat,CENTRO.lng)>800){precio+=5;}
- let esSOP_Lindavista = (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("linda")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("linda")) || (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("lindavista")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("lindavista"));
- if(esSOP_Lindavista){ precio = 45; }
- if(extraLluvia>0){precio+=extraLluvia;}
- if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(map);map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
- document.getElementById("distance").innerText=km.toFixed(2)+" km";document.getElementById("duration").innerText=Math.ceil(route.duration/60)+" min";document.getElementById("price").innerText="$"+precio+" MXN";
- ultimaDistancia=km.toFixed(2)+" km";ultimoPrecio="$"+precio+" MXN";
- document.getElementById("whatsappButton").classList.add("show");
-};
-document.getElementById("whatsappButton").onclick=()=>{
- const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
- const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
- const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`;
- window.open(url,"_blank");
-};
-document.getElementById("resetBtn").onclick=()=>{
- pickupLat=null;pickupLng=null;destinationLat=null;destinationLng=null;pickupName="";destName="";
- pickupInput.value="";destinationInput.value="";
- document.getElementById("distance").innerText="—";document.getElementById("duration").innerText="—";document.getElementById("price").innerText="$ POR COTIZAR";
- document.getElementById("whatsappButton").classList.remove("show");
- if(pickupMarker)map.removeLayer(pickupMarker);if(destinationMarker)map.removeLayer(destinationMarker);if(routeLayer)map.removeLayer(routeLayer);
- map.setView([CENTRO.lat,CENTRO.lng],14);
-};
+document.getElementById("calculateButton").onclick=async()=>{ if(!pickupLat||!destinationLat){alert("Selecciona donde recoger y donde entregar");return;} const url=`https://router.project-osrm.org/route/v1/foot/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const r=await fetch(url);const d=await r.json();if(!d.routes||!d.routes[0]){alert("No se pudo trazar ruta");return;} const route=d.routes[0];const km=route.distance/1000; let precio=35; if(route.distance>2000){let extra=route.distance-2000;precio=35+Math.ceil(extra/650)*5;} if(distMts(pickupLat,pickupLng,CENTRO.lat,CENTRO.lng)>800&&distMts(destinationLat,destinationLng,CENTRO.lat,CENTRO.lng)>800){precio+=5;} let esSOP_Lindavista = (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("linda")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("linda")) || (pickupName.toLowerCase().includes("sop") && destName.toLowerCase().includes("lindavista")) || (destName.toLowerCase().includes("sop") && pickupName.toLowerCase().includes("lindavista")); if(esSOP_Lindavista){ precio = 45; } if(extraLluvia>0){precio+=extraLluvia;} if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(map);map.fitBounds(routeLayer.getBounds(),{padding:[40,40]}); document.getElementById("distance").innerText=km.toFixed(2)+" km";document.getElementById("duration").innerText=Math.ceil(route.duration/60)+" min";document.getElementById("price").innerText="$"+precio+" MXN"; ultimaDistancia=km.toFixed(2)+" km";ultimoPrecio="$"+precio+" MXN"; document.getElementById("whatsappButton").classList.add("show"); };
+document.getElementById("whatsappButton").onclick=()=>{ const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`; const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`; const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank"); };
+document.getElementById("resetBtn").onclick=()=>{ pickupLat=null;pickupLng=null;destinationLat=null;destinationLng=null;pickupName="";destName=""; pickupInput.value="";destinationInput.value=""; document.getElementById("distance").innerText="—";document.getElementById("duration").innerText="—";document.getElementById("price").innerText="$ POR COTIZAR"; document.getElementById("whatsappButton").classList.remove("show"); if(pickupMarker)map.removeLayer(pickupMarker);if(destinationMarker)map.removeLayer(destinationMarker);if(routeLayer)map.removeLayer(routeLayer); map.setView([CENTRO.lat,CENTRO.lng],14); };
 document.addEventListener("click",e=>{if(!e.target.closest(".input-wrapper")){pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");}});
 const overlay=document.getElementById("adminOverlay");
 document.getElementById("btnAdmin").onclick=()=>{ overlay.classList.add("show"); document.getElementById("btnAdmin").classList.add("active"); document.getElementById("btnInicio").classList.remove("active"); };
 document.getElementById("btnInicio").onclick=()=>{ overlay.classList.remove("show"); document.getElementById("btnInicio").classList.add("active"); document.getElementById("btnAdmin").classList.remove("active"); setTimeout(()=>{ map.invalidateSize(); },100); };
 document.getElementById("closeAdmin").onclick=()=>{ overlay.classList.remove("show"); document.getElementById("btnInicio").classList.add("active"); document.getElementById("btnAdmin").classList.remove("active"); };
 overlay.addEventListener("click",(e)=>{ if(e.target===overlay) { overlay.classList.remove("show"); } });
-document.getElementById("loginBtn").onclick=()=>{
-  const u=document.getElementById("adminUser").value.trim();
-  const p=document.getElementById("adminPass").value.trim();
-  if(u==='admin' && p==='0831'){
-    document.getElementById("loginBox").style.display='none';
-    document.getElementById("adminPanel").style.display='block';
-    document.getElementById("loginError").style.display='none';
-    renderClientes();
-  }else{ document.getElementById("loginError").style.display='block'; }
-};
-document.getElementById("logoutBtn").onclick=()=>{
-  document.getElementById("loginBox").style.display='block';
-  document.getElementById("adminPanel").style.display='none';
-  document.getElementById("adminUser").value=''; document.getElementById("adminPass").value='';
-};
+document.getElementById("loginBtn").onclick=()=>{ const u=document.getElementById("adminUser").value.trim(); const p=document.getElementById("adminPass").value.trim(); if(u==='admin' && p==='0831'){ document.getElementById("loginBox").style.display='none'; document.getElementById("adminPanel").style.display='block'; document.getElementById("loginError").style.display='none'; renderClientes(); }else{ document.getElementById("loginError").style.display='block'; } };
+document.getElementById("logoutBtn").onclick=()=>{ document.getElementById("loginBox").style.display='block'; document.getElementById("adminPanel").style.display='none'; document.getElementById("adminUser").value=''; document.getElementById("adminPass").value=''; };
 let clientes = JSON.parse(localStorage.getItem('kigo_clientes')||'[]');
 let editIndex = -1;
+let clienteLat=null,clienteLng=null;
+let miniMap=null, miniMarker=null;
 function saveLS(){ localStorage.setItem('kigo_clientes', JSON.stringify(clientes)); }
-function renderClientes(){
-  const lista = document.getElementById("listaClientes");
-  const cont = document.getElementById("contadorClientes");
-  lista.innerHTML="";
-  cont.innerText = clientes.length;
-  if(clientes.length===0){ lista.innerHTML='<div style="text-align:center;padding:12px;color:#999;font-size:12px">Sin clientes aún</div>'; return; }
-  clientes.forEach((c,i)=>{
-    const div = document.createElement("div");
-    div.className="cliente-item";
-    div.innerHTML=`
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.nombre}</div>
-        <div style="font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.ubicacion}</div>
-      </div>
-      <div class="cliente-actions">
-        <button class="icon-btn" onclick="editarCliente(${i})">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="icon-btn delete" onclick="eliminarCliente(${i})">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        </button>
-      </div>`;
-    lista.appendChild(div);
-  });
+function renderClientes(){ const lista=document.getElementById("listaClientes"); const cont=document.getElementById("contadorClientes"); lista.innerHTML=""; cont.innerText=clientes.length; if(clientes.length===0){ lista.innerHTML='<div style="text-align:center;padding:12px;color:#999;font-size:12px">Sin clientes aún</div>'; return; } clientes.forEach((c,i)=>{ const div=document.createElement("div"); div.className="cliente-item"; div.innerHTML=`<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.nombre}</div><div style="font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.ubicacion}</div></div><div class="cliente-actions"><button class="icon-btn" onclick="editarCliente(${i})"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="icon-btn delete" onclick="eliminarCliente(${i})"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div>`; lista.appendChild(div); }); }
+async function parseGoogleLink(link){
+  let m = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+  m = link.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+  m = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
+  if(link.includes("goo.gl")||link.includes("maps.app.goo.gl")){
+    try{
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(link)}`;
+      const r = await fetch(proxy);
+      const j = await r.json();
+      const html = j.contents||"";
+      let m2 = html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || html.match(/"lat":(-?\d+\.\d+),"lng":(-?\d+\.\d+)/) || html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      if(m2) return {lat:parseFloat(m2[1]), lng:parseFloat(m2[2])};
+    }catch(e){}
+  }
+  return null;
 }
+function initMiniMap(lat,lng){
+  const el = document.getElementById("clienteMiniMap");
+  el.style.display="block";
+  if(!miniMap){
+    miniMap = L.map("clienteMiniMap",{zoomControl:false}).setView([lat,lng],16);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(miniMap);
+    miniMap.on("click", (e)=>{
+      clienteLat=e.latlng.lat; clienteLng=e.latlng.lng;
+      if(miniMarker) miniMarker.setLatLng(e.latlng);
+      else miniMarker = L.marker(e.latlng,{draggable:true}).addTo(miniMap);
+      document.getElementById("clienteCoordInfo").style.display="block";
+      document.getElementById("clienteCoordInfo").innerText = `📍 Ajustado: ${clienteLat.toFixed(6)}, ${clienteLng.toFixed(6)} - mueve el pin si no es exacto`;
+      miniMarker.on("dragend", (ev)=>{
+        const p = ev.target.getLatLng();
+        clienteLat=p.lat; clienteLng=p.lng;
+        document.getElementById("clienteCoordInfo").innerText = `📍 Ajustado: ${clienteLat.toFixed(6)}, ${clienteLng.toFixed(6)} - mueve el pin si no es exacto`;
+      });
+    });
+  }else{
+    miniMap.setView([lat,lng],16);
+    miniMap.invalidateSize();
+  }
+  if(miniMarker) miniMap.removeLayer(miniMarker);
+  miniMarker = L.marker([lat,lng],{draggable:true}).addTo(miniMap);
+  miniMarker.on("dragend",(ev)=>{
+    const p = ev.target.getLatLng();
+    clienteLat=p.lat; clienteLng=p.lng;
+    document.getElementById("clienteCoordInfo").innerText = `📍 Ajustado: ${clienteLat.toFixed(6)}, ${clienteLng.toFixed(6)} - mueve el pin si no es exacto`;
+  });
+  clienteLat=lat; clienteLng=lng;
+  document.getElementById("clienteCoordInfo").style.display="block";
+  document.getElementById("clienteCoordInfo").innerText = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} - toca el mapa o arrastra el pin para ajustar`;
+  setTimeout(()=>miniMap.invalidateSize(),200);
+}
+document.getElementById("buscarClienteBtn").onclick=async()=>{
+  const txt = document.getElementById("clienteUbicacion").value.trim();
+  if(!txt){ alert("Pega el link o escribe la dirección"); return; }
+  document.getElementById("buscarClienteBtn").innerText="BUSCANDO...";
+  let coords = await parseGoogleLink(txt);
+  if(coords){
+    initMiniMap(coords.lat, coords.lng);
+    document.getElementById("buscarClienteBtn").innerText="BUSCAR UBICACIÓN";
+    return;
+  }
+  const res = await buscarColonias(txt);
+  if(res.length>0){
+    initMiniMap(res[0].lat, res[0].lon);
+  }else{
+    alert("No encontré esa ubicación, intenta pegar el link de Google Maps directo o escribe colonia");
+  }
+  document.getElementById("buscarClienteBtn").innerText="BUSCAR UBICACIÓN";
+};
 document.getElementById("guardarCliente").onclick=()=>{
   const nom = document.getElementById("clienteNombre").value.trim();
   const ubi = document.getElementById("clienteUbicacion").value.trim();
   if(!nom){ alert("Escribe el nombre"); return; }
   if(!ubi){ alert("Escribe la ubicación"); return; }
+  if(!clienteLat){ alert("Primero dale a BUSCAR UBICACIÓN y ajusta el pin en el mapa"); return; }
+  const obj = {nombre:nom, ubicacion:ubi, lat:clienteLat, lng:clienteLng};
   if(editIndex>=0){
-    clientes[editIndex] = {nombre:nom, ubicacion:ubi};
+    clientes[editIndex]=obj;
     editIndex=-1;
     document.getElementById("guardarCliente").innerText="GUARDAR CLIENTE";
   }else{
-    clientes.push({nombre:nom, ubicacion:ubi});
+    clientes.push(obj);
   }
   saveLS(); renderClientes();
   document.getElementById("clienteNombre").value=""; document.getElementById("clienteUbicacion").value="";
+  document.getElementById("clienteMiniMap").style.display="none";
+  document.getElementById("clienteCoordInfo").style.display="none";
+  clienteLat=null; clienteLng=null;
+  if(miniMap){ miniMap.remove(); miniMap=null; miniMarker=null; }
 };
 window.editarCliente=(i)=>{
   editIndex=i;
   document.getElementById("clienteNombre").value=clientes[i].nombre;
   document.getElementById("clienteUbicacion").value=clientes[i].ubicacion;
   document.getElementById("guardarCliente").innerText="ACTUALIZAR CLIENTE";
+  if(clientes[i].lat){ initMiniMap(clientes[i].lat, clientes[i].lng); }
 };
-window.eliminarCliente=(i)=>{
-  if(confirm(`¿Eliminar a ${clientes[i].nombre}?`)){
-    clientes.splice(i,1); saveLS(); renderClientes();
-  }
-};
-document.getElementById("btnVincularUbicacion").onclick=async()=>{
-  const txt = document.getElementById("clienteUbicacion").value.trim() || prompt("Escribe colonia para vincular");
-  if(!txt) return;
-  const res = await buscarColonias(txt);
-  if(res.length>0){
-    document.getElementById("clienteUbicacion").value = res[0].name + " - " + res[0].direccion.substring(0,50);
-  }else{ alert("No se encontró ubicación"); }
-};
+window.eliminarCliente=(i)=>{ if(confirm(`¿Eliminar a ${clientes[i].nombre}?`)){ clientes.splice(i,1); saveLS(); renderClientes(); } };
 </script>
 </body>
 </html>

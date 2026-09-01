@@ -15,19 +15,16 @@
 .suggestions{position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);z-index:9999;display:none;max-height:340px;overflow-y:auto}
 .suggestions.show{display:block}
 .suggestion{padding:12px 14px;border-bottom:1px solid #f2f2f2;display:flex;gap:10px;align-items:center;cursor:pointer}
-.suggestion:hover{background:#f5f5f5}
 .btn-cotizar{width:100%;padding:16px;border:none;border-radius:14px;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer}
 .btn-whatsapp{width:100%;padding:14px;border:1.5px solid #25D366;border-radius:14px;background:#fff;color:#25D366;font-weight:800;font-size:13px;margin-top:10px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px}
 .btn-whatsapp.show{display:flex}
 .price-box{margin-top:12px;padding:16px;background:#111;color:#fff;border-radius:14px;display:flex;justify-content:space-between;font-weight:900}
 .input-wrapper{position:relative}.info{display:flex;gap:10px;margin-top:12px}.info-box{flex:1;background:#f7f7f8;padding:12px;border-radius:12px;text-align:center;border:1px solid #eee}
 .weather-widget{position:absolute;top:12px;right:12px;z-index:999;background:#fff;border-radius:20px;padding:6px 12px;font-size:11px;font-weight:900;box-shadow:0 2px 10px rgba(0,0,0,.25);border:1px solid #eee}
-.weather-widget.lluvia{background:#dbeafe;color:#1e40af}.weather-widget.tormenta{background:#1e293b;color:#fff}
 .rain-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:400;pointer-events:none;display:none;background:rgba(30,58,138,0.12)}.rain-overlay.active{display:block}
 .rain{position:absolute;top:-20px;width:2px;height:16px;background:linear-gradient(to bottom, transparent, #9ec3ff);animation:fall linear infinite}
 @keyframes fall{0%{transform:translateY(0)}100%{transform:translateY(60vh)}}
 .weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
-.weather-badge.tormenta{background:#7f1d1d}.weather-badge.moderada{background:#1e40af}.weather-badge.leve{background:#1e3a8a}
 .reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
 </style>
 </head>
@@ -35,7 +32,7 @@
 <div class="app">
 <div class="map-container">
 <div id="map"></div>
-<div class="map-message" style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25); position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;">
+<div style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25); position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;">
   <img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
 </div>
 <div class="reset-btn" id="resetBtn">↻</div>
@@ -44,8 +41,8 @@
 <div id="weatherBadge" class="weather-badge">🌧️ LLOVIENDO EN DOLORES</div>
 </div>
 <div class="panel">
-<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER?</div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Ej: Calle Platino 77 Esperanza 2..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
-<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">2. ¿DÓNDE ENTREGAR?</div><div class="input-wrapper"><input id="destinationInput" class="colonia-input" placeholder="Ej: Lindavista, San Miguel..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
+<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER? (COLONIA)</div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Escribe colonia: Ej: Lindavista..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
+<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">2. ¿DÓNDE ENTREGAR? (COLONIA)</div><div class="input-wrapper"><input id="destinationInput" class="colonia-input" placeholder="Escribe colonia: Ej: Esperanza..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
 <button id="calculateButton" class="btn-cotizar">COTIZAR SERVICIO</button>
 <button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
 <div class="info"><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">DISTANCIA MOTO</div><div id="distance" style="font-weight:800">—</div></div><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">TIEMPO</div><div id="duration" style="font-weight:800">—</div></div></div>
@@ -63,153 +60,104 @@ const pickupInput=document.getElementById("pickupInput"),destinationInput=docume
 const rainOverlay=document.getElementById("rainOverlay"),weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
 function distMts(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 
-// BASE DE DATOS COMPLETA DOLORES HIDALGO
-const BASE_DOLORES = [
-{n:"Centro Histórico",lat:21.1561,lng:-100.9333,c:"Centro"},
-{n:"Calle Guanajuato",lat:21.1572,lng:-100.9328,c:"Centro"},
-{n:"Calle Querétaro",lat:21.1558,lng:-100.9345,c:"Centro"},
-{n:"Calle Hidalgo",lat:21.1565,lng:-100.9330,c:"Centro"},
-{n:"Calle San Miguel",lat:21.1555,lng:-100.9325,c:"Centro"},
-{n:"Calle Yucatán",lat:21.1570,lng:-100.9340,c:"Centro"},
-{n:"Colonia Lindavista",lat:21.1518,lng:-100.9215,c:"Lindavista"},
-{n:"Calle Lindavista",lat:21.1515,lng:-100.9220,c:"Lindavista"},
-{n:"Colonia La Esperanza 1",lat:21.1660,lng:-100.9400,c:"Esperanza"},
-{n:"Colonia La Esperanza 2",lat:21.1675,lng:-100.9412,c:"Esperanza"},
-{n:"Calle Platino",lat:21.1678,lng:-100.9405,c:"Esperanza"},
-{n:"Calle Oro",lat:21.1670,lng:-100.9410,c:"Esperanza"},
-{n:"Calle Plata",lat:21.1680,lng:-100.9415,c:"Esperanza"},
-{n:"Calle Cobre",lat:21.1665,lng:-100.9420,c:"Esperanza"},
-{n:"Calle Bronce",lat:21.1682,lng:-100.9400,c:"Esperanza"},
-{n:"Colonia San Cristóbal",lat:21.1480,lng:-100.9450,c:"San Cristobal"},
-{n:"Colonia Santa Cruz",lat:21.1620,lng:-100.9280,c:"Santa Cruz"},
-{n:"Colonia Mexiquito",lat:21.1630,lng:-100.9250,c:"Mexiquito"},
-{n:"Colonia 12 de Octubre",lat:21.1600,lng:-100.9150,c:"12 Octubre"},
-{n:"Colonia Las Margaritas",lat:21.1450,lng:-100.93,c:"Margaritas"},
-{n:"Colonia Independencia",lat:21.1590,lng:-100.9450,c:"Independencia"},
-{n:"Colonia Fracc. Guanajuato",lat:21.1520,lng:-100.9350,c:"Guanajuato"},
-{n:"Colonia San Pablo",lat:21.1500,lng:-100.9380,c:"San Pablo"},
-{n:"Colonia José Alfredo Jiménez",lat:21.1530,lng:-100.9280,c:"Jose Alfredo"},
-{n:"Colonia Miguel Hidalgo",lat:21.1580,lng:-100.9250,c:"Miguel Hidalgo"},
-{n:"Colonia La Florida",lat:21.1610,lng:-100.9180,c:"Florida"},
-{n:"Colonia San Antonio",lat:21.1470,lng:-100.9330,c:"San Antonio"},
-{n:"Colonia Las Flores",lat:21.1495,lng:-100.9255,c:"Flores"},
-{n:"Colonia El Calvario",lat:21.1550,lng:-100.9400,c:"Calvario"},
-{n:"Colonia El Carmen",lat:21.1575,lng:-100.9380,c:"Carmen"},
-{n:"Calle Veracruz",lat:21.1560,lng:-100.9310,c:"Centro"},
-{n:"Calle Puebla",lat:21.1550,lng:-100.9300,c:"Centro"},
-{n:"Calle Zacatecas",lat:21.1580,lng:-100.9335,c:"Centro"},
-{n:"Avenida Norte",lat:21.1625,lng:-100.9330,c:"Norte"},
-{n:"Avenida Sur",lat:21.1485,lng:-100.9330,c:"Sur"},
-{n:"Calle Allende",lat:21.1568,lng:-100.9320,c:"Centro"},
-{n:"Calle Guerrero",lat:21.1545,lng:-100.9340,c:"Centro"},
-{n:"Colonia Ejido Jesús María",lat:21.17,lng:-100.93,c:"Ejido"},
-{n:"Colonia Peñafiel",lat:21.1430,lng:-100.94,c:"Peñafiel"},
-{n:"Colonia San Miguelito",lat:21.1650,lng:-100.92,c:"San Miguelito"},
-{n:"Colonia Los Pinos",lat:21.15,lng:-100.915,c:"Pinos"},
-{n:"Colonia La Ermita",lat:21.1640,lng:-100.9350,c:"Ermita"},
-{n:"Colonia El Panteón",lat:21.1585,lng:-100.9420,c:"Panteon"},
+const COLONIAS_DOLORES = [
+{nombre:"Centro Histórico", lat:21.1561, lng:-100.9333},
+{nombre:"Colonia Lindavista", lat:21.1518, lng:-100.9215},
+{nombre:"Colonia La Esperanza 1", lat:21.1660, lng:-100.9400},
+{nombre:"Colonia La Esperanza 2", lat:21.1675, lng:-100.9412},
+{nombre:"Colonia San Cristóbal", lat:21.1480, lng:-100.9450},
+{nombre:"Colonia Santa Cruz", lat:21.1620, lng:-100.9280},
+{nombre:"Colonia Mexiquito", lat:21.1630, lng:-100.9250},
+{nombre:"Colonia 12 de Octubre", lat:21.1600, lng:-100.9150},
+{nombre:"Colonia Las Margaritas", lat:21.1450, lng:-100.93},
+{nombre:"Colonia Independencia", lat:21.1590, lng:-100.9450},
+{nombre:"Colonia San Pablo", lat:21.15, lng:-100.9380},
+{nombre:"Colonia José Alfredo Jiménez", lat:21.1530, lng:-100.9280},
+{nombre:"Colonia Miguel Hidalgo", lat:21.1580, lng:-100.9250},
+{nombre:"Colonia La Florida", lat:21.1610, lng:-100.9180},
+{nombre:"Colonia San Antonio", lat:21.1470, lng:-100.9330},
+{nombre:"Colonia Las Flores", lat:21.1495, lng:-100.9255},
+{nombre:"Colonia El Calvario", lat:21.1550, lng:-100.9400},
+{nombre:"Colonia El Carmen", lat:21.1575, lng:-100.9380},
+{nombre:"Colonia El Panteón", lat:21.1585, lng:-100.9420},
+{nombre:"Colonia La Ermita", lat:21.1640, lng:-100.9350},
+{nombre:"Colonia Los Pinos", lat:21.15, lng:-100.915},
+{nombre:"Colonia Ejido Jesús María", lat:21.17, lng:-100.93},
+{nombre:"Colonia Peñafiel", lat:21.1430, lng:-100.94},
+{nombre:"Colonia San Miguelito", lat:21.1650, lng:-100.92},
+{nombre:"Colonia Fraccionamiento Guanajuato", lat:21.1520, lng:-100.9350},
+{nombre:"Colonia San Isidro", lat:21.1460, lng:-100.94},
+{nombre:"Colonia Los Olivos", lat:21.1540, lng:-100.92},
+{nombre:"Colonia Valle de Guadalupe", lat:21.1655, lng:-100.9320},
+{nombre:"Colonia Insurgentes", lat:21.1615, lng:-100.9425},
+{nombre:"Colonia Morelos", lat:21.1570, lng:-100.92},
+{nombre:"Colonia Benito Juárez", lat:21.1490, lng:-100.93},
+{nombre:"Colonia Primavera", lat:21.1555, lng:-100.9155},
+{nombre:"Colonia Bugambilias", lat:21.1510, lng:-100.93},
+{nombre:"Colonia La Esperanza 3", lat:21.1685, lng:-100.9420},
+{nombre:"Colonia San Gabriel", lat:21.1625, lng:-100.9455},
+{nombre:"Colonia El Santuario", lat:21.1545, lng:-100.94},
+{nombre:"Colonia Emiliano Zapata", lat:21.1595, lng:-100.93},
+{nombre:"Colonia Reforma", lat:21.1565, lng:-100.9180},
+{nombre:"Colonia Chapultepec", lat:21.1485, lng:-100.9250},
 ];
 
 function limpiar(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
-function contieneTodo(texto, busqueda){
-  const palabras = busqueda.split(" ").filter(w=>w.length>1);
-  return palabras.every(p=> texto.includes(p));
-}
 
 async function buscarColonias(t){
-  const original = t.trim();
-  if(!original) return [];
-  const qLow = limpiar(original);
-  const numMatch = original.match(/\b(\d{1,4}[a-z]?)\b/i);
-  const numero = numMatch? numMatch[1] : "";
-  let resultados = [];
+  const q = limpiar(t.trim());
+  if(!q) return [];
+  let res = COLONIAS_DOLORES.filter(c=>{
+    const n = limpiar(c.nombre);
+    if(q.length===1) return n.includes(q);
+    return n.includes(q);
+  }).map(c=>({
+    lat:c.lat, lon:c.lng,
+    name:c.nombre,
+    direccion:c.nombre + ", Dolores Hidalgo, Guanajuato",
+    tipo:"🏘️ Colonia",
+    extra:"Dolores Hidalgo Cuna"
+  }));
 
-  BASE_DOLORES.forEach(b=>{
-    const nombreLow = limpiar(b.n);
-    const coloniaLow = limpiar(b.c);
-    if(qLow.length<=2){
-      if(nombreLow.startsWith(qLow) || coloniaLow.startsWith(qLow)) resultados.push({...b, score:100});
-    }else{
-      if(nombreLow.includes(qLow) || qLow.includes(coloniaLow) || contieneTodo(nombreLow,qLow) || contieneTodo(coloniaLow,qLow)){
-        resultados.push({...b, score:90});
-      }else{
-        const partes = qLow.split(" ");
-        if(partes.some(p=> nombreLow.includes(p) || coloniaLow.includes(p))){
-          resultados.push({...b, score:60});
-        }
-      }
-    }
-  });
+  // Si escribe poco, mostrar todas con esa letra
+  if(res.length>0) return res.slice(0,25);
 
-  if(numero){
-    const baseFiltrada = resultados.length>0? resultados : BASE_DOLORES.filter(b=> limpiar(b.n).includes(qLow.split(" ")[0]) || qLow.includes(limpiar(b.c)));
-    const baseUsar = baseFiltrada.length>0? baseFiltrada : resultados;
-    if(baseUsar.length>0){
-      const base = baseUsar[0];
-      const variacionNum = {
-        n:`${base.n} ${numero} - ${base.c}`,
-        lat: base.lat + (parseInt(numero)%20)*0.00008,
-        lng: base.lng + (parseInt(numero)%20)*0.00008,
-        c: base.c,
-        score: 110,
-        exacta:true
-      };
-      resultados.unshift(variacionNum);
-    }
-  }
-
+  // Si no encuentra en base local, buscar en OSM colonias
   try{
     const viewbox="-100.99,21.19,-100.88,21.12";
-    const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(original+", Dolores Hidalgo Guanajuato")}&limit=12&countrycodes=mx&viewbox=${viewbox}&bounded=1&addressdetails=1&accept-language=es`;
+    const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(t+", Dolores Hidalgo")}&limit=15&countrycodes=mx&viewbox=${viewbox}&bounded=1&addressdetails=1`;
     const r=await fetch(url); const d=await r.json();
     d.forEach(x=>{
-      const lat=parseFloat(x.lat), lon=parseFloat(x.lon);
-      if(distMts(lat,lon,CENTRO.lat,CENTRO.lng)>9000) return;
-      resultados.push({n:x.display_name.split(",")[0], lat, lng:lon, c:x.display_name.split(",")[1]||"Dolores", score:40, osm:true, dirFull:x.display_name});
+      res.push({
+        lat:parseFloat(x.lat), lon:parseFloat(x.lon),
+        name:x.display_name.split(",")[0],
+        direccion:x.display_name,
+        tipo:"📍 Colonia OSM",
+        extra:"Dolores Hidalgo"
+      });
     });
   }catch(e){}
-
-  const seen=new Set(); let final=[];
-  resultados.forEach(r=>{
-    const key = r.n.toLowerCase()+"_"+r.lat.toFixed(4);
-    if(seen.has(key)) return; seen.add(key);
-    const esExacta = r.exacta || (numero && r.n.toLowerCase().includes(numero.toLowerCase()));
-    final.push({
-      lat:r.lat, lon:r.lng,
-      name: r.n,
-      direccion: r.dirFull || `${r.n}, ${r.c}, Dolores Hidalgo, Gto. ${numero? "Num "+numero:""}`,
-      tipo: esExacta? "🏠 Dirección exacta" : r.n.toLowerCase().includes("calle")? "🛣️ Calle":"🏘️ Colonia",
-      extra: r.c + " - Dolores Hidalgo"
-    });
-  });
-
-  final.sort((a,b)=> (b.score||0)-(a.score||0));
-  return final.slice(0,25);
+  return res.slice(0,25);
 }
-
 function mostrar(c,res,tipo){
   c.innerHTML="";
-  if(!res.length){
-    c.innerHTML='<div style="padding:12px;text-align:center">Buscando...</div>';
-    c.classList.add("show"); return;
-  }
   res.forEach(r=>{
     const el=document.createElement("div");
     el.className="suggestion";
-    el.innerHTML=`<div style="font-size:18px">${r.tipo.split(" ")[0]}</div><div style="flex:1"><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777;line-height:1.2">${r.direccion.substring(0,110)}</div><div style="font-size:9px;color:#E53935;font-weight:700;margin-top:2px">${r.tipo} • ${r.extra}</div></div>`;
+    el.innerHTML=`<div style="font-size:18px">🏘️</div><div style="flex:1"><div style="font-weight:800;font-size:14px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion}</div><div style="font-size:9px;color:#E53935;font-weight:700">${r.tipo}</div></div>`;
     el.onclick=()=>{
       if(tipo==="pickup"){
-        pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name+" - "+r.extra;pickupInput.value=r.name;
+        pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;
         pickupSuggestions.classList.remove("show");
         if(pickupMarker)map.removeLayer(pickupMarker);
         pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();
-        map.setView([r.lat,r.lon],17);
+        map.setView([r.lat,r.lon],16);
       }else{
-        destinationLat=r.lat;destinationLng=r.lon;destName=r.name+" - "+r.extra;destinationInput.value=r.name;
+        destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;
         destinationSuggestions.classList.remove("show");
         if(destinationMarker)map.removeLayer(destinationMarker);
         destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();
-        map.setView([r.lat,r.lon],17);
+        map.setView([r.lat,r.lon],16);
       }
     };
     c.appendChild(el);
@@ -221,17 +169,17 @@ let t1=null;pickupInput.addEventListener("input",function(){
   const txt=this.value.trim();
   if(t1)clearTimeout(t1);
   if(txt.length<1){pickupSuggestions.classList.remove("show");return;}
+  pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">🔍 Buscando colonias...</div>';
   pickupSuggestions.classList.add("show");
-  pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">🔍 Buscando dirección exacta...</div>';
-  t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},180);
+  t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},150);
 });
 let t2=null;destinationInput.addEventListener("input",function(){
   const txt=this.value.trim();
   if(t2)clearTimeout(t2);
   if(txt.length<1){destinationSuggestions.classList.remove("show");return;}
+  destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">🔍 Buscando colonias...</div>';
   destinationSuggestions.classList.add("show");
-  destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">🔍 Buscando dirección exacta...</div>';
-  t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},180);
+  t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},150);
 });
 
 for(let i=0;i<70;i++){let d=document.createElement("div");d.className="rain";d.style.left=Math.random()*100+"%";d.style.animationDelay=Math.random()*1.2+"s";d.style.animationDuration=(0.5+Math.random()*0.6)+"s";d.style.opacity=0.6+Math.random()*0.4;rainOverlay.appendChild(d);}

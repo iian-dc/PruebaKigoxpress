@@ -25,7 +25,6 @@
 .weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
 .reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
 .admin-btn{position:absolute;top:12px;left:52px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
-.radar-btn{position:absolute;top:48px;left:12px;z-index:999;background:#111;color:#fff;border:none;border-radius:20px;padding:6px 10px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .modal{position:fixed;inset:0;background:rgba(10,10,10,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;z-index:10000;padding:16px;align-items:center;justify-content:center}
 .modal.show{display:flex}
 .login-box{width:100%;max-width:340px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;animation:pop.25s ease}
@@ -53,7 +52,6 @@
 <div class="map-message"><img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"></div>
 <div class="reset-btn" id="resetBtn">↻</div>
 <button class="admin-btn" onclick="openLogin()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-<button class="radar-btn" id="radarBtn" onclick="toggleRadar()">🛰️ Radar OFF</button>
 <div id="weatherWidget" class="weather-widget">☀️ --°C</div>
 <div id="weatherBadge" class="weather-badge">🌧️</div>
 </div>
@@ -67,12 +65,12 @@
 </div>
 </div>
 <div class="modal" id="loginModal"><div class="login-box"><div class="login-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()">✕</button></div><div class="login-body"><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div><button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Ingresar</button></div></div></div>
-<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Radar por colonia</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">👥 Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">🎨 Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">⚙️ Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">🛠️ Soporte</button></div><div class="adminContent"><div id="panelClientes"><div class="adminCard">👥 Clientes</div></div><div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800">🎨 TARIFAS POR COLONIA LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.8">🔵 Azul leve ≤0.4mm: +$0<br>🟢 Verde 0.5-2.4mm: +$5<br>🟡 Amarillo 2.5-7.4mm: +$9<br>🔴 Rojo 7.5-15mm: +$12<br>🟣 Morado >15mm: +$18<br><br><i>Solo cobra si llueve en la colonia del pedido</i></div></div></div><div id="panelAjustes" style="display:none"><div class="adminCard">⚙️ Ajustes</div></div><div id="panelSoporte" style="display:none"><div class="adminCard">🛠️ Soporte</div></div></div></div></div>
+<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Radar por colonia siempre activo</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">👥 Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">🎨 Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">⚙️ Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">🛠️ Soporte</button></div><div class="adminContent"><div id="panelClientes"><div class="adminCard">👥 Clientes</div></div><div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800">🎨 TARIFAS POR COLONIA LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.8">🔵 Azul leve ≤0.4mm: +$0<br>🟢 Verde 0.5-2.4mm: +$5<br>🟡 Amarillo 2.5-7.4mm: +$9<br>🔴 Rojo 7.5-15mm: +$12<br>🟣 Morado >15mm: +$18<br><br><i>Radar siempre activo sin mensajes</i></div></div></div><div id="panelAjustes" style="display:none"><div class="adminCard">⚙️ Ajustes</div></div><div id="panelSoporte" style="display:none"><div class="adminCard">🛠️ Soporte</div></div></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const CENTRO={lat:21.1561,lng:-100.9333};
 let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupMarker=null,destinationMarker=null,routeLayer=null,ultimaDistancia="",ultimoPrecio="",pickupName="",destName="";
-let extraLluvia=0,radarLayer=null,radarVisible=false,lastPrecip=0,lastInfo="";
+let extraLluvia=0,radarLayer=null,lastPrecip=0,lastInfo="";
 const map=L.map("map",{zoomControl:false}).setView([CENTRO.lat,CENTRO.lng],14);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
@@ -82,8 +80,9 @@ async function buscarColonias(t){const texto=t.toLowerCase();let resultados=[];i
 function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>🛵</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
 let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
 let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
-const DOLORES_BOUNDS = L.latLngBounds([20.95,-101.15],[21.35,-100.70]);
-const TRANSPARENT_TILE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
+
+// RADAR SIEMPRE ACTIVO - SIN MENSAJE LEVEL NOT SUPPORT
+const DOLORES_BOUNDS = L.latLngBounds([20.6,-101.6],[21.7,-100.2]);
 async function initRadar(){
  try{
   const r=await fetch("https://api.rainviewer.com/public/weather-maps.json");
@@ -91,24 +90,21 @@ async function initRadar(){
   if(!j.radar ||!j.radar.past ||!j.radar.past.length) return;
   const last=j.radar.past[j.radar.past.length-1];
   if(radarLayer) map.removeLayer(radarLayer);
-  radarLayer=L.tileLayer(`https://tilecache.rainviewer.com${last.path}/256/{z}/{x}/{y}/2/1_1.png`,{
-    opacity:0.55,
+  // TRUCO: 512px tiles + maxNativeZoom 7 = nunca pide zoom 16, 17, 18. Estira la nube y no sale letrero
+  radarLayer=L.tileLayer(`https://tilecache.rainviewer.com${last.path}/512/{z}/{x}/{y}/6/1_1.png`,{
+    opacity:0.65,
     maxZoom:19,
-    maxNativeZoom:8,
+    maxNativeZoom:7,
     minZoom:5,
     bounds:DOLORES_BOUNDS,
-    errorTileUrl: TRANSPARENT_TILE,
-    keepBuffer:1
+    tileSize:512,
+    zoomOffset:-1,
+    keepBuffer:2
   });
-  if(radarVisible) radarLayer.addTo(map);
+  radarLayer.addTo(map);
  }catch(e){}
 }
-function toggleRadar(){
- radarVisible=!radarVisible;
- const btn=document.getElementById("radarBtn");
- if(radarVisible){ if(radarLayer) radarLayer.addTo(map); btn.innerText="🛰️ Radar ON"; btn.style.background="#E53935"; }
- else { if(radarLayer) map.removeLayer(radarLayer); btn.innerText="🛰️ Radar OFF"; btn.style.background="#111"; }
-}
+
 async function getLluviaColonia(lat,lng){
  try{
   const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=precipitation,weather_code&timezone=America/Mexico_City`);
@@ -131,7 +127,10 @@ async function checarClimaGeneral(){
   weatherWidget.innerText=`☀️ ${temp}°C`;
  }catch(e){}
 }
-checarClimaGeneral(); initRadar();
+checarClimaGeneral();
+initRadar();
+setInterval(initRadar, 300000);
+
 let creds={user:"admin",pass:"0831"}; let isLogged=false;
 function openLogin(){ if(isLogged){openAdmin();} else {document.getElementById("loginModal").classList.add("show");} }
 function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
@@ -160,13 +159,6 @@ document.getElementById("calculateButton").onclick=async()=>{
  lastPrecip = precipFinal;
  lastInfo = `${info.emoji} ${info.txt} en ${coloniaLluviosa}`;
  if(precipFinal>0.4){
-  await initRadar();
-  if(!radarVisible){
-   radarVisible=true;
-   if(radarLayer) radarLayer.addTo(map);
-   document.getElementById("radarBtn").innerText="🛰️ Radar ON";
-   document.getElementById("radarBtn").style.background="#E53935";
-  }
   weatherBadge.style.background=info.color;
   weatherBadge.className="weather-badge show";
   weatherBadge.innerText=`${info.emoji} ${info.txt} en ${coloniaLluviosa} (${precipFinal}mm) +$${info.extra}`;

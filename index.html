@@ -23,28 +23,23 @@
 .input-wrapper{position:relative}.info{display:flex;gap:10px;margin-top:12px}.info-box{flex:1;background:#f7f7f8;padding:12px;border-radius:12px;text-align:center;border:1px solid #eee}
 .weather-widget{position:absolute;top:12px;right:12px;z-index:999;background:#fff;border-radius:20px;padding:6px 12px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,.25);border:1px solid #eee}
 .weather-widget.lluvia{background:#dbeafe;color:#1e40af}.weather-widget.tormenta{background:#1e293b;color:#fff}
-.rain-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:400;pointer-events:none;display:none;background:rgba(30,58,138,0.12)}.rain-overlay.active{display:block}
-.rain{position:absolute;top:-20px;width:2px;height:16px;background:linear-gradient(to bottom, transparent, #9ec3ff);animation:fall linear infinite}
-@keyframes fall{0%{transform:translateY(0)}100%{transform:translateY(60vh)}}
-.weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
-.weather-badge.tormenta{background:#7f1d1d}.weather-badge.moderada{background:#1e40af}.weather-badge.leve{background:#1e3a8a}
+.weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
 .reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
 .admin-btn{position:absolute;top:12px;left:52px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.radar-btn{position:absolute;top:48px;left:12px;z-index:999;background:#111;color:#fff;border:none;border-radius:20px;padding:6px 10px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .modal{position:fixed;inset:0;background:rgba(10,10,10,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;z-index:10000;padding:16px;align-items:center;justify-content:center}
 .modal.show{display:flex}
-.login-box{width:100%;max-width:340px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;animation:pop .25s ease}
+.login-box{width:100%;max-width:340px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;animation:pop.25s ease}
 @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
 .login-head{padding:16px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
 .login-body{padding:20px;display:grid;gap:12px}
 .login-input-wrap{position:relative;display:flex;align-items:center}
 .login-input-wrap svg{position:absolute;left:12px;color:#888}
 .login-input{width:100%;padding:12px 14px 12px 38px;border:1.5px solid #e5e7eb;border-radius:12px;background:#f9fafb;font-size:14px;font-weight:600;outline:none}
-.login-input:focus{border-color:#111;background:#fff}
 .iconBtn{width:36px;height:36px;border-radius:10px;border:1px solid #eee;background:#fff;display:grid;place-items:center;cursor:pointer}
-/* ADMIN PANEL KIGO XPRESS */
-.admin-panel-box{width:100%;max-width:500px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;max-height:90vh;display:flex;flex-direction:column;animation:pop .25s ease}
+.admin-panel-box{width:100%;max-width:500px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;max-height:90vh;display:flex;flex-direction:column;animation:pop.25s ease}
 .admin-panel-head{padding:16px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#fcfcfd}
-.adminTabs{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;scroll-snap-type:x mandatory;background:#fff;border-bottom:1px solid #eee; -webkit-overflow-scrolling:touch}
+.adminTabs{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;scroll-snap-type:x mandatory;background:#fff;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
 .adminTabs::-webkit-scrollbar{display:none}
 .adminTab{scroll-snap-align:center;flex-shrink:0;display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;border:1px solid #e5e7eb;background:#f7f7f8;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
 .adminTab.active{background:#111;color:#fff;border-color:#111;box-shadow:0 4px 12px rgba(0,0,0,.15)}
@@ -56,16 +51,12 @@
 <div class="app">
 <div class="map-container">
 <div id="map"></div>
-<div class="map-message">
-  <img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
-</div>
+<div class="map-message"><img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"></div>
 <div class="reset-btn" id="resetBtn">↻</div>
-<button class="admin-btn" id="adminBtn" onclick="openLogin()">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-</button>
+<button class="admin-btn" onclick="openLogin()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+<button class="radar-btn" id="radarBtn" onclick="toggleRadar()">🛰️ Radar OFF</button>
 <div id="weatherWidget" class="weather-widget">☀️ --°C</div>
-<div id="rainOverlay" class="rain-overlay"></div>
-<div id="weatherBadge" class="weather-badge">🌧️ LLOVIENDO EN DOLORES</div>
+<div id="weatherBadge" class="weather-badge">🌧️</div>
 </div>
 <div class="panel">
 <div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER?</div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Escribe Centro o colonia..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
@@ -79,71 +70,24 @@
 
 <div class="modal" id="loginModal">
 <div class="login-box">
-<div class="login-head">
-<div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div>
-<button class="iconBtn" onclick="closeLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-</div>
+<div class="login-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
 <div class="login-body">
-<div class="login-input-wrap">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-<input id="loginUser" class="login-input" placeholder="Usuario" value="admin">
-</div>
-<div class="login-input-wrap">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-<input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831">
-</div>
-<button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-Ingresar
-</button>
+<div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div>
+<div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div>
+<button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">Ingresar</button>
 </div>
 </div>
 </div>
 
 <div class="modal" id="adminModal">
 <div class="admin-panel-box">
-<div class="admin-panel-head">
-<div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Mapa en segundo plano • blur activo</div></div></div>
-<div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-</div>
-
-<!-- CATEGORIAS DESLIZABLES -->
-<div class="adminTabs" id="adminTabs">
-<button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-Clientes
-</button>
-<button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-Modificaciones
-</button>
-<button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 009 15a1.65 1.65 0 00-1-1.51V13a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51z"/></svg>
-Ajustes
-</button>
-<button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-Soporte técnico
-</button>
-</div>
-
+<div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Radar lluvia + tarifas</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+<div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">👥 Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">🎨 Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">⚙️ Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">🛠️ Soporte</button></div>
 <div class="adminContent">
-<!-- CLIENTES -->
-<div id="panelClientes">
-<div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:8px">👥 CLIENTES KIGO XPRESS</div><div style="font-size:12px;color:#888">Aquí irá tu lista de clientes, historial de pedidos, teléfonos, direcciones frecuentes.</div><div style="margin-top:10px;padding:10px;background:#f7f7f8;border-radius:10px;font-size:11px;color:#666">Desliza las categorías arriba ← → para ver más</div></div>
-</div>
-<!-- MODIFICACIONES -->
-<div id="panelMod" style="display:none">
-<div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:8px">🎨 MODIFICACIONES</div><div style="display:grid;gap:10px"><input class="colonia-input" placeholder="Nombre plataforma"><input class="colonia-input" placeholder="Precio base"><button class="btn-cotizar" style="margin-top:0">Guardar cambios</button></div></div>
-</div>
-<!-- AJUSTES -->
-<div id="panelAjustes" style="display:none">
-<div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:8px">⚙️ AJUSTES / CONFIGURACIÓN</div><div style="display:grid;gap:10px"><input class="colonia-input" placeholder="Nuevo usuario"><input class="colonia-input" placeholder="Nueva contraseña" type="password"><button class="btn-cotizar" style="background:#111;margin-top:0">Actualizar acceso</button></div></div>
-</div>
-<!-- SOPORTE -->
-<div id="panelSoporte" style="display:none">
-<div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:8px">🛠️ SOPORTE TÉCNICO</div><div style="font-size:12px;color:#888">Estado del mapa, clima, OSRM, WhatsApp, contacto desarrollador.</div><div style="margin-top:10px"><button class="btn-cotizar" style="background:#25D366;margin-top:0">📲 Contactar soporte</button></div></div>
-</div>
+<div id="panelClientes"><div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:8px">👥 CLIENTES</div><div style="font-size:12px;color:#888">Historial de clientes</div></div></div>
+<div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800;color:#666">🎨 TARIFAS LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.6">🔵 Azul leve: +$0<br>🟢 Verde: +$5<br>🟡 Amarillo/Naranja: +$9<br>🔴 Rojo: +$12<br>🟣 Morado: +$18</div></div></div>
+<div id="panelAjustes" style="display:none"><div class="adminCard">⚙️ Ajustes</div></div>
+<div id="panelSoporte" style="display:none"><div class="adminCard">🛠️ Soporte técnico</div></div>
 </div>
 </div>
 </div>
@@ -151,75 +95,120 @@ Soporte técnico
 <script>
 const CENTRO={lat:21.1561,lng:-100.9333};
 let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupMarker=null,destinationMarker=null,routeLayer=null,ultimaDistancia="",ultimoPrecio="",pickupName="",destName="";
-let extraLluvia=0;
+let extraLluvia=0,radarLayer=null,radarVisible=false,lastPrecip=0,lastCode=0;
 const map=L.map("map",{zoomControl:false}).setView([CENTRO.lat,CENTRO.lng],14);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
-const rainOverlay=document.getElementById("rainOverlay"),weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
+const weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
 function distMts(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 async function buscarColonias(t){const texto=t.toLowerCase();let resultados=[];if(texto.includes("centro")||texto.includes("cent")){resultados.push({lat:CENTRO.lat,lon:CENTRO.lng,name:"Centro - Zona Centro",direccion:"Centro, Dolores Hidalgo, Gto."});}const q=encodeURIComponent(t+", Dolores Hidalgo Guanajuato Mexico");try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=10&countrycodes=mx&accept-language=es`);const d=await r.json();const otros=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:x.display_name.split(",")[0],direccion:x.display_name}));resultados=[...resultados,...otros];}catch(e){}return resultados;}
 function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>🛵</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
 let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
 let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
-for(let i=0;i<70;i++){let d=document.createElement("div");d.className="rain";d.style.left=Math.random()*100+"%";d.style.animationDelay=Math.random()*1.2+"s";d.style.animationDuration=(0.5+Math.random()*0.6)+"s";d.style.opacity=0.6+Math.random()*0.4;rainOverlay.appendChild(d);}
+
+// RADAR LLUVIA REAL - RainViewer
+async function initRadar(){
+ try{
+  const r=await fetch("https://api.rainviewer.com/public/weather-maps.json");
+  const j=await r.json();
+  if(!j.radar ||!j.radar.past ||!j.radar.past.length) return;
+  const last=j.radar.past[j.radar.past.length-1];
+  const path=last.path;
+  if(radarLayer) map.removeLayer(radarLayer);
+  radarLayer=L.tileLayer(`https://tilecache.rainviewer.com${path}/256/{z}/{x}/{y}/2/1_1.png`,{opacity:0.6, maxZoom:19, zIndex:500});
+  if(radarVisible) radarLayer.addTo(map);
+ }catch(e){}
+}
+function toggleRadar(){
+ radarVisible=!radarVisible;
+ const btn=document.getElementById("radarBtn");
+ if(radarVisible){
+  if(radarLayer) radarLayer.addTo(map);
+  btn.innerText="🛰️ Radar ON";
+  btn.style.background="#E53935";
+ } else {
+  if(radarLayer) map.removeLayer(radarLayer);
+  btn.innerText="🛰️ Radar OFF";
+  btn.style.background="#111";
+ }
+}
+
+// NUEVA LOGICA COLORES Y PRECIOS QUE PEDISTE
 async function checarLluvia(){
-try{
-const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m,precipitation,rain,weather_code&timezone=America/Mexico_City");
-const data=await r.json();
-const precip=data.current.precipitation;
-const temp=Math.round(data.current.temperature_2m);
-const code=data.current.weather_code;
-let estaLloviendo=precip>0||(code>=51&&code<=99);
-if(!estaLloviendo){
-extraLluvia=0;
-rainOverlay.classList.remove("active");
-weatherBadge.classList.remove("show");
-weatherWidget.className="weather-widget";
-weatherWidget.innerText=`☀️ ${temp}°C`;
-return;
-}
-if(code>=95||precip>7.5||code==65||code==82){
-extraLluvia=10;
-weatherWidget.className="weather-widget tormenta";
-weatherWidget.innerText=`⛈️ ${temp}°C Fuerte`;
-weatherBadge.className="weather-badge show tormenta";
-weatherBadge.innerText=`⛈️ LLOVIENDO EN DOLORES - Fuerte (${precip}mm) +$10`;
-}else if(code==53||code==63||code==81||code==55||(precip>=2.5&&precip<=7.5)){
-extraLluvia=5;
-weatherWidget.className="weather-widget lluvia";
-weatherWidget.innerText=`🌧️ ${temp}°C Moderada`;
-weatherBadge.className="weather-badge show moderada";
-weatherBadge.innerText=`🌧️ LLOVIENDO EN DOLORES - Moderada (${precip}mm) +$5`;
-}else{
-extraLluvia=0;
-weatherWidget.className="weather-widget lluvia";
-weatherWidget.innerText=`🌦️ ${temp}°C Leve`;
-weatherBadge.className="weather-badge show leve";
-weatherBadge.innerText=`🌦️ LLOVIENDO EN DOLORES - Leve (${precip}mm) +$0`;
-}
-rainOverlay.classList.add("active");
-}catch(e){weatherWidget.innerText=`☀️ --°C`;}
+ try{
+  const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m,precipitation,rain,weather_code&timezone=America/Mexico_City");
+  const data=await r.json();
+  const precip=data.current.precipitation;
+  const temp=Math.round(data.current.temperature_2m);
+  const code=data.current.weather_code;
+  lastPrecip=precip; lastCode=code;
+
+  // COLORES SEGUN TU TABLA NUEVA
+  if(precip<=0 && code<51){
+   extraLluvia=0;
+   weatherBadge.classList.remove("show");
+   weatherWidget.className="weather-widget";
+   weatherWidget.innerText=`☀️ ${temp}°C`;
+   if(radarLayer && radarVisible){map.removeLayer(radarLayer); radarVisible=false; document.getElementById("radarBtn").innerText="🛰️ Radar OFF"; document.getElementById("radarBtn").style.background="#111";}
+   return;
+  }
+
+  let color="#60a5fa", texto="Leve", precioExtra=0;
+  // AZUL LEVE 0-0.4mm
+  if(precip<=0.4){
+   color="#60a5fa"; texto="Leve - Azul"; precioExtra=0; extraLluvia=0;
+   weatherWidget.className="weather-widget"; weatherWidget.style.background="#dbeafe"; weatherWidget.style.color="#1e40af";
+   weatherBadge.style.background="#60a5fa";
+  // VERDE 0.5-2.4mm
+  } else if(precip>0.4 && precip<2.5){
+   color="#22c55e"; texto="Moderada - Verde"; precioExtra=5; extraLluvia=5;
+   weatherWidget.className="weather-widget"; weatherWidget.style.background="#dcfce7"; weatherWidget.style.color="#166534";
+   weatherBadge.style.background="#22c55e";
+  // AMARILLO/NARANJA 2.5-7.4mm
+  } else if(precip>=2.5 && precip<7.5){
+   color="#eab308"; texto="Fuerte - Amarillo"; precioExtra=9; extraLluvia=9;
+   weatherWidget.className="weather-widget"; weatherWidget.style.background="#fef9c3"; weatherWidget.style.color="#854d0e";
+   weatherBadge.style.background="#eab308";
+  // ROJO 7.5-15mm
+  } else if(precip>=7.5 && precip<15){
+   color="#ef4444"; texto="Muy fuerte - Rojo"; precioExtra=12; extraLluvia=12;
+   weatherWidget.className="weather-widget"; weatherWidget.style.background="#fecaca"; weatherWidget.style.color="#7f1d1d";
+   weatherBadge.style.background="#ef4444";
+  // MORADO >15mm
+  } else {
+   color="#a855f7"; texto="Extrema - Morado"; precioExtra=18; extraLluvia=18;
+   weatherWidget.className="weather-widget"; weatherWidget.style.background="#e9d5ff"; weatherWidget.style.color="#581c87";
+   weatherBadge.style.background="#a855f7";
+  }
+
+  weatherWidget.innerText=`${precip<=0.4?"🌦️":precip<2.5?"🌧️":precip<7.5?"🌧️⛈️":precip<15?"⛈️":"⛈️🟣"} ${temp}°C ${texto} +$${precioExtra}`;
+  weatherBadge.className="weather-badge show";
+  weatherBadge.innerText=`${precip<=0.4?"🔵":precip<2.5?"🟢":precip<7.5?"🟡":precip<15?"🔴":"🟣"} ${texto} (${precip}mm) +$${precioExtra}`;
+
+  // Prende radar automático si llueve
+  await initRadar();
+  if(!radarVisible){
+   radarVisible=true;
+   if(radarLayer) radarLayer.addTo(map);
+   document.getElementById("radarBtn").innerText="🛰️ Radar ON";
+   document.getElementById("radarBtn").style.background="#E53935";
+  }
+
+ }catch(e){weatherWidget.innerText=`☀️ --°C`;}
 }
 checarLluvia(); setInterval(checarLluvia,600000);
-// LOGIN + ADMIN CON CATEGORIAS DESLIZABLES
-let creds={user:"admin",pass:"0831"};
-let isLogged=false;
+initRadar();
+// LOGIN + ADMIN
+let creds={user:"admin",pass:"0831"}; let isLogged=false;
 function openLogin(){ if(isLogged){openAdmin();} else {document.getElementById("loginModal").classList.add("show");} }
 function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
-function doLogin(){
- let u=document.getElementById("loginUser").value;
- let p=document.getElementById("loginPass").value;
- if(u===creds.user && p===creds.pass){isLogged=true;closeLogin();openAdmin();} else {alert("❌ Incorrecto");}
-}
+function doLogin(){ let u=document.getElementById("loginUser").value; let p=document.getElementById("loginPass").value; if(u===creds.user && p===creds.pass){isLogged=true;closeLogin();openAdmin();} else {alert("❌ Incorrecto");}}
 function openAdmin(){document.getElementById("adminModal").classList.add("show"); switchAdminTab('clientes');}
 function closeAdmin(){document.getElementById("adminModal").classList.remove("show");}
 function logout(){isLogged=false;closeAdmin();}
 function switchAdminTab(tab){
  document.querySelectorAll('.adminTab').forEach(b=>b.classList.remove('active'));
- document.getElementById('panelClientes').style.display='none';
- document.getElementById('panelMod').style.display='none';
- document.getElementById('panelAjustes').style.display='none';
- document.getElementById('panelSoporte').style.display='none';
+ document.getElementById('panelClientes').style.display='none';document.getElementById('panelMod').style.display='none';document.getElementById('panelAjustes').style.display='none';document.getElementById('panelSoporte').style.display='none';
  if(tab==='clientes'){document.getElementById('tabClientes').classList.add('active'); document.getElementById('panelClientes').style.display='block';}
  if(tab==='mod'){document.getElementById('tabMod').classList.add('active'); document.getElementById('panelMod').style.display='block';}
  if(tab==='ajustes'){document.getElementById('tabAjustes').classList.add('active'); document.getElementById('panelAjustes').style.display='block';}
@@ -244,7 +233,7 @@ document.getElementById("calculateButton").onclick=async()=>{
 };
 document.getElementById("whatsappButton").onclick=()=>{
  const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
- const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
+ const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n${extraLluvia>0?`🌧️ *Lluvia:* +$${extraLluvia} (${lastPrecip}mm)\n`:""}\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
  const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`;
  window.open(url,"_blank");
 };

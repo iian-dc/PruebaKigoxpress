@@ -9,7 +9,7 @@
 *{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#f3f4f6}
 .app{max-width:500px;margin:auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
 #map{width:100%;height:52vh}.map-container{position:relative;overflow:hidden}
-.map-message{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;background:#111;color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:900;letter-spacing:1px}
+.map-message{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25);}
 .panel{padding:16px;border-radius:22px 22px 0 0;margin-top:-18px;position:relative;z-index:1000;background:#fff;flex:1;box-shadow:0 -4px 20px rgba(0,0,0,.12)}
 .step{background:#f7f7f8;border:1px solid #eee;padding:12px;border-radius:14px;margin-bottom:12px}
 .colonia-input{width:100%;padding:14px;border:1.5px solid #ddd;border-radius:12px;font-size:14px;font-weight:600;outline:none}
@@ -29,16 +29,32 @@
 .weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
 .weather-badge.tormenta{background:#7f1d1d}.weather-badge.moderada{background:#1e40af}.weather-badge.leve{background:#1e3a8a}
 .reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
+/* LOGIN ELEGANTE KIGO */
+.admin-btn{position:absolute;top:12px;left:52px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.modal{position:fixed;inset:0;background:rgba(10,10,10,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;z-index:10000;padding:16px;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.login-box{width:100%;max-width:340px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.login-head{padding:16px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.login-body{padding:20px;display:grid;gap:12px}
+.login-input-wrap{position:relative;display:flex;align-items:center}
+.login-input-wrap svg{position:absolute;left:12px;color:#888}
+.login-input{width:100%;padding:12px 14px 12px 38px;border:1.5px solid #e5e7eb;border-radius:12px;background:#f9fafb;font-size:14px;font-weight:600;outline:none}
+.login-input:focus{border-color:#111;background:#fff}
+.iconBtn{width:36px;height:36px;border-radius:10px;border:1px solid #eee;background:#fff;display:grid;place-items:center;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="map-container">
 <div id="map"></div>
-<div class="map-message" style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25);">
+<div class="map-message">
   <img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
 </div>
 <div class="reset-btn" id="resetBtn">↻</div>
+<button class="admin-btn" id="adminBtn" onclick="openLogin()">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+</button>
 <div id="weatherWidget" class="weather-widget">☀️ --°C</div>
 <div id="rainOverlay" class="rain-overlay"></div>
 <div id="weatherBadge" class="weather-badge">🌧️ LLOVIENDO EN DOLORES</div>
@@ -50,6 +66,31 @@
 <button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
 <div class="info"><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">DISTANCIA MOTO</div><div id="distance" style="font-weight:800">—</div></div><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">TIEMPO</div><div id="duration" style="font-weight:800">—</div></div></div>
 <div class="price-box"><span>PRECIO</span><span id="price">POR COTIZAR</span></div>
+</div>
+</div>
+
+<!-- MODAL LOGIN ELEGANTE - MAPA QUEDA EN SEGUNDO PLANO CON BLUR -->
+<div class="modal" id="loginModal">
+<div class="login-box">
+<div class="login-head">
+<div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div>
+<button class="iconBtn" onclick="closeLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div>
+<div class="login-body">
+<div class="login-input-wrap">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+<input id="loginUser" class="login-input" placeholder="Usuario" value="admin">
+</div>
+<div class="login-input-wrap">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831">
+</div>
+<button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+Ingresar
+</button>
+<div style="font-size:10px;color:#888;text-align:center">admin / 0831</div>
+</div>
 </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -106,6 +147,20 @@ rainOverlay.classList.add("active");
 }catch(e){weatherWidget.innerText=`☀️ --°C`;}
 }
 checarLluvia(); setInterval(checarLluvia,600000);
+// LOGIN ELEGANTE - MAPA QUEDA EN SEGUNDO PLANO CON BLUR
+let creds={user:"admin",pass:"0831"};
+function openLogin(){document.getElementById("loginModal").classList.add("show");}
+function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
+function doLogin(){
+ let u=document.getElementById("loginUser").value;
+ let p=document.getElementById("loginPass").value;
+ if(u===creds.user && p===creds.pass){
+   closeLogin();
+   alert("✅ Acceso correcto KIGO XPRESS - Aquí después ponemos tu panel admin");
+ } else {
+   alert("❌ Usuario o contraseña incorrectos");
+ }
+}
 
 document.getElementById("calculateButton").onclick=async()=>{
  if(!pickupLat||!destinationLat){alert("Selecciona donde recoger y donde entregar");return;}
@@ -137,7 +192,14 @@ document.getElementById("resetBtn").onclick=()=>{
  if(pickupMarker)map.removeLayer(pickupMarker);if(destinationMarker)map.removeLayer(destinationMarker);if(routeLayer)map.removeLayer(routeLayer);
  map.setView([CENTRO.lat,CENTRO.lng],14);
 };
-document.addEventListener("click",e=>{if(!e.target.closest(".input-wrapper")){pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");}});
+document.addEventListener("click",e=>{
+ if(!e.target.closest(".input-wrapper") && !e.target.closest("#loginModal")){
+   pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");
+ }
+});
+document.getElementById("loginModal").addEventListener("click",e=>{
+ if(e.target.id==="loginModal") closeLogin();
+});
 </script>
 </body>
 </html>

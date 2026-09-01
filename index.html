@@ -43,6 +43,16 @@
 .adminTab.active{background:#111;color:#fff;border-color:#111;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .adminContent{padding:18px;overflow-y:auto;flex:1;background:#fcfcfd}
 .adminCard{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;margin-bottom:12px}
+.clientes-top{display:flex;gap:8px;margin-bottom:12px}
+.clientes-btn{flex:1;padding:10px;border:1px solid #111;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;background:#fff;color:#111}
+.clientes-btn.active{background:#111;color:#fff}
+.cliente-input{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;font-weight:600;margin-bottom:8px;outline:none}
+.cliente-row{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid #eee;border-radius:12px;margin-bottom:8px;background:#fff}
+.cliente-actions{display:flex;gap:6px}
+.miniMap{width:100%;height:160px;border-radius:12px;border:1px solid #ddd;margin-top:8px;display:none}
+.miniMap.show{display:block}
+.searchWrap{position:relative;display:flex;gap:6px}
+.iconBtnSmall{width:42px;height:42px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -65,7 +75,37 @@
 </div>
 </div>
 <div class="modal" id="loginModal"><div class="login-box"><div class="login-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()">✕</button></div><div class="login-body"><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div><button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Ingresar</button></div></div></div>
-<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Radar por colonia siempre activo</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">👥 Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">🎨 Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">⚙️ Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">🛠️ Soporte</button></div><div class="adminContent"><div id="panelClientes"><div class="adminCard">👥 Clientes</div></div><div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800">🎨 TARIFAS POR COLONIA LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.8">🔵 Azul leve ≤0.4mm: +$0<br>🟢 Verde 0.5-2.4mm: +$5<br>🟡 Amarillo 2.5-7.4mm: +$9<br>🔴 Rojo 7.5-15mm: +$12<br>🟣 Morado >15mm: +$18<br><br><i>Radar siempre activo sin mensajes</i></div></div></div><div id="panelAjustes" style="display:none"><div class="adminCard">⚙️ Ajustes</div></div><div id="panelSoporte" style="display:none"><div class="adminCard">🛠️ Soporte</div></div></div></div></div>
+<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Gestión de clientes</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 009 15a1.65 1.65 0 00-1-1.51V13a2 2 0 014 0v.49c.3.2.64.34 1.49z"/></svg> Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> Soporte</button></div><div class="adminContent">
+
+<div id="panelClientes">
+<div class="clientes-top">
+<button class="clientes-btn active" id="btnAddCliente" onclick="showAddCliente()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar nuevo cliente</button>
+<button class="clientes-btn" id="btnListCliente" onclick="showListClientes()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Lista de clientes</button>
+</div>
+
+<div id="addClienteView">
+<div class="adminCard">
+<div style="font-size:11px;font-weight:800;margin-bottom:10px">AGREGAR CLIENTE</div>
+<input id="clienteNombre" class="cliente-input" placeholder="Nombre del cliente">
+<div class="searchWrap">
+<input id="clienteUbicacion" class="cliente-input" style="margin-bottom:0" placeholder="Escribe colonia o dirección...">
+<button class="iconBtnSmall" onclick="buscarUbicacionCliente()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+</div>
+<div id="clienteMiniMap" class="miniMap"></div>
+<div id="clienteConfirmText" style="font-size:11px;color:#666;margin-top:6px;display:none"></div>
+<button onclick="guardarCliente()" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:10px;background:#111;color:#fff;font-weight:800;font-size:13px;cursor:pointer">Guardar cliente</button>
+</div>
+</div>
+
+<div id="listClienteView" style="display:none">
+<div id="listaClientesContainer"></div>
+</div>
+</div>
+
+<div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800">TARIFAS POR COLONIA LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.8">Azul ≤0.4mm: +$0<br>Verde 0.5-2.4mm: +$5<br>Amarillo 2.5-7.4mm: +$9<br>Rojo 7.5-15mm: +$12<br>Morado >15mm: +$18<br><br><i>Radar siempre activo 0.35</i></div></div></div>
+<div id="panelAjustes" style="display:none"><div class="adminCard">Ajustes</div></div>
+<div id="panelSoporte" style="display:none"><div class="adminCard">Soporte</div></div>
+</div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const CENTRO={lat:21.1561,lng:-100.9333};
@@ -76,8 +116,133 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).a
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 const weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
 function distMts(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-async function buscarColonias(t){const texto=t.toLowerCase();let resultados=[];if(texto.includes("centro")||texto.includes("cent")){resultados.push({lat:CENTRO.lat,lon:CENTRO.lng,name:"Centro - Zona Centro",direccion:"Centro, Dolores Hidalgo, Gto."});}const q=encodeURIComponent(t+", Dolores Hidalgo Guanajuato Mexico");try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=10&countrycodes=mx&accept-language=es`);const d=await r.json();const otros=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:x.display_name.split(",")[0],direccion:x.display_name}));resultados=[...resultados,...otros];}catch(e){}return resultados;}
-function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>🛵</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
+
+// CLIENTES LOGICA
+let clientesGuardados = JSON.parse(localStorage.getItem("kigo_clientes")||"[]");
+let tempClienteLat=null,tempClienteLng=null,tempClienteDir="",editandoId=null;
+let clienteMiniMap=null, clienteMiniMarker=null;
+
+function showAddCliente(){
+ document.getElementById("btnAddCliente").classList.add("active");
+ document.getElementById("btnListCliente").classList.remove("active");
+ document.getElementById("addClienteView").style.display="block";
+ document.getElementById("listClienteView").style.display="none";
+}
+function showListClientes(){
+ document.getElementById("btnListCliente").classList.add("active");
+ document.getElementById("btnAddCliente").classList.remove("active");
+ document.getElementById("addClienteView").style.display="none";
+ document.getElementById("listClienteView").style.display="block";
+ renderListaClientes();
+}
+
+async function buscarColonias(t){
+ const texto=t.toLowerCase();
+ let resultados=[];
+ if(texto.includes("centro")||texto.includes("cent")){
+  resultados.push({lat:CENTRO.lat,lon:CENTRO.lng,name:"Centro - Zona Centro",direccion:"Centro, Dolores Hidalgo, Gto.", esCliente:false});
+ }
+ // agregar clientes guardados al buscador principal
+ clientesGuardados.forEach(c=>{
+  if(c.nombre.toLowerCase().includes(texto) || c.direccion.toLowerCase().includes(texto)){
+   resultados.push({lat:c.lat,lon:c.lng,name:c.nombre+" (Cliente)",direccion:c.direccion, esCliente:true});
+  }
+ });
+ const q=encodeURIComponent(t+", Dolores Hidalgo Guanajuato Mexico");
+ try{
+  const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=8&countrycodes=mx&accept-language=es`);
+  const d=await r.json();
+  const otros=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:x.display_name.split(",")[0],direccion:x.display_name, esCliente:false}));
+  resultados=[...resultados,...otros];
+ }catch(e){}
+ return resultados;
+}
+
+async function buscarUbicacionCliente(){
+ const txt=document.getElementById("clienteUbicacion").value.trim();
+ if(!txt){alert("Escribe una ubicación");return;}
+ const q=encodeURIComponent(txt+", Dolores Hidalgo Guanajuato Mexico");
+ try{
+  const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&countrycodes=mx&accept-language=es`);
+  const d=await r.json();
+  if(!d.length){alert("No se encontró ubicación");return;}
+  tempClienteLat=parseFloat(d[0].lat);
+  tempClienteLng=parseFloat(d[0].lon);
+  tempClienteDir=d[0].display_name;
+  document.getElementById("clienteConfirmText").style.display="block";
+  document.getElementById("clienteConfirmText").innerText="Ubicación encontrada: "+tempClienteDir;
+  const miniDiv=document.getElementById("clienteMiniMap");
+  miniDiv.classList.add("show");
+  setTimeout(()=>{
+   if(!clienteMiniMap){
+    clienteMiniMap=L.map("clienteMiniMap",{zoomControl:false}).setView([tempClienteLat,tempClienteLng],16);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(clienteMiniMap);
+   } else {
+    clienteMiniMap.setView([tempClienteLat,tempClienteLng],16);
+    clienteMiniMap.invalidateSize();
+   }
+   if(clienteMiniMarker) clienteMiniMap.removeLayer(clienteMiniMarker);
+   clienteMiniMarker=L.marker([tempClienteLat,tempClienteLng]).addTo(clienteMiniMap);
+  },200);
+ }catch(e){alert("Error buscando");}
+}
+
+function guardarCliente(){
+ const nombre=document.getElementById("clienteNombre").value.trim();
+ if(!nombre){alert("Escribe nombre");return;}
+ if(!tempClienteLat){alert("Busca la ubicación primero con el botón de buscar");return;}
+ if(editandoId){
+  const idx=clientesGuardados.findIndex(c=>c.id===editandoId);
+  if(idx>=0){
+   clientesGuardados[idx]={...clientesGuardados[idx], nombre:nombre, direccion:tempClienteDir, lat:tempClienteLat, lng:tempClienteLng};
+  }
+  editandoId=null;
+ } else {
+  const nuevo={id:Date.now(), nombre:nombre, direccion:tempClienteDir, lat:tempClienteLat, lng:tempClienteLng};
+  clientesGuardados.push(nuevo);
+ }
+ localStorage.setItem("kigo_clientes", JSON.stringify(clientesGuardados));
+ document.getElementById("clienteNombre").value="";
+ document.getElementById("clienteUbicacion").value="";
+ document.getElementById("clienteMiniMap").classList.remove("show");
+ document.getElementById("clienteConfirmText").style.display="none";
+ tempClienteLat=null;tempClienteLng=null;
+ alert("Cliente guardado");
+ showListClientes();
+}
+
+function renderListaClientes(){
+ const cont=document.getElementById("listaClientesContainer");
+ if(!clientesGuardados.length){cont.innerHTML='<div class="adminCard" style="text-align:center;font-size:12px;color:#888">No hay clientes aún</div>';return;}
+ const orden=[...clientesGuardados].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+ cont.innerHTML="";
+ orden.forEach(c=>{
+  const div=document.createElement("div");
+  div.className="cliente-row";
+  div.innerHTML=`<div style="flex:1"><div style="font-weight:800;font-size:13px">${c.nombre}</div><div style="font-size:10px;color:#777">${c.direccion.substring(0,70)}</div></div><div class="cliente-actions"><button class="iconBtn" onclick="editarCliente(${c.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1-4 9.5-9.5z"/></svg></button><button class="iconBtn" onclick="eliminarCliente(${c.id})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div>`;
+  cont.appendChild(div);
+ });
+}
+
+function editarCliente(id){
+ const c=clientesGuardados.find(x=>x.id===id);
+ if(!c) return;
+ editandoId=id;
+ document.getElementById("clienteNombre").value=c.nombre;
+ document.getElementById("clienteUbicacion").value=c.direccion;
+ tempClienteLat=c.lat; tempClienteLng=c.lng; tempClienteDir=c.direccion;
+ showAddCliente();
+ setTimeout(()=>buscarUbicacionCliente(),100);
+}
+
+function eliminarCliente(id){
+ if(!confirm("¿Eliminar cliente?")) return;
+ clientesGuardados=clientesGuardados.filter(c=>c.id!==id);
+ localStorage.setItem("kigo_clientes", JSON.stringify(clientesGuardados));
+ renderListaClientes();
+}
+
+function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>${r.esCliente?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>':'🛵'}</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
 let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
 let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
 const DOLORES_BOUNDS = L.latLngBounds([20.6,-101.6],[21.7,-100.2]);
@@ -136,7 +301,7 @@ function logout(){isLogged=false;closeAdmin();}
 function switchAdminTab(tab){
  document.querySelectorAll('.adminTab').forEach(b=>b.classList.remove('active'));
  document.getElementById('panelClientes').style.display='none';document.getElementById('panelMod').style.display='none';document.getElementById('panelAjustes').style.display='none';document.getElementById('panelSoporte').style.display='none';
- if(tab==='clientes'){document.getElementById('tabClientes').classList.add('active'); document.getElementById('panelClientes').style.display='block';}
+ if(tab==='clientes'){document.getElementById('tabClientes').classList.add('active'); document.getElementById('panelClientes').style.display='block'; renderListaClientes();}
  if(tab==='mod'){document.getElementById('tabMod').classList.add('active'); document.getElementById('panelMod').style.display='block';}
  if(tab==='ajustes'){document.getElementById('tabAjustes').classList.add('active'); document.getElementById('panelAjustes').style.display='block';}
  if(tab==='soporte'){document.getElementById('tabSoporte').classList.add('active'); document.getElementById('panelSoporte').style.display='block';}

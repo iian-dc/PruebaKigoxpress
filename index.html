@@ -29,26 +29,22 @@
 .weather-badge{position:absolute;bottom:12px;left:12px;z-index:999;background:#1e3a8a;color:#fff;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:900;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}.weather-badge.show{display:block}
 .weather-badge.tormenta{background:#7f1d1d}.weather-badge.moderada{background:#1e40af}.weather-badge.leve{background:#1e3a8a}
 .reset-btn{position:absolute;top:12px;left:12px;z-index:999;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:16px;font-weight:900}
-
-/* BOTONES FIJOS ABAJO */
 .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;background:#fff;border-top:1px solid #eee;display:flex;z-index:99999;box-shadow:0 -4px 15px rgba(0,0,0,.08);padding:8px 10px;gap:10px}
-.bottom-nav button{flex:1;padding:12px;border:none;border-radius:12px;font-weight:900;font-size:13px;cursor:pointer}
+.bottom-nav button{flex:1;padding:10px;border:none;border-radius:12px;font-weight:900;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .btn-inicio{background:#111;color:#fff}
 .btn-admin{background:#f3f4f6;color:#111;border:1px solid #ddd !important}
 .bottom-nav button.active{background:#E53935;color:#fff;border:none !important}
-
-/* VISTAS */
-.view{display:none}.view.active{display:flex;flex-direction:column}
-#adminView{padding:20px;min-height:70vh}
-.admin-card{background:#fff;border:1px solid #eee;padding:18px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.admin-input{width:100%;padding:13px;border:1.5px solid #ddd;border-radius:12px;margin-bottom:10px;font-weight:600}
+.bottom-nav svg{width:20px;height:20px}
+.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:100000;display:none;align-items:center;justify-content:center;padding:20px}
+.admin-overlay.show{display:flex}
+.admin-card{width:100%;max-width:360px;background:#fff;border-radius:20px;padding:22px;box-shadow:0 15px 40px rgba(0,0,0,.3);animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.admin-input{width:100%;padding:13px;border:1.5px solid #ddd;border-radius:12px;margin-bottom:10px;font-weight:600;outline:none}
+.close-admin{position:absolute;top:16px;right:16px;background:#fff;border:none;width:34px;height:34px;border-radius:50%;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 </style>
 </head>
 <body>
 <div class="app">
-
-<!-- VISTA INICIO - TU CÓDIGO ORIGINAL INTACTO -->
-<div id="inicioView" class="view active" style="flex:1;display:flex;flex-direction:column">
 <div class="map-container">
 <div id="map"></div>
 <div class="map-message" style="background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25);">
@@ -68,37 +64,38 @@
 <div class="price-box"><span>PRECIO</span><span id="price">POR COTIZAR</span></div>
 </div>
 </div>
-
-<!-- VISTA ADMIN -->
-<div id="adminView" class="view">
+<div class="bottom-nav">
+  <button id="btnInicio" class="btn-inicio active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    INICIO
+  </button>
+  <button id="btnAdmin" class="btn-admin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 15a1.65 1.65 0 0 0-1-1.51V13a2 2 0 0 1 0-4v-.49c0-.6.38-1.13 1-1.51A1.65 1.65 0 0 0 10.83 6.67l-.06-.06A2 2 0 1 1 13.6 3.78l.06.06A1.65 1.65 0 0 0 15.48 4.17c.6.38 1.13 1 1.51 1v.49a2 2 0 0 1 0 4v.49c0 .6-.38 1.13-1 1.51Z"/></svg>
+    ADMIN
+  </button>
+</div>
+<div id="adminOverlay" class="admin-overlay">
+  <button class="close-admin" id="closeAdmin">✕</button>
   <div id="loginBox" class="admin-card">
-    <h3 style="margin:0 0 12px 0">🔐 Admin Kigo Xpress</h3>
-    <p style="font-size:12px;color:#777;margin-top:0">Ingresa para administrar</p>
+    <h3 style="margin:0 0 6px 0;display:flex;align-items:center;gap:8px">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Admin Kigo Xpress
+    </h3>
+    <p style="font-size:12px;color:#777;margin-top:0">Acceso privado</p>
     <input id="adminUser" class="admin-input" placeholder="Usuario">
     <input id="adminPass" class="admin-input" type="password" placeholder="Contraseña">
     <button id="loginBtn" class="btn-cotizar">ENTRAR</button>
     <div id="loginError" style="color:#E53935;font-size:12px;font-weight:700;margin-top:10px;display:none">Usuario o contraseña incorrectos</div>
   </div>
-  <div id="adminPanel" style="display:none">
-    <div class="admin-card">
-      <h3 style="margin:0">✅ Bienvenido Admin</h3>
-      <p style="font-size:12px;color:#666">Panel de administración listo</p>
-      <div style="background:#f7f7f8;padding:12px;border-radius:12px;margin-top:10px;font-size:12px">
-        Aquí vamos a poner luego: pedidos, repartidores, precios, reportes, etc.
-      </div>
-      <button id="logoutBtn" style="margin-top:14px;width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;font-weight:800;cursor:pointer">Cerrar sesión</button>
+  <div id="adminPanel" class="admin-card" style="display:none">
+    <h3 style="margin:0">Bienvenido Admin</h3>
+    <p style="font-size:12px;color:#666">Panel activo</p>
+    <div style="background:#f7f7f8;padding:12px;border-radius:12px;margin-top:10px;font-size:12px">
+      Aquí irán pedidos, repartidores, precios, reportes.
     </div>
+    <button id="logoutBtn" style="margin-top:14px;width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff;font-weight:800;cursor:pointer">Cerrar sesión</button>
   </div>
 </div>
-
-</div>
-
-<!-- BARRA FIJA ABAJO -->
-<div class="bottom-nav">
-  <button id="btnInicio" class="btn-inicio active" onclick="showView('inicio')">🏠 INICIO</button>
-  <button id="btnAdmin" class="btn-admin" onclick="showView('admin')">⚙️ ADMIN</button>
-</div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const CENTRO={lat:21.1561,lng:-100.9333};
@@ -186,21 +183,24 @@ document.getElementById("resetBtn").onclick=()=>{
 };
 document.addEventListener("click",e=>{if(!e.target.closest(".input-wrapper")){pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");}});
 
-// LOGICA NUEVA BOTONES FIJOS
-function showView(v){
-  document.getElementById("inicioView").classList.remove("active");
-  document.getElementById("adminView").classList.remove("active");
+const overlay=document.getElementById("adminOverlay");
+document.getElementById("btnAdmin").onclick=()=>{
+  overlay.classList.add("show");
+  document.getElementById("btnAdmin").classList.add("active");
   document.getElementById("btnInicio").classList.remove("active");
+};
+document.getElementById("btnInicio").onclick=()=>{
+  overlay.classList.remove("show");
+  document.getElementById("btnInicio").classList.add("active");
   document.getElementById("btnAdmin").classList.remove("active");
-  if(v==='inicio'){
-    document.getElementById("inicioView").classList.add("active");
-    document.getElementById("btnInicio").classList.add("active");
-    setTimeout(()=>{ map.invalidateSize(); },100);
-  }else{
-    document.getElementById("adminView").classList.add("active");
-    document.getElementById("btnAdmin").classList.add("active");
-  }
-}
+  setTimeout(()=>{ map.invalidateSize(); },100);
+};
+document.getElementById("closeAdmin").onclick=()=>{
+  overlay.classList.remove("show");
+  document.getElementById("btnInicio").classList.add("active");
+  document.getElementById("btnAdmin").classList.remove("active");
+};
+overlay.addEventListener("click",(e)=>{ if(e.target===overlay) { overlay.classList.remove("show"); } });
 document.getElementById("loginBtn").onclick=()=>{
   const u=document.getElementById("adminUser").value.trim();
   const p=document.getElementById("adminPass").value.trim();

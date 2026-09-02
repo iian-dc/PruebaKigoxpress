@@ -19,6 +19,8 @@
 .btn-cotizar{width:100%;padding:16px;border:none;border-radius:14px;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer}
 .btn-whatsapp{width:100%;padding:14px;border:1.5px solid #25D366;border-radius:14px;background:#fff;color:#25D366;font-weight:800;font-size:13px;margin-top:10px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px}
 .btn-whatsapp.show{display:flex}
+.btn-repartidor{width:100%;padding:14px;border:1.5px solid #111;border-radius:14px;background:#111;color:#fff;font-weight:800;font-size:13px;margin-top:10px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px}
+.btn-repartidor.show{display:flex}
 .price-box{margin-top:12px;padding:16px;background:#111;color:#fff;border-radius:14px;display:flex;justify-content:space-between;font-weight:900}
 .input-wrapper{position:relative}.info{display:flex;gap:10px;margin-top:12px}.info-box{flex:1;background:#f7f7f8;padding:12px;border-radius:12px;text-align:center;border:1px solid #eee}
 .weather-widget{position:absolute;top:12px;right:12px;z-index:999;background:#fff;border-radius:20px;padding:6px 12px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:4px;box-shadow:0 2px 10px rgba(0,0,0,.25);border:1px solid #eee}
@@ -82,6 +84,7 @@
 <div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">2. ¿DÓNDE ENTREGAR?</div><div class="input-wrapper"><input id="destinationInput" class="colonia-input" placeholder="Escribe colonia..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
 <button id="calculateButton" class="btn-cotizar">COTIZAR SERVICIO</button>
 <button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
+<button id="whatsappRepartidorButton" class="btn-repartidor">🛵 Compartir con repartidor por WhatsApp</button>
 <div class="info"><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">DISTANCIA MOTO</div><div id="distance" style="font-weight:800">—</div></div><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">TIEMPO</div><div id="duration" style="font-weight:800">—</div></div></div>
 <div class="price-box"><span id="platformPriceLabel">PRECIO</span><span id="price">POR COTIZAR</span></div>
 </div>
@@ -225,10 +228,8 @@ let tempClienteLat=null,tempClienteLng=null,tempClienteDir="",editandoId=null;
 let clienteMiniMap=null, clienteMiniMarker=null;
 let configMarca={logoMapa:"",logoLogin:"",platformName:"KIGO XPRESS",primaryColor:"#E53935"};
 let configTarifas={azul:0,verde:5,amarillo:9,rojo:12,morado:18,base:35,metros:650,extraMonto:5,lejosCentro:5,sop:45};
-
 db.ref("kigo_config").on("value",(snap)=>{const v=snap.val(); if(v){configMarca=v; aplicarConfigMarca();}});
 db.ref("kigo_tarifas").on("value",(snap)=>{const v=snap.val(); if(v){configTarifas=v; aplicarConfigTarifas();}});
-
 function aplicarConfigMarca(){
   if(configMarca.logoMapa){document.getElementById("logoMapaImg").src=configMarca.logoMapa; document.getElementById("previewMapa").src=configMarca.logoMapa;}
   if(configMarca.logoLogin){document.getElementById("logoLoginImg").src=configMarca.logoLogin; document.getElementById("logoAdminHead").src=configMarca.logoLogin; document.getElementById("previewLogin").src=configMarca.logoLogin;}
@@ -437,17 +438,23 @@ document.getElementById("calculateButton").onclick=async()=>{
  document.getElementById("distance").innerText=km.toFixed(2)+" km";document.getElementById("duration").innerText=Math.ceil(route.duration/60)+" min";document.getElementById("price").innerText="$"+precio+" MXN";
  ultimaDistancia=km.toFixed(2)+" km";ultimoPrecio="$"+precio+" MXN";
  document.getElementById("whatsappButton").classList.add("show");
+ document.getElementById("whatsappRepartidorButton").classList.add("show");
 };
 document.getElementById("whatsappButton").onclick=()=>{
  const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
  const mensaje=`*COTIZACIÓN ${configMarca.platformName}* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n${extraLluvia>0?`🌧️ *Lluvia en colonia:* ${lastInfo} (${lastPrecip}mm) +$${extraLluvia}\n`:"☀️ Sin lluvia en colonias\n"}\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
  const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank");
 };
+document.getElementById("whatsappRepartidorButton").onclick=()=>{
+ const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
+ const mensaje=`🚨 Pedido # \n📍 Recoger: ${pickupName}\n👤 Cliente: ${pickupName}\n📦 Entregar: ${destName}\n⏱️ Tiempo aprox: \n💰 Precio: ${ultimoPrecio}\n📏 Distancia: ${ultimaDistancia}\n🗺️ Ruta: ${linkRuta}`;
+ const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank");
+};
 document.getElementById("resetBtn").onclick=()=>{
  pickupLat=null;pickupLng=null;destinationLat=null;destinationLng=null;pickupName="";destName="";
  pickupInput.value="";destinationInput.value="";
  document.getElementById("distance").innerText="—";document.getElementById("duration").innerText="—";document.getElementById("price").innerText="$ POR COTIZAR";
- document.getElementById("whatsappButton").classList.remove("show"); weatherBadge.classList.remove("show");
+ document.getElementById("whatsappButton").classList.remove("show"); document.getElementById("whatsappRepartidorButton").classList.remove("show"); weatherBadge.classList.remove("show");
  if(pickupMarker)map.removeLayer(pickupMarker);if(destinationMarker)map.removeLayer(destinationMarker);if(routeLayer)map.removeLayer(routeLayer);
  map.setView([CENTRO.lat,CENTRO.lng],14);
 };

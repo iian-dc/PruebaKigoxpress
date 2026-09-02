@@ -53,6 +53,7 @@
 .miniMap.show{display:block}
 .searchWrap{position:relative;display:flex;gap:6px}
 .iconBtnSmall{width:42px;height:42px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+.client-header{font-size:10px;font-weight:900;color:#E53935;padding:8px 14px;background:#fff1f1;border-bottom:1px solid #f2f2f2;letter-spacing:.5px}
 </style>
 </head>
 <body>
@@ -66,7 +67,7 @@
 <div id="weatherBadge" class="weather-badge">🌧️</div>
 </div>
 <div class="panel">
-<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER?</div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Escribe Centro o colonia..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
+<div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">1. ¿DÓNDE RECOGER? <span style="color:#E53935">• Clientes guardados</span></div><div class="input-wrapper"><input id="pickupInput" class="colonia-input" placeholder="Toca aquí y elige un cliente o escribe..." autocomplete="off"><div id="pickupSuggestions" class="suggestions"></div></div></div>
 <div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px">2. ¿DÓNDE ENTREGAR?</div><div class="input-wrapper"><input id="destinationInput" class="colonia-input" placeholder="Escribe colonia..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
 <button id="calculateButton" class="btn-cotizar">COTIZAR SERVICIO</button>
 <button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
@@ -118,7 +119,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
 const CENTRO={lat:21.1561,lng:-100.9333};
 let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupMarker=null,destinationMarker=null,routeLayer=null,ultimaDistancia="",ultimoPrecio="",pickupName="",destName="";
 let extraLluvia=0,radarLayer=null,lastPrecip=0,lastInfo="";
@@ -127,23 +127,15 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).a
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 const weatherBadge=document.getElementById("weatherBadge"),weatherWidget=document.getElementById("weatherWidget");
 function distMts(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Math.PI/180;const dLon=(lon2-lon1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-
 let clientesGuardados=[];
 let tempClienteLat=null,tempClienteLng=null,tempClienteDir="",editandoId=null;
 let clienteMiniMap=null, clienteMiniMarker=null;
-
-// CARGAR CLIENTES DE FIREBASE EN TIEMPO REAL
 db.ref("kigo_clientes").on("value", (snap)=>{
   const val=snap.val();
   clientesGuardados=[];
-  if(val){
-    Object.keys(val).forEach(k=>{
-      clientesGuardados.push({fbKey:k,...val[k]});
-    });
-  }
+  if(val){Object.keys(val).forEach(k=>{clientesGuardados.push({fbKey:k,...val[k]});});}
   renderListaClientes();
 });
-
 function showAddCliente(){
  document.getElementById("btnAddCliente").classList.add("active");
  document.getElementById("btnListCliente").classList.remove("active");
@@ -156,6 +148,36 @@ function showListClientes(){
  document.getElementById("addClienteView").style.display="none";
  document.getElementById("listClienteView").style.display="block";
  renderListaClientes();
+}
+function mostrarClientesEnPickup(){
+  const c=pickupSuggestions;
+  c.innerHTML="";
+  if(!clientesGuardados.length){
+    c.innerHTML='<div style="padding:12px;text-align:center;font-size:12px;color:#888">No hay clientes guardados aún</div>';
+    c.classList.add("show");
+    return;
+  }
+  const header=document.createElement("div");
+  header.className="client-header";
+  header.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> TUS CLIENTES GUARDADOS - TOCA PARA SELECCIONAR';
+  c.appendChild(header);
+  const orden=[...clientesGuardados].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  orden.forEach(cl=>{
+    const el=document.createElement("div");
+    el.className="suggestion";
+    el.innerHTML=`<div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div style="font-weight:800;font-size:13px">${cl.nombre}</div><div style="font-size:10px;color:#777">${cl.direccion.substring(0,70)}</div></div>`;
+    el.onclick=()=>{
+      pickupLat=cl.lat; pickupLng=cl.lng; pickupName=cl.nombre;
+      pickupInput.value=cl.nombre;
+      c.classList.remove("show");
+      if(pickupMarker)map.removeLayer(pickupMarker);
+      pickupMarker=L.marker([cl.lat,cl.lng]).addTo(map).bindPopup("RECOGER: "+cl.nombre).openPopup();
+      map.setView([cl.lat,cl.lng],16);
+      setTimeout(()=>{document.getElementById("destinationInput").focus();},300);
+    };
+    c.appendChild(el);
+  });
+  c.classList.add("show");
 }
 async function buscarColonias(t){
  const texto=t.toLowerCase();
@@ -249,9 +271,66 @@ function eliminarCliente(fbKey){
  if(!confirm("¿Eliminar cliente?")) return;
  db.ref("kigo_clientes/"+fbKey).remove();
 }
-function mostrar(c,res,tipo){c.innerHTML="";if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}res.forEach(r=>{const el=document.createElement("div");el.className="suggestion";el.innerHTML=`<div>${r.esCliente?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>':'🛵'}</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;el.onclick=()=>{if(tipo==="pickup"){pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;pickupInput.value=r.name;pickupSuggestions.classList.remove("show");if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}else{destinationLat=r.lat;destinationLng=r.lon;destName=r.name;destinationInput.value=r.name;destinationSuggestions.classList.remove("show");if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();map.setView([r.lat,r.lon],16);}};c.appendChild(el);});c.classList.add("show");}
-let t1=null;pickupInput.addEventListener("input",function(){const txt=this.value.trim();if(t1)clearTimeout(t1);if(txt.length<2){pickupSuggestions.classList.remove("show");return;}pickupSuggestions.classList.add("show");pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);});
-let t2=null;destinationInput.addEventListener("input",function(){const txt=this.value.trim();if(t2)clearTimeout(t2);if(txt.length<2){destinationSuggestions.classList.remove("show");return;}destinationSuggestions.classList.add("show");destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);});
+function mostrar(c,res,tipo){
+ c.innerHTML="";
+ if(!res.length){c.innerHTML='<div style="padding:12px;text-align:center">Sin resultados</div>';c.classList.add("show");return;}
+ if(tipo==="pickup"){
+   const clientesFiltrados=res.filter(r=>r.esCliente);
+   if(clientesFiltrados.length){
+     const h=document.createElement("div");
+     h.className="client-header";
+     h.innerText="CLIENTES ENCONTRADOS";
+     c.appendChild(h);
+   }
+ }
+ res.forEach(r=>{
+   const el=document.createElement("div");
+   el.className="suggestion";
+   el.innerHTML=`<div>${r.esCliente?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>':'🛵'}</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;
+   el.onclick=()=>{
+     if(tipo==="pickup"){
+       pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;
+       pickupInput.value=r.name;
+       pickupSuggestions.classList.remove("show");
+       if(pickupMarker)map.removeLayer(pickupMarker);
+       pickupMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("RECOGER: "+r.name).openPopup();
+       map.setView([r.lat,r.lon],16);
+     }else{
+       destinationLat=r.lat;destinationLng=r.lon;destName=r.name;
+       destinationInput.value=r.name;
+       destinationSuggestions.classList.remove("show");
+       if(destinationMarker)map.removeLayer(destinationMarker);
+       destinationMarker=L.marker([r.lat,r.lon]).addTo(map).bindPopup("ENTREGAR: "+r.name).openPopup();
+       map.setView([r.lat,r.lon],16);
+     }
+   };
+   c.appendChild(el);
+ });
+ c.classList.add("show");
+}
+pickupInput.addEventListener("focus", function(){
+  const txt=this.value.trim();
+  if(txt.length===0){mostrarClientesEnPickup();}
+});
+let t1=null;
+pickupInput.addEventListener("input",function(){
+  const txt=this.value.trim();
+  if(t1)clearTimeout(t1);
+  if(txt.length===0){mostrarClientesEnPickup();return;}
+  if(txt.length<2){pickupSuggestions.classList.remove("show");return;}
+  pickupSuggestions.classList.add("show");
+  pickupSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';
+  t1=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(pickupSuggestions,res,"pickup");},350);
+});
+let t2=null;
+destinationInput.addEventListener("input",function(){
+  const txt=this.value.trim();
+  if(t2)clearTimeout(t2);
+  if(txt.length<2){destinationSuggestions.classList.remove("show");return;}
+  destinationSuggestions.classList.add("show");
+  destinationSuggestions.innerHTML='<div style="padding:10px;text-align:center;font-size:11px">Buscando...</div>';
+  t2=setTimeout(async()=>{const res=await buscarColonias(txt);mostrar(destinationSuggestions,res,"destination");},350);
+});
 const DOLORES_BOUNDS = L.latLngBounds([20.6,-101.6],[21.7,-100.2]);
 async function initRadar(){
  try{
@@ -260,16 +339,7 @@ async function initRadar(){
   if(!j.radar ||!j.radar.past ||!j.radar.past.length) return;
   const last=j.radar.past[j.radar.past.length-1];
   if(radarLayer) map.removeLayer(radarLayer);
-  radarLayer=L.tileLayer(`https://tilecache.rainviewer.com${last.path}/512/{z}/{x}/{y}/6/1_1.png`,{
-    opacity:0.35,
-    maxZoom:19,
-    maxNativeZoom:7,
-    minZoom:5,
-    bounds:DOLORES_BOUNDS,
-    tileSize:512,
-    zoomOffset:-1,
-    keepBuffer:2
-  });
+  radarLayer=L.tileLayer(`https://tilecache.rainviewer.com${last.path}/512/{z}/{x}/{y}/6/1_1.png`,{opacity:0.35,maxZoom:19,maxNativeZoom:7,minZoom:5,bounds:DOLORES_BOUNDS,tileSize:512,zoomOffset:-1,keepBuffer:2});
   radarLayer.addTo(map);
  }catch(e){}
 }

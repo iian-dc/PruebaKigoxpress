@@ -37,9 +37,9 @@
 .iconBtn{width:36px;height:36px;border-radius:10px;border:1px solid #eee;background:#fff;display:grid;place-items:center;cursor:pointer}
 .admin-panel-box{width:100%;max-width:500px;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid #eee;max-height:90vh;display:flex;flex-direction:column;animation:pop.25s ease}
 .admin-panel-head{padding:16px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#fcfcfd}
-.adminTabs{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;scroll-snap-type:x mandatory;background:#fff;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
+.adminTabs{display:flex;gap:8px;padding:12px 12px;overflow-x:auto;scroll-snap-type:x mandatory;background:#fff;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch}
 .adminTabs::-webkit-scrollbar{display:none}
-.adminTab{scroll-snap-align:center;flex-shrink:0;display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;border:1px solid #e5e7eb;background:#f7f7f8;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
+.adminTab{scroll-snap-align:center;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid #e5e7eb;background:#f7f7f8;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
 .adminTab.active{background:#111;color:#fff;border-color:#111;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .adminContent{padding:18px;overflow-y:auto;flex:1;background:#fcfcfd}
 .adminCard{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;margin-bottom:12px}
@@ -61,6 +61,10 @@
 .color-dot{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ddd;cursor:pointer}
 .tarifa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tarifa-item{border:1px solid #eee;border-radius:10px;padding:10px;background:#fff}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-ok{background:#22c55e;box-shadow:0 0 0 3px #dcfce7}
+.status-bad{background:#ef4444;box-shadow:0 0 0 3px #fee2e2}
+.status-warn{background:#f59e0b;box-shadow:0 0 0 3px #fef3c7}
 </style>
 </head>
 <body>
@@ -83,7 +87,14 @@
 </div>
 </div>
 <div class="modal" id="loginModal"><div class="login-box"><div class="login-head"><div style="display:flex;gap:10px;align-items:center"><img id="logoLoginImg" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px;height:36px;border-radius:10px;object-fit:cover;background:#111"><div><div id="platformNameLogin" style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()">✕</button></div><div class="login-body"><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div><button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Ingresar</button></div></div></div>
-<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><img id="logoAdminHead" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><div><div id="platformNameAdmin" style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Gestión Firebase</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')">Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')">Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')">Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')">Soporte</button></div><div class="adminContent">
+<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><img id="logoAdminHead" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><div><div id="platformNameAdmin" style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Gestión Firebase</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div>
+<div class="adminTabs">
+<button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button>
+<button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> Modificaciones</button>
+<button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 009 15a1.65 1.65 0 00-1-1.51V13a2 2 0 014 0v.49c.3.2.64.34 1.49z"/></svg> Ajustes</button>
+<button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> Soporte</button>
+</div>
+<div class="adminContent">
 <div id="panelClientes">
 <div class="clientes-top">
 <button class="clientes-btn active" id="btnAddCliente" onclick="showAddCliente()">Agregar nuevo cliente</button>
@@ -138,7 +149,6 @@
 <div id="panelAjustes" style="display:none">
 <div class="adminCard">
 <div style="font-size:12px;font-weight:900;margin-bottom:10px">🌧️ TARIFAS POR LLUVIA EN COLONIA - EDITABLES</div>
-<div style="font-size:10px;color:#666;margin-bottom:10px">Cambia el extra que se cobra según el color de lluvia detectado en la colonia. Radar siempre activo 0.35</div>
 <div class="tarifa-grid">
 <div class="tarifa-item"><div style="font-size:10px;font-weight:800">🔵 Azul ≤0.4mm</div><input id="tarifaAzul" type="number" class="mod-input" style="margin-top:6px" value="0"></div>
 <div class="tarifa-item"><div style="font-size:10px;font-weight:800">🟢 Verde 0.5-2.4mm</div><input id="tarifaVerde" type="number" class="mod-input" style="margin-top:6px" value="5"></div>
@@ -161,7 +171,30 @@
 <button onclick="guardarTarifas()" style="width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:#E53935;color:#fff;font-weight:900;font-size:13px;cursor:pointer">💾 Guardar todas las tarifas</button>
 </div>
 </div>
-<div id="panelSoporte" style="display:none"><div class="adminCard">Soporte</div></div>
+<div id="panelSoporte" style="display:none">
+<div class="adminCard">
+<div style="font-size:12px;font-weight:900;margin-bottom:10px">📡 ESTADO DEL SISTEMA</div>
+<div style="font-size:10px;color:#666;margin-bottom:12px">Verifica que todo esté funcionando correctamente</div>
+<div style="border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:12px;font-weight:800"><span id="dotFirebase" class="status-dot status-warn"></span>Firebase</div><div style="font-size:10px;color:#888" id="txtFirebase">Verificando...</div></div>
+<div id="badgeFirebase" style="font-size:10px;font-weight:800;padding:4px 8px;border-radius:20px;background:#fef3c7;color:#92400e">...</div>
+</div>
+<div style="border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:12px;font-weight:800"><span id="dotRadar" class="status-dot status-warn"></span>Radar de lluvia</div><div style="font-size:10px;color:#888" id="txtRadar">Verificando RainViewer...</div></div>
+<div id="badgeRadar" style="font-size:10px;font-weight:800;padding:4px 8px;border-radius:20px;background:#fef3c7;color:#92400e">...</div>
+</div>
+<div style="border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:12px;font-weight:800"><span id="dotClima" class="status-dot status-warn"></span>API Clima (Open-Meteo)</div><div style="font-size:10px;color:#888" id="txtClima">Verificando clima...</div></div>
+<div id="badgeClima" style="font-size:10px;font-weight:800;padding:4px 8px;border-radius:20px;background:#fef3c7;color:#92400e">...</div>
+</div>
+<button onclick="verificarSistema()" style="width:100%;padding:12px;border:1px solid #111;border-radius:10px;background:#fff;font-weight:800;font-size:12px;cursor:pointer">🔄 Verificar de nuevo</button>
+<div style="margin-top:10px;padding:10px;background:#f7f7f8;border-radius:10px;font-size:10px;line-height:1.6">
+<div>Clientes guardados: <b id="statClientes">0</b></div>
+<div>Última verificación: <b id="statHora">--</b></div>
+<div>Plataforma: <b id="statPlatform">KIGO XPRESS</b></div>
+</div>
+</div>
+</div>
 </div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -199,7 +232,7 @@ db.ref("kigo_tarifas").on("value",(snap)=>{const v=snap.val(); if(v){configTarif
 function aplicarConfigMarca(){
   if(configMarca.logoMapa){document.getElementById("logoMapaImg").src=configMarca.logoMapa; document.getElementById("previewMapa").src=configMarca.logoMapa;}
   if(configMarca.logoLogin){document.getElementById("logoLoginImg").src=configMarca.logoLogin; document.getElementById("logoAdminHead").src=configMarca.logoLogin; document.getElementById("previewLogin").src=configMarca.logoLogin;}
-  if(configMarca.platformName){document.getElementById("platformNameLogin").innerText=configMarca.platformName; document.getElementById("platformNameAdmin").innerText="Panel "+configMarca.platformName; document.getElementById("inputPlatformName").value=configMarca.platformName; document.title=configMarca.platformName;}
+  if(configMarca.platformName){document.getElementById("platformNameLogin").innerText=configMarca.platformName; document.getElementById("platformNameAdmin").innerText="Panel "+configMarca.platformName; document.getElementById("inputPlatformName").value=configMarca.platformName; document.title=configMarca.platformName; document.getElementById("statPlatform").innerText=configMarca.platformName;}
   if(configMarca.primaryColor){document.getElementById("calculateButton").style.background=configMarca.primaryColor; document.getElementById("inputPrimaryColor").value=configMarca.primaryColor;}
 }
 function aplicarConfigTarifas(){
@@ -245,12 +278,45 @@ function guardarTarifas(){
     lejosCentro: parseInt(document.getElementById("tarifaLejosCentro").value)||5,
     sop: parseInt(document.getElementById("tarifaSOP").value)||45
   };
-  db.ref("kigo_tarifas").set(configTarifas).then(()=>{aplicarConfigTarifas(); alert("✅ Tarifas guardadas y ya se aplican al cotizar");});
+  db.ref("kigo_tarifas").set(configTarifas).then(()=>{aplicarConfigTarifas(); alert("✅ Tarifas guardadas");});
+}
+function verificarSistema(){
+  document.getElementById("statHora").innerText=new Date().toLocaleTimeString();
+  document.getElementById("statClientes").innerText=clientesGuardados.length;
+  db.ref("kigo_clientes").once("value").then(()=>{
+    document.getElementById("dotFirebase").className="status-dot status-ok";
+    document.getElementById("txtFirebase").innerText="Conectado a santillos-1ac6d";
+    document.getElementById("badgeFirebase").innerText="CONECTADO"; document.getElementById("badgeFirebase").style.background="#dcfce7"; document.getElementById("badgeFirebase").style.color="#166534";
+  }).catch(()=>{
+    document.getElementById("dotFirebase").className="status-dot status-bad";
+    document.getElementById("txtFirebase").innerText="Error de conexión";
+    document.getElementById("badgeFirebase").innerText="ERROR"; document.getElementById("badgeFirebase").style.background="#fee2e2"; document.getElementById("badgeFirebase").style.color="#991b1b";
+  });
+  fetch("https://api.rainviewer.com/public/weather-maps.json").then(r=>r.json()).then(j=>{
+    if(j.radar && j.radar.past && j.radar.past.length){
+      document.getElementById("dotRadar").className="status-dot status-ok";
+      document.getElementById("txtRadar").innerText="Radar activo, "+j.radar.past.length+" capas disponibles";
+      document.getElementById("badgeRadar").innerText="ACTIVO"; document.getElementById("badgeRadar").style.background="#dcfce7"; document.getElementById("badgeRadar").style.color="#166534";
+    }else{throw "no radar";}
+  }).catch(()=>{
+    document.getElementById("dotRadar").className="status-dot status-bad";
+    document.getElementById("txtRadar").innerText="No se pudo cargar radar";
+    document.getElementById("badgeRadar").innerText="FALLA"; document.getElementById("badgeRadar").style.background="#fee2e2"; document.getElementById("badgeRadar").style.color="#991b1b";
+  });
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m&timezone=America/Mexico_City").then(r=>r.json()).then(d=>{
+    document.getElementById("dotClima").className="status-dot status-ok";
+    document.getElementById("txtClima").innerText="Clima OK - "+Math.round(d.current.temperature_2m)+"°C en Dolores";
+    document.getElementById("badgeClima").innerText="OK"; document.getElementById("badgeClima").style.background="#dcfce7"; document.getElementById("badgeClima").style.color="#166534";
+  }).catch(()=>{
+    document.getElementById("dotClima").className="status-dot status-bad";
+    document.getElementById("txtClima").innerText="Error API clima";
+    document.getElementById("badgeClima").innerText="FALLA"; document.getElementById("badgeClima").style.background="#fee2e2"; document.getElementById("badgeClima").style.color="#991b1b";
+  });
 }
 db.ref("kigo_clientes").on("value", (snap)=>{
   const val=snap.val(); clientesGuardados=[];
   if(val){Object.keys(val).forEach(k=>{clientesGuardados.push({fbKey:k,...val[k]});});}
-  renderListaClientes();
+  renderListaClientes(); document.getElementById("statClientes").innerText=clientesGuardados.length;
 });
 function showAddCliente(){
  document.getElementById("btnAddCliente").classList.add("active");
@@ -336,7 +402,7 @@ let creds={user:"admin",pass:"0831"}; let isLogged=false;
 function openLogin(){ if(isLogged){openAdmin();} else {document.getElementById("loginModal").classList.add("show");} }
 function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
 function doLogin(){ let u=document.getElementById("loginUser").value; let p=document.getElementById("loginPass").value; if(u===creds.user && p===creds.pass){isLogged=true;closeLogin();openAdmin();} else {alert("❌ Incorrecto");}}
-function openAdmin(){document.getElementById("adminModal").classList.add("show"); switchAdminTab('clientes');}
+function openAdmin(){document.getElementById("adminModal").classList.add("show"); switchAdminTab('clientes'); verificarSistema();}
 function closeAdmin(){document.getElementById("adminModal").classList.remove("show");}
 function logout(){isLogged=false;closeAdmin();}
 function switchAdminTab(tab){
@@ -345,7 +411,7 @@ function switchAdminTab(tab){
  if(tab==='clientes'){document.getElementById('tabClientes').classList.add('active'); document.getElementById('panelClientes').style.display='block'; renderListaClientes();}
  if(tab==='mod'){document.getElementById('tabMod').classList.add('active'); document.getElementById('panelMod').style.display='block';}
  if(tab==='ajustes'){document.getElementById('tabAjustes').classList.add('active'); document.getElementById('panelAjustes').style.display='block';}
- if(tab==='soporte'){document.getElementById('tabSoporte').classList.add('active'); document.getElementById('panelSoporte').style.display='block';}
+ if(tab==='soporte'){document.getElementById('tabSoporte').classList.add('active'); document.getElementById('panelSoporte').style.display='block'; verificarSistema();}
 }
 document.getElementById("calculateButton").onclick=async()=>{
  if(!pickupLat||!destinationLat){alert("Selecciona donde recoger y donde entregar");return;}

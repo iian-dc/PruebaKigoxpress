@@ -9,7 +9,7 @@
 *{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#f3f4f6}
 .app{max-width:500px;margin:auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
 #map{width:100%;height:52vh}.map-container{position:relative;overflow:hidden}
-.map-message{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;background:white; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25);}
+.map-message{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:999;background:white; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:2px; box-shadow:0 2px 10px rgba(0,0,0,.25);}
 .panel{padding:16px;border-radius:22px 22px 0 0;margin-top:-18px;position:relative;z-index:1000;background:#fff;flex:1;box-shadow:0 -4px 20px rgba(0,0,0,.12)}
 .step{background:#f7f7f8;border:1px solid #eee;padding:12px;border-radius:14px;margin-bottom:12px}
 .colonia-input{width:100%;padding:14px;border:1.5px solid #ddd;border-radius:12px;font-size:14px;font-weight:600;outline:none}
@@ -54,13 +54,18 @@
 .searchWrap{position:relative;display:flex;gap:6px}
 .iconBtnSmall{width:42px;height:42px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
 .client-header{font-size:10px;font-weight:900;color:#E53935;padding:8px 14px;background:#fff1f1;border-bottom:1px solid #f2f2f2;letter-spacing:.5px}
+.mod-label{font-size:11px;font-weight:800;margin:12px 0 6px 0;color:#333}
+.mod-input{width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;font-weight:600;outline:none;margin-bottom:8px}
+.mod-preview{width:60px;height:60px;border-radius:50%;border:2px solid #eee;object-fit:cover;background:#f9f9f9}
+.mod-row{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.color-dot{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ddd;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="map-container">
 <div id="map"></div>
-<div class="map-message"><img src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:32px; height:32px; border-radius:50%; object-fit:cover;"></div>
+<div class="map-message"><img id="logoMapaImg" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px; height:36px; border-radius:50%; object-fit:cover;"></div>
 <div class="reset-btn" id="resetBtn">↻</div>
 <button class="admin-btn" onclick="openLogin()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
 <div id="weatherWidget" class="weather-widget">☀️ --°C</div>
@@ -72,11 +77,11 @@
 <button id="calculateButton" class="btn-cotizar">COTIZAR SERVICIO</button>
 <button id="whatsappButton" class="btn-whatsapp">📲 Compartir cotización por WhatsApp</button>
 <div class="info"><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">DISTANCIA MOTO</div><div id="distance" style="font-weight:800">—</div></div><div class="info-box"><div style="font-size:9px;color:#888;font-weight:700">TIEMPO</div><div id="duration" style="font-weight:800">—</div></div></div>
-<div class="price-box"><span>PRECIO</span><span id="price">POR COTIZAR</span></div>
+<div class="price-box"><span id="platformPriceLabel">PRECIO</span><span id="price">POR COTIZAR</span></div>
 </div>
 </div>
-<div class="modal" id="loginModal"><div class="login-box"><div class="login-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()">✕</button></div><div class="login-body"><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div><button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Ingresar</button></div></div></div>
-<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:10px;background:#111;color:#fff;display:grid;place-items:center;font-weight:900">K</div><div><div style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Gestión de clientes Firebase</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg> Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> Soporte</button></div><div class="adminContent">
+<div class="modal" id="loginModal"><div class="login-box"><div class="login-head"><div style="display:flex;gap:10px;align-items:center"><img id="logoLoginImg" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px;height:36px;border-radius:10px;object-fit:cover;background:#111"><div><div id="platformNameLogin" style="font-weight:800;font-size:13px">KIGO XPRESS</div><div style="font-size:10px;color:#888">Acceso administrador</div></div></div><button class="iconBtn" onclick="closeLogin()">✕</button></div><div class="login-body"><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input id="loginUser" class="login-input" placeholder="Usuario" value="admin"></div><div class="login-input-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input id="loginPass" type="password" class="login-input" placeholder="Contraseña" value="0831"></div><button onclick="doLogin()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:14px;cursor:pointer">Ingresar</button></div></div></div>
+<div class="modal" id="adminModal"><div class="admin-panel-box"><div class="admin-panel-head"><div style="display:flex;gap:10px;align-items:center"><img id="logoAdminHead" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><div><div id="platformNameAdmin" style="font-weight:800;font-size:14px">Panel KIGO XPRESS</div><div style="font-size:10px;color:#888">Gestión de clientes Firebase</div></div></div><div style="display:flex;gap:8px"><button class="iconBtn" onclick="logout()">⎋</button><button class="iconBtn" onclick="closeAdmin()">✕</button></div></div><div class="adminTabs"><button class="adminTab active" id="tabClientes" onclick="switchAdminTab('clientes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button><button class="adminTab" id="tabMod" onclick="switchAdminTab('mod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg> Modificaciones</button><button class="adminTab" id="tabAjustes" onclick="switchAdminTab('ajustes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg> Ajustes</button><button class="adminTab" id="tabSoporte" onclick="switchAdminTab('soporte')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> Soporte</button></div><div class="adminContent">
 <div id="panelClientes">
 <div class="clientes-top">
 <button class="clientes-btn active" id="btnAddCliente" onclick="showAddCliente()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar nuevo cliente</button>
@@ -99,7 +104,48 @@
 <div id="listaClientesContainer"><div class="adminCard" style="text-align:center;font-size:12px;color:#888">Cargando clientes...</div></div>
 </div>
 </div>
-<div id="panelMod" style="display:none"><div class="adminCard"><div style="font-size:11px;font-weight:800">TARIFAS LLUVIA</div><div style="font-size:11px;margin-top:8px;line-height:1.8">Azul ≤0.4mm: +$0<br>Verde: +$5<br>Amarillo: +$9<br>Rojo: +$12<br>Morado: +$18<br><br><i>Radar 0.35 transparente</i></div></div></div>
+
+<div id="panelMod" style="display:none">
+<div class="adminCard">
+<div style="font-size:12px;font-weight:900;margin-bottom:12px">🎨 MODIFICACIONES DE MARCA</div>
+
+<div class="mod-label">Logo centrado en el mapa (bolita blanca)</div>
+<div class="mod-row">
+<img id="previewMapa" class="mod-preview" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3">
+<input type="file" id="inputLogoMapa" accept="image/*" style="font-size:11px">
+</div>
+
+<div class="mod-label">Logo del panel / login</div>
+<div class="mod-row">
+<img id="previewLogin" class="mod-preview" style="border-radius:10px" src="https://firebasestorage.googleapis.com/v0/b/glide-prod.appspot.com/o/icon-images%2Fanonymous-ba983199-acce-404e-b058-c75e9633b325.jpeg?alt=media&token=a58284c1-111c-4874-b60f-35380cf5fbe3">
+<input type="file" id="inputLogoLogin" accept="image/*" style="font-size:11px">
+</div>
+
+<div class="mod-label">Nombre de la plataforma</div>
+<input id="inputPlatformName" class="mod-input" placeholder="Ej: KIGO XPRESS">
+
+<div class="mod-label">Color principal del tema (botón cotizar)</div>
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+<input type="color" id="inputPrimaryColor" value="#E53935" style="width:50px;height:40px;border:none;border-radius:8px">
+<div style="display:flex;gap:6px">
+<div class="color-dot" style="background:#E53935" onclick="setColor('#E53935')"></div>
+<div class="color-dot" style="background:#111" onclick="setColor('#111111')"></div>
+<div class="color-dot" style="background:#2563eb" onclick="setColor('#2563eb')"></div>
+<div class="color-dot" style="background:#16a34a" onclick="setColor('#16a34a')"></div>
+<div class="color-dot" style="background:#f59e0b" onclick="setColor('#f59e0b')"></div>
+</div>
+</div>
+
+<button onclick="guardarModificaciones()" style="width:100%;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:13px;cursor:pointer">💾 Guardar modificaciones</button>
+<div style="font-size:10px;color:#888;margin-top:8px;text-align:center">Se guarda en Firebase y se aplica al instante</div>
+</div>
+
+<div class="adminCard">
+<div style="font-size:11px;font-weight:800">TARIFAS LLUVIA</div>
+<div style="font-size:11px;margin-top:8px;line-height:1.8">Azul ≤0.4mm: +$0<br>Verde: +$5<br>Amarillo: +$9<br>Rojo: +$12<br>Morado: +$18<br><br><i>Radar 0.35 transparente</i></div>
+</div>
+</div>
+
 <div id="panelAjustes" style="display:none"><div class="adminCard">Ajustes</div></div>
 <div id="panelSoporte" style="display:none"><div class="adminCard">Soporte</div></div>
 </div></div></div>
@@ -130,6 +176,70 @@ function distMts(lat1,lon1,lat2,lon2){const R=6371000;const dLat=(lat2-lat1)*Mat
 let clientesGuardados=[];
 let tempClienteLat=null,tempClienteLng=null,tempClienteDir="",editandoId=null;
 let clienteMiniMap=null, clienteMiniMarker=null;
+let configMarca={logoMapa:"",logoLogin:"",platformName:"KIGO XPRESS",primaryColor:"#E53935"};
+
+// CARGAR CONFIG MARCA DE FIREBASE
+db.ref("kigo_config").on("value",(snap)=>{
+  const v=snap.val();
+  if(v){
+    configMarca=v;
+    aplicarConfigMarca();
+  }
+});
+function aplicarConfigMarca(){
+  if(configMarca.logoMapa){
+    document.getElementById("logoMapaImg").src=configMarca.logoMapa;
+    document.getElementById("previewMapa").src=configMarca.logoMapa;
+  }
+  if(configMarca.logoLogin){
+    document.getElementById("logoLoginImg").src=configMarca.logoLogin;
+    document.getElementById("logoAdminHead").src=configMarca.logoLogin;
+    document.getElementById("previewLogin").src=configMarca.logoLogin;
+  }
+  if(configMarca.platformName){
+    document.getElementById("platformNameLogin").innerText=configMarca.platformName;
+    document.getElementById("platformNameAdmin").innerText="Panel "+configMarca.platformName;
+    document.getElementById("inputPlatformName").value=configMarca.platformName;
+    document.title=configMarca.platformName;
+  }
+  if(configMarca.primaryColor){
+    document.getElementById("calculateButton").style.background=configMarca.primaryColor;
+    document.getElementById("inputPrimaryColor").value=configMarca.primaryColor;
+  }
+}
+function setColor(c){document.getElementById("inputPrimaryColor").value=c;}
+document.getElementById("inputLogoMapa").addEventListener("change", function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    document.getElementById("previewMapa").src=ev.target.result;
+    configMarca.logoMapa=ev.target.result;
+    document.getElementById("logoMapaImg").src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById("inputLogoLogin").addEventListener("change", function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    document.getElementById("previewLogin").src=ev.target.result;
+    configMarca.logoLogin=ev.target.result;
+    document.getElementById("logoLoginImg").src=ev.target.result;
+    document.getElementById("logoAdminHead").src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+function guardarModificaciones(){
+  const nombre=document.getElementById("inputPlatformName").value.trim()||"KIGO XPRESS";
+  const color=document.getElementById("inputPrimaryColor").value||"#E53935";
+  configMarca.platformName=nombre;
+  configMarca.primaryColor=color;
+  db.ref("kigo_config").set(configMarca).then(()=>{
+    aplicarConfigMarca();
+    alert("✅ Modificaciones guardadas en Firebase");
+  });
+}
+
 db.ref("kigo_clientes").on("value", (snap)=>{
   const val=snap.val();
   clientesGuardados=[];
@@ -159,13 +269,13 @@ function mostrarClientesEnPickup(){
   }
   const header=document.createElement("div");
   header.className="client-header";
-  header.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> TUS CLIENTES GUARDADOS - TOCA PARA SELECCIONAR';
+  header.innerHTML='TUS CLIENTES GUARDADOS - TOCA PARA SELECCIONAR';
   c.appendChild(header);
   const orden=[...clientesGuardados].sort((a,b)=>a.nombre.localeCompare(b.nombre));
   orden.forEach(cl=>{
     const el=document.createElement("div");
     el.className="suggestion";
-    el.innerHTML=`<div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div style="font-weight:800;font-size:13px">${cl.nombre}</div><div style="font-size:10px;color:#777">${cl.direccion.substring(0,70)}</div></div>`;
+    el.innerHTML=`<div>👤</div><div><div style="font-weight:800;font-size:13px">${cl.nombre}</div><div style="font-size:10px;color:#777">${cl.direccion.substring(0,70)}</div></div>`;
     el.onclick=()=>{
       pickupLat=cl.lat; pickupLng=cl.lng; pickupName=cl.nombre;
       pickupInput.value=cl.nombre;
@@ -286,7 +396,7 @@ function mostrar(c,res,tipo){
  res.forEach(r=>{
    const el=document.createElement("div");
    el.className="suggestion";
-   el.innerHTML=`<div>${r.esCliente?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>':'🛵'}</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;
+   el.innerHTML=`<div>${r.esCliente?'👤':'🛵'}</div><div><div style="font-weight:800;font-size:13px">${r.name}</div><div style="font-size:10px;color:#777">${r.direccion.substring(0,70)}</div></div>`;
    el.onclick=()=>{
      if(tipo==="pickup"){
        pickupLat=r.lat;pickupLng=r.lon;pickupName=r.name;
@@ -421,7 +531,7 @@ document.getElementById("calculateButton").onclick=async()=>{
 };
 document.getElementById("whatsappButton").onclick=()=>{
  const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
- const mensaje=`*COTIZACIÓN KIGO XPRESS* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n${extraLluvia>0?`🌧️ *Lluvia en colonia:* ${lastInfo} (${lastPrecip}mm) +$${extraLluvia}\n`:"☀️ Sin lluvia en colonias\n"}\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
+ const mensaje=`*COTIZACIÓN ${configMarca.platformName}* 🛵\n\n📍 *Recoger:* ${pickupName}\n📦 *Entregar:* ${destName}\n📏 *Distancia:* ${ultimaDistancia}\n💰 *Valor:* ${ultimoPrecio}\n${extraLluvia>0?`🌧️ *Lluvia en colonia:* ${lastInfo} (${lastPrecip}mm) +$${extraLluvia}\n`:"☀️ Sin lluvia en colonias\n"}\n🗺️ *Ver ruta:* ${linkRuta}\n\n¿Confirmamos servicio?`;
  const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`;
  window.open(url,"_blank");
 };

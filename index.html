@@ -398,8 +398,7 @@ function getExtraYColor(precip){
  return {extra:configTarifas.morado, color:"#a855f7", emoji:"🟣", txt:"Morado"};
 }
 async function checarClimaGeneral(){try{const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=21.1561&longitude=-100.9333&current=temperature_2m&timezone=America/Mexico_City"); const data=await r.json(); const temp=Math.round(data.current.temperature_2m); weatherWidget.innerText=`☀️ ${temp}°C`;}catch(e){}}
-checarClimaGeneral(); initRadar(); setInterval(initRadar, 300000);
-let creds={user:"admin",pass:"0831"}; let isLogged=false;
+checarClimaGeneral(); initRadar(); setInterval(initRadar, 300000);let creds={user:"admin",pass:"0831"}; let isLogged=false;
 function openLogin(){ if(isLogged){openAdmin();} else {document.getElementById("loginModal").classList.add("show");} }
 function closeLogin(){document.getElementById("loginModal").classList.remove("show");}
 function doLogin(){ let u=document.getElementById("loginUser").value; let p=document.getElementById("loginPass").value; if(u===creds.user && p===creds.pass){isLogged=true;closeLogin();openAdmin();} else {alert("❌ Incorrecto");}}
@@ -446,8 +445,8 @@ document.getElementById("whatsappButton").onclick=()=>{
  const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank");
 };
 document.getElementById("whatsappRepartidorButton").onclick=()=>{
- const linkRuta=`https://www.google.com/maps/dir/${pickupLat},${pickupLng}/${destinationLat},${destinationLng}`;
- const mensaje=`🚨 Pedido # \n📍 Recoger: ${pickupName}\n👤 Cliente: ${pickupName}\n📦 Entregar: ${destName}\n⏱️ Tiempo aprox: \n💰 Precio: ${ultimoPrecio}\n📏 Distancia: ${ultimaDistancia}\n🗺️ Ruta: ${linkRuta}`;
+ const linkRecoger=`https://www.google.com/maps/search/?api=1&query=${pickupLat},${pickupLng}`;
+ const mensaje=`🚨 Pedido # \n📍 Recoger: ${linkRecoger}\n👤 Cliente: ${pickupName}\n⏱️ Tiempo aprox: \n💰 Precio: ${ultimoPrecio}\n📏 Distancia: ${ultimaDistancia}`;
  const url=`https://wa.me/?text=${encodeURIComponent(mensaje)}`; window.open(url,"_blank");
 };
 document.getElementById("resetBtn").onclick=()=>{

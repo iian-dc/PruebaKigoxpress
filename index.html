@@ -310,7 +310,7 @@ function toggleAutoLluvia(){ cfg.lluviaAuto=!cfg.lluviaAuto; pushConfig(); actua
 function setLluviaManual(n){ cfg.lluviaNivel=n; cfg.lluviaAuto=false; pushConfig(); actualizarBotonesLluvia(); }
 async function buscarColonias(t){
   if(!t||t.length<2) return []; let texto=t.trim(); let res=[]; const viewbox="-100.98,21.10,-100.85,21.20";
- try{ const q=encodeURIComponent(texto+", Dolores Hidalgo, Guanajuato"); const url=`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=8&addressdetails=1&countrycodes=mx&viewbox=${viewbox}&bounded=1`; const r=await fetch(url); const d=await r.json(); res=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:(x.address?.road||x.display_name.split(",")[0]).substring(0,60),direccion:x.display_name})); }catch(e){}
+  try{ const q=encodeURIComponent(texto+", Dolores Hidalgo, Guanajuato"); const url=`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=8&addressdetails=1&countrycodes=mx&viewbox=${viewbox}&bounded=1`; const r=await fetch(url); const d=await r.json(); res=d.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:(x.address?.road||x.display_name.split(",")[0]).substring(0,60),direccion:x.display_name})); }catch(e){}
   return res.slice(0,8);
 }
 function mostrar(c,res,tipoS){
@@ -385,36 +385,46 @@ function confirmarViajeFinal(){
  let msg=`🏢 *${cfg.nombre.toUpperCase()}*\n⏰ ${hora} - ${fecha}\n#${contador.toString().padStart(4,'0')} - ${tipo.toUpperCase()}\n${lluviaLinea}\n📍 ${pickupName}\n📌 ${linkPunto}\n🏁 ${datosViaje.destino}\n🗺️ ${linkRuta}\n📏 ${datosViaje.distKm} km - 💰 $${precio} MXN`;
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
  let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); hist.unshift({tipo:tipo,precio:precio,fecha:ahora.toLocaleString(),hora:ahora.getHours(),origen:pickupName,destino:destName,km:datosViaje.distKm}); if(hist.length>100) hist=hist.slice(0,100); localStorage.setItem('kigo_hist',JSON.stringify(hist));
- let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
- let nuevoPedido={id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString(),estado:'pendiente'};
- pedidos.unshift(nuevoPedido);
- if(pedidos.length>20) pedidos=pedidos.slice(0,20);
- localStorage.setItem('kigo_pedidos',JSON.stringify(pedidos));
+ let nuevoPedido={id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString(),estado:'pendiente', intentos:0};
  localStorage.setItem('kigo_ultimo_pedido_cliente', JSON.stringify(nuevoPedido));
- if(db){ db.ref('pedidos/'+nuevoPedido.id).set(nuevoPedido); db.ref('pedidos_disponibles/'+nuevoPedido.id).set(nuevoPedido); }
+ if(db){
+   db.ref('pedidos/'+nuevoPedido.id).set(nuevoPedido);
+   db.ref('pedidos_disponibles/'+nuevoPedido.id).set(nuevoPedido).then(()=>{
+     asignarPorOrdenAlfabetico(nuevoPedido.id);
+   });
+ }
+}
+function asignarPorOrdenAlfabetico(pedidoId){
+ if(!db) return;
+ db.ref('conductores').once('value').then(snap=>{
+   let conds=Object.values(snap.val()||{}).filter(c=>c.estado==='en_linea');
+   // filtrar por tipo compatible
+   db.ref('pedidos_disponibles/'+pedidoId).once('value').then(s=>{
+     let ped=s.val(); if(!ped) return;
+     let compatibles=conds.filter(c=>{
+       if(c.tipo==='ambos') return true;
+       return c.tipo===ped.tipo;
+     });
+     compatibles.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+     if(compatibles.length>0){
+       let primero=compatibles[0];
+       db.ref('asignaciones/'+pedidoId).set({conductorId:primero.id, conductorNombre:primero.nombre, expira:Date.now()+10000, intento:0});
+     }
+   });
+ });
 }
 function cancelarPedidoCliente(){
- if(!confirm('¿Cancelar servicio? Se eliminará de todos los conductores')) return;
+ if(!confirm('¿Cancelar servicio? Se eliminara de todos')) return;
  let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null');
- let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
- if(ultimo){
-   pedidos=pedidos.filter(p=>p.id!==ultimo.id);
-   localStorage.setItem('kigo_pedidos', JSON.stringify(pedidos));
-   if(db){ db.ref('pedidos/'+ultimo.id).remove(); db.ref('pedidos_disponibles/'+ultimo.id).remove(); db.ref('asignaciones/'+ultimo.id).remove(); db.ref('pedidos_cancelados_cliente/'+ultimo.id).set({id:ultimo.id, fecha:Date.now(), motivo:'cliente canceló'}); }
-   localStorage.removeItem('kigo_ultimo_pedido_cliente');
-   alert('Pedido cancelado - ya no aparece a conductores');
-   volverMapa(); irInicioForzado();
- } else {
-   // cancela el último de la lista
-   if(pedidos.length>0){
-     let id=pedidos[0].id;
-     pedidos=pedidos.filter(p=>p.id!==id);
-     localStorage.setItem('kigo_pedidos', JSON.stringify(pedidos));
-     if(db){ db.ref('pedidos/'+id).remove(); db.ref('pedidos_disponibles/'+id).remove(); db.ref('asignaciones/'+id).remove(); }
-     alert('Pedido cancelado');
-     irInicioForzado();
-   }
+ if(ultimo && db){
+   db.ref('pedidos/'+ultimo.id).remove();
+   db.ref('pedidos_disponibles/'+ultimo.id).remove();
+   db.ref('asignaciones/'+ultimo.id).remove();
+   db.ref('pedidos_cancelados_cliente/'+ultimo.id).set({id:ultimo.id, fecha:Date.now()});
  }
+ localStorage.removeItem('kigo_ultimo_pedido_cliente');
+ alert('Pedido cancelado');
+ irInicioForzado();
 }
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); document.querySelectorAll('.tabs.tab').forEach(t=>{ if(t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active'); }); if(name==='conductores') renderConductores(); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; cargarAdmin(); detectarLluviaDolores(); return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
@@ -573,68 +583,29 @@ function manejarOrientacion(e){
  if(inner) inner.style.transform=`rotate(${heading}deg)`;
 }
 
-function esPedidoBloqueadoPorOtro(pedidoId){
- let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
- let asig = asignaciones[pedidoId];
- if(!asig) return false;
- let ses = JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
- if(asig.conductorId===ses?.id) return false;
- if(Date.now() > asig.expira) return false;
- return true;
-}
-function bloquearPedidoParaMi(pedido){
- let ses = JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
- if(!ses) return;
- let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
- asignaciones[pedido.id]={conductorId:ses.id, expira: Date.now()+10000, tipo:pedido.tipo};
- localStorage.setItem('kigo_asignaciones', JSON.stringify(asignaciones));
- pedidoBloqueadoId=pedido.id;
- if(db) db.ref('asignaciones/'+pedido.id).set({conductorId:ses.id, expira: Date.now()+10000});
-}
-function liberarPedido(pedidoId){
- let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
- delete asignaciones[pedidoId];
- localStorage.setItem('kigo_asignaciones', JSON.stringify(asignaciones));
- if(pedidoBloqueadoId===pedidoId) pedidoBloqueadoId=null;
- if(db) db.ref('asignaciones/'+pedidoId).remove();
-}
-
 function renderPedidosConductor(){
+ // SOLO PEDIDOS REALES DE FIREBASE, NO FALSOS
  const cont=document.getElementById('pedidosScroll');
  const vacio=document.getElementById('vacioPedidos');
- let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
  let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
- if(ses && ses.estado==='ocupado'){ cont.innerHTML=''; vacio.style.display='block'; pedidosGlobales=[]; detenerTimerPedido(); detenerSonidoPedido(); return; }
- if(ses){
-   if(ses.tipo==='moto') pedidos=pedidos.filter(p=>p.tipo==='moto');
-   if(ses.tipo==='carro') pedidos=pedidos.filter(p=>p.tipo==='carro');
-   pedidos = pedidos.filter(p=>!esPedidoBloqueadoPorOtro(p.id) );
- }
- if(!pedidos.length){
+ if(ses && ses.estado==='ocupado'){ cont.innerHTML=''; vacio.style.display='block'; document.getElementById('vacioPedidosSub').innerText='Viaje en curso'; detenerTimerPedido(); detenerSonidoPedido(); return; }
+ // pedidosGlobales ya viene de Firebase pedidos_disponibles filtrado por asignacion
+ if(!pedidosGlobales.length){
    cont.innerHTML='';
    vacio.style.display='block';
-   document.getElementById('vacioPedidosSub').innerText='Sin pedidos disponibles ahora';
+   document.getElementById('vacioPedidosSub').innerText='Esperando pedidos reales de clientes...';
    lucide.createIcons();
    detenerTimerPedido(); detenerSonidoPedido();
-   setTimeout(()=>{ if(document.getElementById('panelConductor').style.display==='flex' &&!localStorage.getItem('kigo_viaje_activo')) renderPedidosConductor(); },3000);
    return;
  }
- pedidosGlobales=pedidos;
- if(!pedidoBloqueadoId ||!pedidosGlobales.find(p=>p.id===pedidoBloqueadoId)){
-   pedidoActualIdx=0;
-   bloquearPedidoParaMi(pedidosGlobales[0]);
- } else {
-   let idx=pedidosGlobales.findIndex(p=>p.id===pedidoBloqueadoId);
-   pedidoActualIdx = idx>=0? idx : 0;
- }
+ // ya tengo un pedido asignado exclusivamente a mi (por Firebase)
+ vacio.style.display='none';
  mostrarPedidoUnico();
 }
 function mostrarPedidoUnico(){
  const cont=document.getElementById('pedidosScroll');
- const vacio=document.getElementById('vacioPedidos');
- if(!pedidosGlobales.length){ cont.innerHTML=''; vacio.style.display='block'; detenerTimerPedido(); detenerSonidoPedido(); return; }
- vacio.style.display='none';
- const p=pedidosGlobales[pedidoActualIdx];
+ if(!pedidosGlobales.length){ cont.innerHTML=''; return; }
+ const p=pedidosGlobales[0];
  if(!p){ cont.innerHTML=''; return; }
  cont.innerHTML=`
    <div class="pedido-card">
@@ -648,7 +619,7 @@ function mostrarPedidoUnico(){
        <div style="margin:8px 0 8px 3px;border-left:1px dashed #ddd;height:12px"></div>
        <div style="display:flex;gap:8px"><span style="width:8px;height:8px;background:#E53935;border-radius:50%;margin-top:6px"></span><div><div style="font-size:11px;color:#666;display:flex;align-items:center;gap:4px"><i data-lucide="flag" style="width:10px;pointer-events:none"></i> ENTREGAR</div><div style="font-size:13px;font-weight:900">${p.destino}</div></div></div>
      </div>
-     <div style="margin-top:10px;font-size:10px;color:#666;display:flex;align-items:center;gap:4px"><i data-lucide="route" style="width:12px;pointer-events:none"></i> ${p.km} km - Solo tu lo ves ahora</div>
+     <div style="margin-top:10px;font-size:10px;color:#666;display:flex;align-items:center;gap:4px"><i data-lucide="route" style="width:12px;pointer-events:none"></i> ${p.km} km - Solo tu lo ves 10s</div>
      <button id="btnAceptarUnico" class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:1;display:flex;align-items:center;gap:6px"><i data-lucide="check-circle" style="width:16px;pointer-events:none"></i> ACEPTAR - <span id="timerTxt">10s</span></span></button>
    </div>`;
  pintarRutaPedido(p);
@@ -689,39 +660,80 @@ function iniciarTimerPedido(){
 }
 function detenerTimerPedido(){ if(timerPedido){ clearInterval(timerPedido); timerPedido=null; } }
 function tiempoAgotado(){
- let p=pedidosGlobales[pedidoActualIdx];
- if(p){
-   liberarPedido(p.id);
-   let pedidoRotado=pedidosGlobales.splice(pedidoActualIdx,1)[0];
-   pedidosGlobales.push(pedidoRotado);
-   localStorage.setItem('kigo_pedidos', JSON.stringify(pedidosGlobales));
-   if(db){ db.ref('pedidos/'+pedidoRotado.id).set(pedidoRotado); db.ref('pedidos_disponibles/'+pedidoRotado.id).set(pedidoRotado); }
- }
+ let p=pedidosGlobales[0];
+ if(!p) return;
  detenerSonidoPedido();
- setTimeout(()=>{ renderPedidosConductor(); },600);
+ // liberar y pasar al siguiente conductor alfabeticamente
+ if(db){
+   db.ref('asignaciones/'+p.id).remove();
+   db.ref('conductores').once('value').then(snap=>{
+     let conds=Object.values(snap.val()||{}).filter(c=>c.estado==='en_linea');
+     conds.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+     db.ref('asignaciones/'+p.id).once('value').then(aSnap=>{
+       // buscar siguiente despues del que lo tuvo
+       let ultimoId = localStorage.getItem('ultimo_conductor_'+p.id) || '';
+       let idx = conds.findIndex(c=>c.id===ultimoId);
+       let siguienteIdx = (idx+1) % conds.length;
+       if(conds.length>0){
+         let siguiente=conds[siguienteIdx];
+         // si solo hay 1 conductor y no acepto, vuelve a el con nuevo tiempo
+         if(conds.length===1 && siguiente.id===JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'{}').id){
+           // re-asignar a mismo
+           db.ref('asignaciones/'+p.id).set({conductorId:siguiente.id, conductorNombre:siguiente.nombre, expira:Date.now()+10000});
+         } else {
+           // si no soy yo, no reasigno aqui, el servidor lo hara al expirar
+           if(siguiente.id!==JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'{}').id){
+             // quitar de mi lista, pasa a otro
+             pedidosGlobales=[];
+             localStorage.setItem('ultimo_conductor_'+p.id, siguiente.id);
+             renderPedidosConductor();
+           } else {
+             db.ref('asignaciones/'+p.id).set({conductorId:siguiente.id, conductorNombre:siguiente.nombre, expira:Date.now()+10000});
+           }
+         }
+       }
+     });
+   });
+ }
 }
 function aceptarPedido(id){
  detenerTimerPedido(); detenerSonidoPedido();
  let pedido=pedidosGlobales.find(p=>p.id===id);
  if(!pedido) return;
  let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!ses) return;
- if(esPedidoBloqueadoPorOtro(id) && pedidoBloqueadoId!==id){
-   alert('Este pedido ya lo tomo otro conductor');
-   renderPedidosConductor();
-   return;
+ // verificar que aun es mio en Firebase
+ if(db){
+   db.ref('asignaciones/'+id).once('value').then(snap=>{
+     let asig=snap.val();
+     if(asig && asig.conductorId!==ses.id){
+       alert('Este pedido ya paso a otro conductor');
+       pedidosGlobales=[];
+       renderPedidosConductor();
+       return;
+     }
+     // ACEPTAR - borrar para todos
+     ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
+     let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); db.ref('conductores/'+ses.id+'/estado').set('ocupado'); }
+     db.ref('pedidos_disponibles/'+id).remove();
+     db.ref('pedidos/'+id).remove();
+     db.ref('asignaciones/'+id).remove();
+     db.ref('pedidos_aceptados/'+id).set({pedido:pedido, conductorId:ses.id, fecha:Date.now()});
+     pedidosGlobales=[];
+     let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id,estado:'hacia_recogida'};
+     localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
+     mostrarViajeActivo(viajeActivo);
+     trazarRutaConductorARecogida(pedido);
+     iniciarSeguimiento();
+     if(!brujulaActiva) toggleBrujula();
+   });
+ } else {
+   ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
+   pedidosGlobales=[];
+   let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id,estado:'hacia_recogida'};
+   localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
+   mostrarViajeActivo(viajeActivo);
+   trazarRutaConductorARecogida(pedido);
  }
- ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
- let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+ses.id+'/estado').set('ocupado'); }
- pedidosGlobales=pedidosGlobales.filter(p=>p.id!==id);
- localStorage.setItem('kigo_pedidos', JSON.stringify(pedidosGlobales));
- liberarPedido(id);
- if(db){ db.ref('pedidos/'+id).remove(); db.ref('pedidos_disponibles/'+id).remove(); db.ref('asignaciones/'+id).remove(); db.ref('pedidos_aceptados/'+id).set({pedido:pedido, conductorId:ses.id, fecha:Date.now()}); }
- let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id,estado:'hacia_recogida'};
- localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
- mostrarViajeActivo(viajeActivo);
- trazarRutaConductorARecogida(pedido);
- iniciarSeguimiento();
- if(!brujulaActiva) toggleBrujula();
 }
 function mostrarViajeActivo(viaje){
  detenerTimerPedido(); detenerSonidoPedido();
@@ -778,13 +790,14 @@ function marcarRecogido(){
 function cancelarViaje(){
  if(!confirm('¿Cancelar viaje? Se devolvera a la lista')) return;
  let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
- if(viaje){
+ if(viaje && db){
    let pedido=viaje.pedido;
-   let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
    pedido.estado='pendiente';
-   pedidos.unshift(pedido);
-   localStorage.setItem('kigo_pedidos', JSON.stringify(pedidos));
-   if(db){ db.ref('pedidos/'+pedido.id).set(pedido); db.ref('pedidos_disponibles/'+pedido.id).set(pedido); db.ref('pedidos_aceptados/'+pedido.id).remove(); db.ref('asignaciones/'+pedido.id).remove(); }
+   db.ref('pedidos/'+pedido.id).set(pedido);
+   db.ref('pedidos_disponibles/'+pedido.id).set(pedido);
+   db.ref('pedidos_aceptados/'+pedido.id).remove();
+   db.ref('asignaciones/'+pedido.id).remove();
+   setTimeout(()=>{ asignarPorOrdenAlfabetico(pedido.id); },500);
  }
  localStorage.removeItem('kigo_viaje_activo');
  pedidoBloqueadoId=null;
@@ -793,7 +806,6 @@ function cancelarViaje(){
  detenerTimerPedido(); detenerSonidoPedido();
  siguiendoConductor=false;
  cambiarEstado('en_linea');
- renderPedidosConductor();
 }
 function cargarAdmin(){ const g=(id)=>document.getElementById(id); if(g('cfgNombre')) g('cfgNombre').value=cfg.nombre; if(g('cfgMoto')) g('cfgMoto').value=cfg.baseMoto; if(g('cfgCarro')) g('cfgCarro').value=cfg.baseCarro; if(g('cfgExtraMoto')) g('cfgExtraMoto').value=cfg.extraMoto; if(g('cfgExtraCarro')) g('cfgExtraCarro').value=cfg.extraCarro; if(g('cfgLluviaLeve')) g('cfgLluviaLeve').value=cfg.precioLeve; if(g('cfgLluviaMod')) g('cfgLluviaMod').value=cfg.precioMod; if(g('cfgLluviaFuerte')) g('cfgLluviaFuerte').value=cfg.precioFuerte; if(g('nombrePlataformaTitulo')) g('nombrePlataformaTitulo').innerText=cfg.nombre+' • Admin'; aplicarDisponibilidad(); actualizarStats(); actualizarBotonesLluvia(); renderConductores(); }
 function guardarAjustes(){ const g=(id)=>document.getElementById(id); if(g('cfgNombre')&&g('cfgNombre').value) cfg.nombre=g('cfgNombre').value; if(g('cfgMoto')) cfg.baseMoto=parseInt(g('cfgMoto').value)||35; if(g('cfgCarro')) cfg.baseMoto=parseInt(g('cfgCarro').value)||55; if(g('cfgExtraMoto')) cfg.extraMoto=parseInt(g('cfgExtraMoto').value)||5; if(g('cfgExtraCarro')) cfg.extraCarro=parseInt(g('cfgExtraCarro').value)||8; if(g('cfgLluviaLeve')) cfg.precioLeve=parseInt(g('cfgLluviaLeve').value)||0; if(g('cfgLluviaMod')) cfg.precioMod=parseInt(g('cfgLluviaMod').value)||5; if(g('cfgLluviaFuerte')) cfg.precioFuerte=parseInt(g('cfgLluviaFuerte').value)||10; pushConfig(); alert('Guardado'); }
@@ -802,7 +814,7 @@ function aplicarDisponibilidad(){ const m=document.getElementById('cardMoto'); c
 function actualizarStats(){ let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); document.getElementById('statTotal').innerText=hist.length; document.getElementById('statMoto').innerText=hist.filter(h=>h.tipo==='moto').length; document.getElementById('statCarro').innerText=hist.filter(h=>h.tipo==='carro').length; let box=document.getElementById('historialBox'); if(!hist.length){ box.innerHTML='<div style="text-align:center;padding:20px;color:#999;font-size:12px">Sin historial</div>'; return; } box.innerHTML=hist.map(h=>`<div style="padding:10px;border-bottom:1px solid #f0f0f0"><b>${h.tipo.toUpperCase()} $${h.precio} ${h.km}km</b><br><small>${h.origen} → ${h.destino}</small><br><small>${h.fecha}</small></div>`).join(''); }
 function borrarHistorial(){ if(confirm('Borrar?')){ localStorage.removeItem('kigo_hist'); actualizarStats(); } }
 function cerrarSesionAdmin(){ localStorage.removeItem('kigo_admin_sesion'); irInicioForzado(); }
-function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); detenerTimerPedido(); detenerSonidoPedido(); window.removeEventListener('deviceorientation', manejarOrientacion); if(pedidoBloqueadoId) liberarPedido(pedidoBloqueadoId); irInicioForzado(); }
+function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); detenerTimerPedido(); detenerSonidoPedido(); window.removeEventListener('deviceorientation', manejarOrientacion); irInicioForzado(); }
 let conductores = JSON.parse(localStorage.getItem('kigo_conductores')||'[]');
 let tempFoto="", tempFotoINE="";
 function abrirModalConductor(id=null){ document.getElementById('modalConductor').classList.add('show'); if(id){ const c=conductores.find(x=>x.id===id); if(!c) return; document.getElementById('tituloConductor').innerText='Editar Conductor'; document.getElementById('cId').value=c.id; document.getElementById('cNombre').value=c.nombre; document.getElementById('cTelefono').value=c.telefono; document.getElementById('cTelRef').value=c.telRef||''; document.getElementById('cUsuario').value=c.usuario||''; document.getElementById('cPass').value=c.pass||''; document.getElementById('cINE').value=c.ine||''; document.getElementById('cPlaca').value=c.placa||''; document.getElementById('cTipo').value=c.tipo||'moto'; document.getElementById('cDireccion').value=c.direccion||''; tempFoto=c.foto||''; tempFotoINE=c.fotoINE||''; if(tempFoto){ document.getElementById('previewFoto').src=tempFoto; document.getElementById('previewFoto').style.display='block'; document.getElementById('fotoPlaceholder').style.display='none'; } if(tempFotoINE){ document.getElementById('previewFotoINE').src=tempFotoINE; document.getElementById('previewFotoINE').style.display='block'; document.getElementById('fotoINEPlaceholder').style.display='none'; } } else { document.getElementById('tituloConductor').innerText='Agregar Conductor'; document.getElementById('cId').value=''; ['cNombre','cTelefono','cTelRef','cUsuario','cPass','cINE','cPlaca','cDireccion'].forEach(i=>document.getElementById(i).value=''); document.getElementById('cTipo').value='moto'; tempFoto=''; tempFotoINE=''; document.getElementById('previewFoto').style.display='none'; document.getElementById('fotoPlaceholder').style.display='block'; document.getElementById('previewFotoINE').style.display='none'; document.getElementById('fotoINEPlaceholder').style.display='block'; } lucide.createIcons(); }
@@ -820,40 +832,95 @@ document.addEventListener("click",e=>{ if(!e.target.closest('.input-wrap')){pick
 if(db){
   db.ref('config').on('value',snap=>{ const data=snap.val(); if(!data) return; isSyncing=true; cfg=data; localStorage.setItem('kigo_cfg',JSON.stringify(cfg)); cargarAdmin(); aplicarDisponibilidad(); actualizarUIClima(); actualizarWeatherWidget(); isSyncing=false; });
   db.ref('conductores').on('value',snap=>{ const data=snap.val(); if(!data){ conductores=[]; localStorage.setItem('kigo_conductores','[]'); renderConductores(); return; } conductores=Object.values(data); localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); renderConductores(); });
-  db.ref('pedidos_disponibles').on('value',snap=>{
-    const data=snap.val();
-    if(!data){
-      let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
-      // si se canceló por cliente, data es null y debemos limpiar local si es cancelado
-    } else {
-      let arr=Object.values(data);
-      localStorage.setItem('kigo_pedidos', JSON.stringify(arr));
-      if(document.getElementById('panelConductor').style.display==='flex' &&!localStorage.getItem('kigo_viaje_activo')){
-        // solo actualizar si no tengo pedido bloqueado actualmente
-        let tieneBloqueo = pedidoBloqueadoId && arr.find(p=>p.id===pedidoBloqueadoId);
-        if(!tieneBloqueo) renderPedidosConductor();
-      }
-    }
-  });
   db.ref('asignaciones').on('value',snap=>{
     const data=snap.val()||{};
-    localStorage.setItem('kigo_asignaciones', JSON.stringify(data));
-  });
-  db.ref('pedidos_cancelados_cliente').on('value',snap=>{
-    const data=snap.val();
-    if(data){
-      Object.keys(data).forEach(id=>{
-        let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
-        pedidos=pedidos.filter(p=>p.id!=id);
-        localStorage.setItem('kigo_pedidos', JSON.stringify(pedidos));
-        liberarPedido(parseInt(id));
-        if(pedidoBloqueadoId==id) pedidoBloqueadoId=null;
+    let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+    if(!ses){ return; }
+    let misPedidos=[];
+    Object.keys(data).forEach(pid=>{
+      let asig=data[pid];
+      if(asig.conductorId===ses.id && Date.now() < asig.expira){
+        // verificar que pedido aun existe
+        db.ref('pedidos_disponibles/'+pid).once('value').then(s=>{
+          let ped=s.val();
+          if(ped){
+            pedidosGlobales=[ped];
+            pedidoBloqueadoId=ped.id;
+            renderPedidosConductor();
+          }
+        });
+      }
+    });
+    // si no tengo asignacion, limpiar y mostrar buscando
+    let tengo=false;
+    Object.keys(data).forEach(pid=>{
+      if(data[pid].conductorId===ses.id && Date.now() < data[pid].expira) tengo=true;
+    });
+    if(!tengo &&!localStorage.getItem('kigo_viaje_activo')){
+      // verificar si hay pedidos sin asignar para mi tipo
+      db.ref('pedidos_disponibles').once('value').then(snap2=>{
+        let todos=Object.values(snap2.val()||{});
+        let compatibles=todos.filter(p=>{
+          if(ses.tipo!=='ambos' && p.tipo!==ses.tipo) return false;
+          return!data[p.id] || Date.now() >= data[p.id].expira;
+        });
+        if(compatibles.length===0){
+          pedidosGlobales=[];
+          renderPedidosConductor();
+        }
       });
-      if(document.getElementById('panelConductor').style.display==='flex') renderPedidosConductor();
     }
   });
+  db.ref('pedidos_disponibles').on('value',snap=>{
+    let data=snap.val();
+    let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+    if(!data){
+      pedidosGlobales=[];
+      if(document.getElementById('panelConductor').style.display==='flex' &&!localStorage.getItem('kigo_viaje_activo')){
+        renderPedidosConductor();
+      }
+      return;
+    }
+    // no mostrar automaticamente aqui, solo si tengo asignacion
+    // la asignacion se encarga de llenar pedidosGlobales
+  });
+  // detector de expiracion para rotar automaticamente
+  setInterval(()=>{
+    if(!db) return;
+    db.ref('asignaciones').once('value').then(snap=>{
+      let data=snap.val()||{};
+      Object.keys(data).forEach(pid=>{
+        let asig=data[pid];
+        if(Date.now() > asig.expira){
+          // expiro, pasar al siguiente alfabeticamente
+          db.ref('conductores').once('value').then(cSnap=>{
+            let conds=Object.values(cSnap.val()||{}).filter(c=>c.estado==='en_linea').sort((a,b)=>a.nombre.localeCompare(b.nombre));
+            db.ref('pedidos_disponibles/'+pid).once('value').then(pSnap=>{
+              let ped=pSnap.val(); if(!ped) { db.ref('asignaciones/'+pid).remove(); return; }
+              let compatibles=conds.filter(c=>{
+                if(c.tipo==='ambos') return true;
+                return c.tipo===ped.tipo;
+              });
+              if(compatibles.length===0){ db.ref('asignaciones/'+pid).remove(); return; }
+              let idx=compatibles.findIndex(c=>c.id===asig.conductorId);
+              let sigIdx=(idx+1)%compatibles.length;
+              // evitar loop infinito si solo hay 1
+              if(compatibles.length===1){
+                // reasignar al mismo con nuevo tiempo
+                db.ref('asignaciones/'+pid).set({conductorId:compatibles[0].id, conductorNombre:compatibles[0].nombre, expira:Date.now()+10000});
+              } else {
+                let siguiente=compatibles[sigIdx];
+                db.ref('asignaciones/'+pid).set({conductorId:siguiente.id, conductorNombre:siguiente.nombre, expira:Date.now()+10000});
+                localStorage.setItem('ultimo_conductor_'+pid, asig.conductorId);
+              }
+            });
+          });
+        }
+      });
+    });
+  },2000);
 }
 cargarAdmin(); aplicarDisponibilidad(); lucide.createIcons(); detectarLluviaDolores();
 </script>
 </body>
-</html>  
+</html>

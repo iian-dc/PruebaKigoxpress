@@ -90,7 +90,7 @@
 .pedido-card{width:92%;background:#fff;border:2px solid #111;border-radius:20px;padding:16px;box-shadow:0 10px 25px rgba(0,0,0,.12);position:relative;overflow:hidden}
 .timer-bar{position:absolute;bottom:0;left:0;height:5px;background:#16a34a;width:100%;transition:width.1s linear}
 .btn-aceptar{width:100%;margin-top:14px;height:52px;border:none;border-radius:14px;background:#111;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
-.btn-aceptar-progress{position:absolute;left:0;top:0;bottom:0;background:rgba(22,163,74,.2);width:100%}
+.btn-aceptar-progress{position:absolute;left:0;top:0;bottom:0;background:rgba(22,163,74,.25);width:100%}
 .btn-map{width:42px;height:42px;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer}
 .btn-map.active{background:#111;color:#fff}
 </style>
@@ -172,20 +172,20 @@
 <div id="mapConductorWrapper"><div id="mapConductor"></div></div>
 <div style="position:absolute;top:10px;left:10px;z-index:400;display:flex;gap:8px">
 <div style="background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1)">📍 En viaje</div>
-<button id="btnBrujula" class="btn-map" onclick="toggleBrujula()" title="Activar rotación con teléfono"><i data-lucide="compass" style="width:18px;pointer-events:none"></i></button>
-<button class="btn-map" onclick="centrarMapaConductor()" title="Centrar"><i data-lucide="crosshair" style="width:18px;pointer-events:none"></i></button>
+<button id="btnBrujula" class="btn-map" onclick="toggleBrujula()"><i data-lucide="compass" style="width:18px;pointer-events:none"></i></button>
+<button class="btn-map" onclick="centrarMapaConductor()"><i data-lucide="crosshair" style="width:18px;pointer-events:none"></i></button>
 </div>
-<div style="position:absolute;bottom:10px;left:10px;z-index:400;background:rgba(0,0,0,.7);color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:700" id="infoOrientacion">🧭 Toque brújula para girar con teléfono</div>
+<div style="position:absolute;bottom:10px;left:10px;z-index:400;background:rgba(0,0,0,.7);color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:700" id="infoOrientacion">🧭 Toque brújula para girar</div>
 </div>
 </div>
 
 <div id="bloquePedidos">
 <div style="padding:12px 14px 0 14px;display:flex;justify-content:space-between;align-items:center">
-<div style="font-weight:900;font-size:14px;color:#111">Pedido nuevo</div>
+<div style="font-weight:900;font-size:14px;color:#111">Pedido exclusivo</div>
 <div id="contadorPedidos" style="font-size:11px;color:#E53935;font-weight:800"></div>
 </div>
 <div id="pedidosScroll" class="pedidos-scroll"></div>
-<div id="vacioPedidos" style="text-align:center;padding:30px;color:#999;font-size:12px;display:none">No hay pedidos de tu tipo<br><small id="vacioPedidosSub">Activa En Línea</small></div>
+<div id="vacioPedidos" style="text-align:center;padding:30px;color:#999;font-size:12px;display:none">Esperando pedidos de tu tipo...<br><small id="vacioPedidosSub">En línea</small></div>
 </div>
 
 <div id="bloqueViajeActivo" style="display:none;padding:14px">
@@ -196,7 +196,7 @@
 </div>
 <div id="viajeInfo" style="margin-top:12px"></div>
 <button type="button" onclick="abrirGoogleMapsRecogida()" style="width:100%;margin-top:12px;height:46px;border:1px solid #111;border-radius:12px;background:#fff;color:#111;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px">Pasar ruta a Google Maps</button>
-<button type="button" id="btnRecogido" onclick="marcarRecogido()" style="width:100%;margin-top:10px;height:52px;border:none;border-radius:14px;background:#16a34a;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">RECOGIDO</button>
+<button type="button" id="btnRecogido" onclick="marcarRecogido()" style="width:100%;margin-top:10px;height:52px;border:none;border-radius:14px;background:#16a34a;color:#fff;font-weight:900;font-size:14px">RECOGIDO</button>
 <button type="button" onclick="cancelarViaje()" style="width:100%;margin-top:8px;height:42px;border:1px solid #eee;border-radius:12px;background:#fff;color:#666;font-weight:800;font-size:12px">Cancelar viaje</button>
 </div>
 </div>
@@ -376,10 +376,11 @@ function confirmarViajeFinal(){
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
  let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); hist.unshift({tipo:tipo,precio:precio,fecha:ahora.toLocaleString(),hora:ahora.getHours(),origen:pickupName,destino:destName,km:datosViaje.distKm}); if(hist.length>100) hist=hist.slice(0,100); localStorage.setItem('kigo_hist',JSON.stringify(hist));
  let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
- pedidos.unshift({id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString()});
+ let nuevoPedido={id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString(),estado:'pendiente'};
+ pedidos.unshift(nuevoPedido);
  if(pedidos.length>20) pedidos=pedidos.slice(0,20);
  localStorage.setItem('kigo_pedidos',JSON.stringify(pedidos));
- if(db) db.ref('pedidos/'+Date.now()).set(pedidos[0]);
+ if(db){ db.ref('pedidos/'+nuevoPedido.id).set(nuevoPedido); db.ref('pedidos_disponibles/'+nuevoPedido.id).set(nuevoPedido); }
 }
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); document.querySelectorAll('.tabs.tab').forEach(t=>{ if(t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active'); }); if(name==='conductores') renderConductores(); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; cargarAdmin(); detectarLluviaDolores(); return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
@@ -424,6 +425,7 @@ let brujulaActiva=false;
 let siguiendoConductor=false;
 let sonidoInterval=null;
 let audioCtx=null;
+let pedidoBloqueadoId=null; // id del pedido que este conductor tiene bloqueado actualmente
 
 function playUberSound(){
  try{
@@ -447,12 +449,7 @@ function playUberSound(){
    },200);
  }catch(e){}
 }
-function iniciarSonidoPedido(){
- detenerSonidoPedido();
- playUberSound();
- sonidoInterval=setInterval(()=>{ playUberSound(); },1200);
- if(navigator.vibrate) navigator.vibrate([200,100,200]);
-}
+function iniciarSonidoPedido(){ detenerSonidoPedido(); playUberSound(); sonidoInterval=setInterval(()=>{ playUberSound(); },1200); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
 function detenerSonidoPedido(){ if(sonidoInterval){ clearInterval(sonidoInterval); sonidoInterval=null; } }
 
 function abrirPanelConductor(c){
@@ -505,7 +502,6 @@ function mostrarUbicacionConductor(centrar=true){
    if(siguiendoConductor){
      mapConductor.setView([pos.coords.latitude,pos.coords.longitude], mapConductor.getZoom(), {animate:true});
    }
-   // si tiene heading GPS, rotar icono
    if(pos.coords.heading!==null &&!brujulaActiva){
      let inner=document.getElementById('iconoConductorInner');
      if(inner) inner.style.transform=`rotate(${pos.coords.heading}deg)`;
@@ -519,8 +515,7 @@ function toggleBrujula(){
  const btn=document.getElementById('btnBrujula');
  if(brujulaActiva){
    btn.classList.add('active');
-   document.getElementById('infoOrientacion').innerText='🧭 Girando con brújula del teléfono - mueve el cel';
-   // pedir permiso iOS
+   document.getElementById('infoOrientacion').innerText='🧭 Girando con brújula';
    if(typeof DeviceOrientationEvent!== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
      DeviceOrientationEvent.requestPermission().then(r=>{ if(r==='granted'){ window.addEventListener('deviceorientation', manejarOrientacion); } }).catch(()=>{});
    } else {
@@ -528,13 +523,12 @@ function toggleBrujula(){
    }
  } else {
    btn.classList.remove('active');
-   document.getElementById('infoOrientacion').innerText='🧭 Toque brújula para girar con teléfono';
+   document.getElementById('infoOrientacion').innerText='🧭 Toque brújula para girar';
    window.removeEventListener('deviceorientation', manejarOrientacion);
    document.getElementById('mapConductor').style.transform='rotate(0deg)';
    let inner=document.getElementById('iconoConductorInner');
    if(inner) inner.style.transform='rotate(0deg)';
  }
- lucide.createIcons();
 }
 function manejarOrientacion(e){
  if(!brujulaActiva) return;
@@ -547,27 +541,63 @@ function manejarOrientacion(e){
  mapEl.style.transform=`rotate(${-heading}deg)`;
  let inner=document.getElementById('iconoConductorInner');
  if(inner) inner.style.transform=`rotate(${heading}deg)`;
- document.getElementById('infoOrientacion').innerText=`🧭 ${Math.round(heading)}° - Norte arriba`;
 }
+
+function esPedidoBloqueadoPorOtro(pedidoId){
+ let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
+ let asig = asignaciones[pedidoId];
+ if(!asig) return false;
+ let ses = JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ if(asig.conductorId===ses?.id) return false; // es mío
+ if(Date.now() > asig.expira) return false; // expiró
+ return true; // bloqueado por otro
+}
+function bloquearPedidoParaMi(pedido){
+ let ses = JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ if(!ses) return;
+ let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
+ asignaciones[pedido.id]={conductorId:ses.id, expira: Date.now()+10000, tipo:pedido.tipo};
+ localStorage.setItem('kigo_asignaciones', JSON.stringify(asignaciones));
+ pedidoBloqueadoId=pedido.id;
+ if(db) db.ref('asignaciones/'+pedido.id).set({conductorId:ses.id, expira: Date.now()+10000});
+}
+function liberarPedido(pedidoId){
+ let asignaciones = JSON.parse(localStorage.getItem('kigo_asignaciones')||'{}');
+ delete asignaciones[pedidoId];
+ localStorage.setItem('kigo_asignaciones', JSON.stringify(asignaciones));
+ if(pedidoBloqueadoId===pedidoId) pedidoBloqueadoId=null;
+ if(db) db.ref('asignaciones/'+pedidoId).remove();
+}
+
 function renderPedidosConductor(){
  const cont=document.getElementById('pedidosScroll');
  const vacio=document.getElementById('vacioPedidos');
  let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
  let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
  if(ses && ses.estado==='ocupado'){ cont.innerHTML=''; vacio.style.display='block'; pedidosGlobales=[]; detenerTimerPedido(); detenerSonidoPedido(); return; }
+ // filtrar por tipo y por bloqueo de otro conductor
  if(ses){
    if(ses.tipo==='moto') pedidos=pedidos.filter(p=>p.tipo==='moto');
    if(ses.tipo==='carro') pedidos=pedidos.filter(p=>p.tipo==='carro');
+   pedidos = pedidos.filter(p=>!esPedidoBloqueadoPorOtro(p.id) );
  }
  if(!pedidos.length){
-   pedidos=[
-     {id:101,origen:"Hidalgo 15, Centro",destino:"Lindavista, Dolores",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo: ses?.tipo==='carro'?'carro':'moto'},
-     {id:102,origen:"Plaza Principal",destino:"San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94,km:"2.4",precio:55,tipo: ses?.tipo||'moto'},
-     {id:103,origen:"Cecyteg",destino:"Centro",origenLat:21.15,origenLng:-100.92,destLat:21.1561,destLng:-100.9333,km:"1.2",precio:35,tipo: ses?.tipo||'moto'}
-   ];
+   cont.innerHTML=''; vacio.style.display='block';
+   document.getElementById('contadorPedidos').innerText='Sin pedidos';
+   detenerTimerPedido(); detenerSonidoPedido();
+   // reintentar en 3s por si se libera uno
+   setTimeout(()=>{ if(document.getElementById('panelConductor').style.display==='flex') renderPedidosConductor(); },3000);
+   return;
  }
  pedidosGlobales=pedidos;
- pedidoActualIdx=0;
+ // si no tengo pedido bloqueado, tomar el primero y bloquearlo para mi
+ if(!pedidoBloqueadoId ||!pedidosGlobales.find(p=>p.id===pedidoBloqueadoId)){
+   pedidoActualIdx=0;
+   bloquearPedidoParaMi(pedidosGlobales[0]);
+ } else {
+   let idx=pedidosGlobales.findIndex(p=>p.id===pedidoBloqueadoId);
+   pedidoActualIdx = idx>=0? idx : 0;
+ }
  mostrarPedidoUnico();
 }
 function mostrarPedidoUnico(){
@@ -581,7 +611,7 @@ function mostrarPedidoUnico(){
    <div class="pedido-card">
      <div id="timerBar" class="timer-bar"></div>
      <div style="display:flex;justify-content:space-between;align-items:center">
-       <span style="background:${p.tipo==='moto'?'#111':'#E53935'};color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()}</span>
+       <span style="background:${p.tipo==='moto'?'#111':'#E53935'};color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} - EXCLUSIVO PARA TI</span>
        <span style="font-weight:900;color:#111">$${p.precio} MXN</span>
      </div>
      <div style="margin-top:10px">
@@ -589,10 +619,10 @@ function mostrarPedidoUnico(){
        <div style="margin:8px 0 8px 3px;border-left:1px dashed #ddd;height:12px"></div>
        <div style="display:flex;gap:8px"><span style="width:8px;height:8px;background:#E53935;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666">ENTREGAR</div><div style="font-size:13px;font-weight:900">${p.destino}</div></div></div>
      </div>
-     <div style="margin-top:10px;font-size:10px;color:#666">📏 ${p.km} km - Solo para ti</div>
+     <div style="margin-top:10px;font-size:10px;color:#666">📏 ${p.km} km - Nadie más lo ve hasta que acabe tu tiempo</div>
      <button id="btnAceptarUnico" class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:1">ACEPTAR - <span id="timerTxt">10s</span></span></button>
    </div>`;
- document.getElementById('contadorPedidos').innerText=`1 pedido • ${p.tipo.toUpperCase()}`;
+ document.getElementById('contadorPedidos').innerText=`1 pedido exclusivo`;
  pintarRutaPedido(p);
  iniciarTimerPedido();
  iniciarSonidoPedido();
@@ -625,36 +655,48 @@ function iniciarTimerPedido(){
    if(bar) bar.style.width=pct+'%';
    if(btnBar) btnBar.style.width=pct+'%';
    if(txt) txt.innerText=Math.ceil(tiempoRestante)+'s';
-   if(tiempoRestante<=0){ clearInterval(timerPedido); pasarSiguienteConductor(); }
+   if(tiempoRestante<=0){ clearInterval(timerPedido); tiempoAgotado(); }
  },100);
 }
 function detenerTimerPedido(){ if(timerPedido){ clearInterval(timerPedido); timerPedido=null; } }
-function pasarSiguienteConductor(){
- detenerSonidoPedido();
- if(pedidosGlobales.length>1){
-   let perdido=pedidosGlobales.splice(pedidoActualIdx,1)[0];
-   pedidosGlobales.push(perdido);
+function tiempoAgotado(){
+ // solo libera y pasa al siguiente conductor cuando acaba el tiempo, no antes
+ let p=pedidosGlobales[pedidoActualIdx];
+ if(p){
+   liberarPedido(p.id);
+   // mover este pedido al final para que lo vea otro conductor
+   let pedidoRotado=pedidosGlobales.splice(pedidoActualIdx,1)[0];
+   pedidosGlobales.push(pedidoRotado);
    localStorage.setItem('kigo_pedidos', JSON.stringify(pedidosGlobales));
-   if(pedidoActualIdx>=pedidosGlobales.length) pedidoActualIdx=0;
+   if(db){ db.ref('pedidos/'+pedidoRotado.id).set(pedidoRotado); db.ref('pedidos_disponibles/'+pedidoRotado.id).set(pedidoRotado); }
  }
- mostrarPedidoUnico();
+ detenerSonidoPedido();
+ // esperar 500ms y mostrar siguiente disponible
+ setTimeout(()=>{ renderPedidosConductor(); },500);
 }
 function aceptarPedido(id){
  detenerTimerPedido(); detenerSonidoPedido();
- let pedido=pedidosGlobales.find(p=>p.id===id) || JSON.parse(localStorage.getItem('kigo_pedidos')||'[]').find(p=>p.id===id);
- if(!pedido) pedido={id:id,origen:"Hidalgo 15, Centro",destino:"Lindavista, Dolores",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo:"moto"};
+ let pedido=pedidosGlobales.find(p=>p.id===id);
+ if(!pedido) return; // ya no existe, otro lo tomó
  let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!ses) return;
+ // verificar que aún lo tengo bloqueado
+ if(esPedidoBloqueadoPorOtro(id) && pedidoBloqueadoId!==id){
+   alert('Este pedido ya lo tomó otro conductor');
+   renderPedidosConductor();
+   return;
+ }
  ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
- let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); }
- actualizarBotonEstado('ocupado');
+ let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+ses.id+'/estado').set('ocupado'); }
+ // BORRAR DE TODOS - ya no aparece a nadie
  pedidosGlobales=pedidosGlobales.filter(p=>p.id!==id);
  localStorage.setItem('kigo_pedidos', JSON.stringify(pedidosGlobales));
+ liberarPedido(id);
+ if(db){ db.ref('pedidos/'+id).remove(); db.ref('pedidos_disponibles/'+id).remove(); db.ref('asignaciones/'+id).remove(); db.ref('pedidos_aceptados/'+id).set({pedido:pedido, conductorId:ses.id, fecha:Date.now()}); }
  let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id,estado:'hacia_recogida'};
  localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
  mostrarViajeActivo(viajeActivo);
  trazarRutaConductorARecogida(pedido);
  iniciarSeguimiento();
- // activar brújula automáticamente
  if(!brujulaActiva) toggleBrujula();
 }
 function mostrarViajeActivo(viaje){
@@ -709,8 +751,19 @@ function marcarRecogido(){
  document.getElementById('viajeEstadoBadge').innerText='EN CAMINO A ENTREGA';
 }
 function cancelarViaje(){
- if(!confirm('¿Cancelar?')) return;
+ if(!confirm('¿Cancelar viaje? Se devolverá a la lista de pedidos')) return;
+ let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
+ if(viaje){
+   let pedido=viaje.pedido;
+   // volver a poner en lista para que otro lo tome
+   let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
+   pedido.estado='pendiente';
+   pedidos.unshift(pedido);
+   localStorage.setItem('kigo_pedidos', JSON.stringify(pedidos));
+   if(db){ db.ref('pedidos/'+pedido.id).set(pedido); db.ref('pedidos_disponibles/'+pedido.id).set(pedido); db.ref('pedidos_aceptados/'+pedido.id).remove(); db.ref('asignaciones/'+pedido.id).remove(); }
+ }
  localStorage.removeItem('kigo_viaje_activo');
+ pedidoBloqueadoId=null;
  document.getElementById('bloquePedidos').style.display='block';
  document.getElementById('bloqueViajeActivo').style.display='none';
  detenerTimerPedido(); detenerSonidoPedido();
@@ -725,7 +778,7 @@ function aplicarDisponibilidad(){ const m=document.getElementById('cardMoto'); c
 function actualizarStats(){ let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); document.getElementById('statTotal').innerText=hist.length; document.getElementById('statMoto').innerText=hist.filter(h=>h.tipo==='moto').length; document.getElementById('statCarro').innerText=hist.filter(h=>h.tipo==='carro').length; let box=document.getElementById('historialBox'); if(!hist.length){ box.innerHTML='<div style="text-align:center;padding:20px;color:#999;font-size:12px">Sin historial</div>'; return; } box.innerHTML=hist.map(h=>`<div style="padding:10px;border-bottom:1px solid #f0f0f0"><b>${h.tipo.toUpperCase()} $${h.precio} ${h.km}km</b><br><small>${h.origen} → ${h.destino}</small><br><small>${h.fecha}</small></div>`).join(''); }
 function borrarHistorial(){ if(confirm('Borrar?')){ localStorage.removeItem('kigo_hist'); actualizarStats(); } }
 function cerrarSesionAdmin(){ localStorage.removeItem('kigo_admin_sesion'); irInicioForzado(); }
-function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); detenerTimerPedido(); detenerSonidoPedido(); window.removeEventListener('deviceorientation', manejarOrientacion); irInicioForzado(); }
+function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); detenerTimerPedido(); detenerSonidoPedido(); window.removeEventListener('deviceorientation', manejarOrientacion); if(pedidoBloqueadoId) liberarPedido(pedidoBloqueadoId); irInicioForzado(); }
 let conductores = JSON.parse(localStorage.getItem('kigo_conductores')||'[]');
 let tempFoto="", tempFotoINE="";
 function abrirModalConductor(id=null){ document.getElementById('modalConductor').classList.add('show'); if(id){ const c=conductores.find(x=>x.id===id); if(!c) return; document.getElementById('tituloConductor').innerText='Editar Conductor'; document.getElementById('cId').value=c.id; document.getElementById('cNombre').value=c.nombre; document.getElementById('cTelefono').value=c.telefono; document.getElementById('cTelRef').value=c.telRef||''; document.getElementById('cUsuario').value=c.usuario||''; document.getElementById('cPass').value=c.pass||''; document.getElementById('cINE').value=c.ine||''; document.getElementById('cPlaca').value=c.placa||''; document.getElementById('cTipo').value=c.tipo||'moto'; document.getElementById('cDireccion').value=c.direccion||''; tempFoto=c.foto||''; tempFotoINE=c.fotoINE||''; if(tempFoto){ document.getElementById('previewFoto').src=tempFoto; document.getElementById('previewFoto').style.display='block'; document.getElementById('fotoPlaceholder').style.display='none'; } if(tempFotoINE){ document.getElementById('previewFotoINE').src=tempFotoINE; document.getElementById('previewFotoINE').style.display='block'; document.getElementById('fotoINEPlaceholder').style.display='none'; } } else { document.getElementById('tituloConductor').innerText='Agregar Conductor'; document.getElementById('cId').value=''; ['cNombre','cTelefono','cTelRef','cUsuario','cPass','cINE','cPlaca','cDireccion'].forEach(i=>document.getElementById(i).value=''); document.getElementById('cTipo').value='moto'; tempFoto=''; tempFotoINE=''; document.getElementById('previewFoto').style.display='none'; document.getElementById('fotoPlaceholder').style.display='block'; document.getElementById('previewFotoINE').style.display='none'; document.getElementById('fotoINEPlaceholder').style.display='block'; } lucide.createIcons(); }
@@ -740,7 +793,27 @@ function cambiarEstado(nuevo){ let sesion=JSON.parse(localStorage.getItem('kigo_
 function actualizarBotonEstado(estado){ const btn=document.getElementById('estadoBtn'); const txt=document.getElementById('estadoBtnTxt'); if(estado==='en_linea'){ btn.className='estado-btn en_linea'; txt.innerText='EN LÍNEA'; } else { btn.className='estado-btn ocupado'; txt.innerText='OCUPADO'; } }
 function editarMiPerfil(){ let sesion=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!sesion) return; abrirModalConductor(sesion.id); }
 document.addEventListener("click",e=>{ if(!e.target.closest('.input-wrap')){pickupSuggestions.classList.remove("show");destinationSuggestions.classList.remove("show");} if(!e.target.closest('.estado-wrap')){ const m=document.getElementById('estadoMenu'); if(m) m.classList.remove('show'); } });
-if(db){ db.ref('config').on('value',snap=>{ const data=snap.val(); if(!data) return; isSyncing=true; cfg=data; localStorage.setItem('kigo_cfg',JSON.stringify(cfg)); cargarAdmin(); aplicarDisponibilidad(); actualizarUIClima(); actualizarWeatherWidget(); isSyncing=false; }); db.ref('conductores').on('value',snap=>{ const data=snap.val(); if(!data){ conductores=[]; localStorage.setItem('kigo_conductores','[]'); renderConductores(); return; } conductores=Object.values(data); localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); renderConductores(); }); }
+if(db){
+  db.ref('config').on('value',snap=>{ const data=snap.val(); if(!data) return; isSyncing=true; cfg=data; localStorage.setItem('kigo_cfg',JSON.stringify(cfg)); cargarAdmin(); aplicarDisponibilidad(); actualizarUIClima(); actualizarWeatherWidget(); isSyncing=false; });
+  db.ref('conductores').on('value',snap=>{ const data=snap.val(); if(!data){ conductores=[]; localStorage.setItem('kigo_conductores','[]'); renderConductores(); return; } conductores=Object.values(data); localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); renderConductores(); });
+  db.ref('pedidos_disponibles').on('value',snap=>{
+    const data=snap.val();
+    if(!data){ if(!JSON.parse(localStorage.getItem('kigo_pedidos')||'[]').length) return; }
+    else {
+      let arr=Object.values(data);
+      // filtrar los que están bloqueados por otro conductor aún vigentes
+      let asignaciones=snap.ref.parent.child('asignaciones');
+      localStorage.setItem('kigo_pedidos', JSON.stringify(arr));
+      if(document.getElementById('panelConductor').style.display==='flex' &&!localStorage.getItem('kigo_viaje_activo')){
+        renderPedidosConductor();
+      }
+    }
+  });
+  db.ref('asignaciones').on('value',snap=>{
+    const data=snap.val()||{};
+    localStorage.setItem('kigo_asignaciones', JSON.stringify(data));
+  });
+}
 cargarAdmin(); aplicarDisponibilidad(); lucide.createIcons(); detectarLluviaDolores();
 </script>
 </body>

@@ -85,6 +85,12 @@
 .estado-opt{padding:12px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:8px;cursor:pointer;color:#111;border-bottom:1px solid #f5f5f5}
 .estado-opt:last-child{border-bottom:none}
 .estado-opt:hover{background:#f7f7f8}
+/* CARRUSEL PEDIDOS */
+.pedidos-scroll{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 12px 20px;scrollbar-width:none}
+.pedidos-scroll::-webkit-scrollbar{display:none}
+.pedido-card{min-width:78%;scroll-snap-align:center;background:#fff;border:2px solid #eee;border-radius:18px;padding:14px;transition:.3s;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.pedido-card.active{border-color:#111;transform:translateY(-6px) scale(1.02);box-shadow:0 10px 25px rgba(0,0,0,.15)}
+.btn-aceptar{width:100%;margin-top:12px;height:46px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
 </style>
 </head>
 <body>
@@ -158,17 +164,22 @@
 </div>
 </div>
 
-<div style="padding:14px">
-<div style="background:#fff;border:1px solid #eee;border-radius:18px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.04)">
-<div style="height:380px;position:relative">
+<div style="padding:14px 0 0 0">
+<div style="background:#fff;border-top:1px solid #eee;border-bottom:1px solid #eee;overflow:hidden">
+<div style="height:360px;position:relative">
 <div id="mapConductor"></div>
-<div style="position:absolute;top:10px;left:10px;z-index:400;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1)">📍 Tu ubicación en línea</div>
+<div style="position:absolute;top:10px;left:10px;z-index:400;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1)">📍 Pedidos cerca</div>
 </div>
-<div style="padding:12px">
-<div style="font-weight:900;font-size:13px;color:#111">Panel del Conductor</div>
-<div style="font-size:11px;color:#666;margin-top:2px">Cuando estés EN LÍNEA verás tu carrito en el mapa</div>
-<div id="conductorInfoBox" style="margin-top:10px;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px;font-size:11px;color:#111"></div>
 </div>
+
+<!-- TARJETAS PEDIDOS TIPO UBER -->
+<div style="padding:12px 0 20px 0">
+<div style="padding:0 14px;display:flex;justify-content:space-between;align-items:center">
+<div style="font-weight:900;font-size:14px;color:#111">Pedidos disponibles</div>
+<div style="font-size:11px;color:#666">Desliza →</div>
+</div>
+<div id="pedidosScroll" class="pedidos-scroll"></div>
+<div id="vacioPedidos" style="text-align:center;padding:30px;color:#999;font-size:12px;display:none">No hay pedidos por ahora<br><small>Cuando un cliente pida, aparecerá aquí</small></div>
 </div>
 </div>
 </div>
@@ -219,7 +230,7 @@ let db=null; try{ firebase.initializeApp(firebaseConfig); db=firebase.database()
 const CENTRO={lat:21.1561,lng:-100.9333};
 let pickupLat=null,pickupLng=null,destinationLat=null,destinationLng=null,pickupMarker=null,destinationMarker=null,routeLayer=null,pickupName="",destName="",tipo="",datosViaje={};
 let mapConfirm=null, markerConfirm=null, finalPickupLat=null, finalPickupLng=null, routeConfirmLayer=null;
-let mapConductor=null, markerConductor=null, watchConductor=null;
+let mapConductor=null, markerConductor=null, watchConductor=null, routeConductorLayer=null, marcadoresPedido=[];
 let estadoLluviaActual={nivel:'ninguna',precip:0,txt:'Sin lluvia',extra:0,temp:24,code:0,isDay:1};
 let isSyncing=false;
 let cfg = JSON.parse(localStorage.getItem('kigo_cfg')||'{"nombre":"Kigo Xpress","baseMoto":35,"baseCarro":55,"extraMoto":5,"extraCarro":8,"motoDisp":true,"carroDisp":true,"precioLeve":0,"precioMod":5,"precioFuerte":10,"lluviaNivel":"ninguna","lluviaAuto":true}');
@@ -261,7 +272,7 @@ function actualizarBotonesLluvia(){
 }
 function pushConfig(){
  localStorage.setItem('kigo_cfg',JSON.stringify(cfg));
- if(db &&!isSyncing){ db.ref('config').set(cfg).then(()=>console.log('Sync OK')).catch(e=>console.log(e)); }
+ if(db &&!isSyncing){ db.ref('config').set(cfg); }
  document.getElementById('nombrePlataformaTitulo').innerText=cfg.nombre+' • Admin';
  aplicarDisponibilidad(); actualizarUIClima();
 }
@@ -344,6 +355,12 @@ function confirmarViajeFinal(){
  let msg=`🏢 *${cfg.nombre.toUpperCase()}*\n⏰ ${hora} - ${fecha}\n#${contador.toString().padStart(4,'0')} - ${tipo.toUpperCase()}\n${lluviaLinea}\n📍 ${pickupName}\n📌 ${linkPunto}\n🏁 ${datosViaje.destino}\n🗺️ ${linkRuta}\n📏 ${datosViaje.distKm} km - 💰 $${precio} MXN`;
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
  let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); hist.unshift({tipo:tipo,precio:precio,fecha:ahora.toLocaleString(),hora:ahora.getHours(),origen:pickupName,destino:destName,km:datosViaje.distKm}); if(hist.length>100) hist=hist.slice(0,100); localStorage.setItem('kigo_hist',JSON.stringify(hist));
+ // guardar pedido para conductores
+ let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
+ pedidos.unshift({id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString()});
+ if(pedidos.length>20) pedidos=pedidos.slice(0,20);
+ localStorage.setItem('kigo_pedidos',JSON.stringify(pedidos));
+ if(db) db.ref('pedidos/'+Date.now()).set(pedidos[0]);
 }
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); document.querySelectorAll('.tabs.tab').forEach(t=>{ if(t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active'); }); if(name==='conductores') renderConductores(); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; cargarAdmin(); detectarLluviaDolores(); return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
@@ -382,10 +399,9 @@ function abrirPanelConductor(c){
  document.getElementById('panelConductor').style.display='flex';
  document.getElementById('conductorPanelFoto').src=c.foto||'';
  document.getElementById('conductorPanelNombre').innerText=c.nombre||'Conductor';
- document.getElementById('conductorInfoBox').innerHTML=`<b>${c.nombre}</b><br>📞 ${c.telefono}<br>🚗 ${c.tipo?.toUpperCase()} ${c.placa?'- '+c.placa:''}<br>🪪 INE: ${c.ine||'N/A'}<br>📍 ${c.direccion||''}<br><br><small>Usuario: ${c.usuario}</small>`;
  actualizarBotonEstado(c.estado||'en_linea');
  lucide.createIcons();
- setTimeout(()=>{ initMapConductor(); },200);
+ setTimeout(()=>{ initMapConductor(); renderPedidosConductor(); },200);
 }
 function initMapConductor(){
  if(!mapConductor){
@@ -397,29 +413,31 @@ function initMapConductor(){
  let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
  if(ses && ses.estado==='en_linea'){
    mostrarUbicacionCarrito();
- } else {
-   if(markerConductor){ mapConductor.removeLayer(markerConductor); markerConductor=null; }
  }
+}
+function getIconoTransporte(tipoConductor){
+ let emoji = tipoConductor==='moto'? '🏍️' : tipoConductor==='carro'? '🚗' : '🚗';
+ if(tipoConductor==='ambos') emoji='🚗';
+ let bg = tipoConductor==='moto'? '#111' : '#111';
+ return L.divIcon({
+   className:'custom-car-icon',
+   html:`<div style="width:44px;height:44px;background:${bg};border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.35);font-size:22px">${emoji}</div>`,
+   iconSize:[44,44],
+   iconAnchor:[22,22]
+ });
 }
 function mostrarUbicacionCarrito(){
  if(!mapConductor) return;
  if(!navigator.geolocation) return;
+ let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ let tipoCond = ses?.tipo||'moto';
  navigator.geolocation.getCurrentPosition(pos=>{
    const lat=pos.coords.latitude, lng=pos.coords.longitude;
-   const iconCar = L.divIcon({
-     className:'custom-car-icon',
-     html:`<div style="width:42px;height:42px;background:#111;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);font-size:20px">🚗</div>`,
-     iconSize:[42,42],
-     iconAnchor:[21,21]
-   });
    if(markerConductor){ mapConductor.removeLayer(markerConductor); }
-   markerConductor=L.marker([lat,lng],{icon:iconCar}).addTo(mapConductor);
-   mapConductor.setView([lat,lng],16);
-   // actualizar firebase ubicación
-   let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+   markerConductor=L.marker([lat,lng],{icon:getIconoTransporte(tipoCond)}).addTo(mapConductor);
+   mapConductor.setView([lat,lng],15);
    if(ses && db){ db.ref('conductores/'+ses.id+'/ubicacion').set({lat,lng,ts:Date.now()}); }
  });
- // seguir actualizando si está en línea
  if(watchConductor) navigator.geolocation.clearWatch(watchConductor);
  watchConductor=navigator.geolocation.watchPosition(pos=>{
    let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
@@ -427,6 +445,93 @@ function mostrarUbicacionCarrito(){
    const lat=pos.coords.latitude, lng=pos.coords.longitude;
    if(markerConductor){ markerConductor.setLatLng([lat,lng]); }
  }, null, {enableHighAccuracy:true});
+}
+function renderPedidosConductor(){
+ const cont=document.getElementById('pedidosScroll');
+ const vacio=document.getElementById('vacioPedidos');
+ let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
+ if(db){
+   // si hay pedidos en firebase también los mezclamos
+ }
+ if(!pedidos.length){
+   // datos demo para que veas el efecto
+   pedidos=[
+     {id:1,origen:"Hidalgo 15, Centro",destino:"Lindavista, Dolores",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo:"moto"},
+     {id:2,origen:"Plaza Principal",destino:"Col. San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94,km:"2.4",precio:55,tipo:"carro"},
+     {id:3,origen:"Cecyteg",destino:"Centro",origenLat:21.15,origenLng:-100.92,destLat:21.1561,destLng:-100.9333,km:"1.2",precio:35,tipo:"moto"}
+   ];
+ }
+ if(!pedidos.length){ cont.innerHTML=''; vacio.style.display='block'; return; }
+ vacio.style.display='none';
+ cont.innerHTML=pedidos.map((p,i)=>`
+   <div class="pedido-card ${i===0?'active':''}" data-idx="${i}" onclick="seleccionarPedido(${i})">
+     <div style="display:flex;justify-content:space-between;align-items:center">
+       <span style="background:${p.tipo==='moto'?'#111':'#E53935'};color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()}</span>
+       <span style="font-weight:900;color:#111">$${p.precio} MXN</span>
+     </div>
+     <div style="margin-top:10px">
+       <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:8px;height:8px;background:#16a34a;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666;font-weight:700">RECOGER</div><div style="font-size:12px;font-weight:800;color:#111">${p.origen}</div></div></div>
+       <div style="margin:8px 0 8px 3px;border-left:1px dashed #ddd;height:12px"></div>
+       <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:8px;height:8px;background:#E53935;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666;font-weight:700">ENTREGAR</div><div style="font-size:12px;font-weight:800;color:#111">${p.destino}</div></div></div>
+     </div>
+     <div style="margin-top:10px;display:flex;gap:8px;font-size:10px;color:#666"><span>📏 ${p.km} km</span><span>⏱️ ~8 min</span></div>
+     <button class="btn-aceptar" onclick="event.stopPropagation(); aceptarPedido(${p.id})"><i data-lucide="check" style="width:16px"></i> ACEPTAR VIAJE</button>
+   </div>
+ `).join('');
+ lucide.createIcons();
+ // observar scroll para centrar
+ cont.addEventListener('scroll', debounce(()=>{ detectarTarjetaCentro(); },100));
+ setTimeout(()=>{ seleccionarPedido(0); },300);
+}
+function debounce(fn,delay){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),delay); } }
+function detectarTarjetaCentro(){
+ const cont=document.getElementById('pedidosScroll');
+ const cards=cont.querySelectorAll('.pedido-card');
+ let center = cont.scrollLeft + cont.offsetWidth/2;
+ let closest=null, minDist=Infinity;
+ cards.forEach((card,i)=>{
+   let cardCenter = card.offsetLeft + card.offsetWidth/2;
+   let dist = Math.abs(center - cardCenter);
+   if(dist<minDist){ minDist=dist; closest=i; }
+ });
+ if(closest!==null) seleccionarPedido(closest,false);
+}
+let pedidoActualIdx=0;
+async function seleccionarPedido(idx, scroll=true){
+ const cont=document.getElementById('pedidosScroll');
+ const cards=cont.querySelectorAll('.pedido-card');
+ cards.forEach(c=>c.classList.remove('active'));
+ if(cards[idx]) cards[idx].classList.add('active');
+ if(scroll && cards[idx]) cards[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+ pedidoActualIdx=idx;
+ let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
+ if(!pedidos.length){
+   pedidos=[
+     {id:1,origen:"Hidalgo 15, Centro",destino:"Lindavista",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233},
+     {id:2,origen:"Plaza Principal",destino:"Col. San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94},
+     {id:3,origen:"Cecyteg",destino:"Centro",origenLat:21.15,origenLng:-100.92,destLat:21.1561,destLng:-100.9333}
+   ];
+ }
+ const p=pedidos[idx]; if(!p) return;
+ // pintar ruta en mapa conductor
+ try{
+   const url=`https://router.project-osrm.org/route/v1/driving/${p.origenLng},${p.origenLat};${p.destLng},${p.destLat}?overview=full&geometries=geojson`;
+   const r=await fetch(url); const d=await r.json();
+   if(d.routes && d.routes[0]){
+     if(routeConductorLayer) mapConductor.removeLayer(routeConductorLayer);
+     marcadoresPedido.forEach(m=>mapConductor.removeLayer(m)); marcadoresPedido=[];
+     routeConductorLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#111",weight:5}}).addTo(mapConductor);
+     const iconO = L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:#16a34a;border:2px solid #fff;border-radius:50%"></div>`,iconSize:[10,10]});
+     const iconD = L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:#E53935;border:2px solid #fff;border-radius:50%"></div>`,iconSize:[10,10]});
+     let m1=L.marker([p.origenLat,p.origenLng],{icon:iconO}).addTo(mapConductor);
+     let m2=L.marker([p.destLat,p.destLng],{icon:iconD}).addTo(mapConductor);
+     marcadoresPedido=[m1,m2];
+     mapConductor.fitBounds(routeConductorLayer.getBounds(),{padding:[40,40]});
+   }
+ }catch(e){}
+}
+function aceptarPedido(id){
+ alert('✅ Pedido #'+id+' aceptado - Aquí conectaremos con WhatsApp del cliente');
 }
 function cargarAdmin(){
  const g=(id)=>document.getElementById(id);
@@ -561,7 +666,7 @@ function cambiarEstado(nuevo){
  let idx=conductores.findIndex(x=>x.id===sesion.id); if(idx>=0){ conductores[idx].estado=nuevo; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+sesion.id+'/estado').set(nuevo); }
  document.getElementById('estadoMenu').classList.remove('show');
  actualizarBotonEstado(nuevo);
- if(nuevo==='en_linea'){ mostrarUbicacionCarrito(); }
+ if(nuevo==='en_linea'){ mostrarUbicacionCarrito(); renderPedidosConductor(); }
  else { if(markerConductor && mapConductor){ mapConductor.removeLayer(markerConductor); markerConductor=null; } if(watchConductor) navigator.geolocation.clearWatch(watchConductor); }
 }
 function actualizarBotonEstado(estado){
@@ -590,6 +695,11 @@ if(db){
     localStorage.setItem('kigo_conductores', JSON.stringify(conductores));
     renderConductores();
     let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(ses){ let act=conductores.find(x=>x.id===ses.id); if(act){ localStorage.setItem('kigo_conductor_sesion', JSON.stringify(act)); actualizarBotonEstado(act.estado||'en_linea'); } }
+  });
+  db.ref('pedidos').on('value',snap=>{
+    const data=snap.val(); if(!data) return;
+    const arr=Object.values(data); localStorage.setItem('kigo_pedidos',JSON.stringify(arr));
+    if(document.getElementById('panelConductor').style.display==='flex') renderPedidosConductor();
   });
 }
 cargarAdmin(); aplicarDisponibilidad(); lucide.createIcons();

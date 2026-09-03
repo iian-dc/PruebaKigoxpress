@@ -85,7 +85,6 @@
 .estado-opt{padding:12px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:8px;cursor:pointer;color:#111;border-bottom:1px solid #f5f5f5}
 .estado-opt:last-child{border-bottom:none}
 .estado-opt:hover{background:#f7f7f8}
-/* CARRUSEL PEDIDOS */
 .pedidos-scroll{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 12px 20px;scrollbar-width:none}
 .pedidos-scroll::-webkit-scrollbar{display:none}
 .pedido-card{min-width:78%;scroll-snap-align:center;background:#fff;border:2px solid #eee;border-radius:18px;padding:14px;transition:.3s;box-shadow:0 4px 12px rgba(0,0,0,.06)}
@@ -172,15 +171,27 @@
 </div>
 </div>
 
-<!-- TARJETAS PEDIDOS TIPO UBER -->
-<div style="padding:12px 0 20px 0">
-<div style="padding:0 14px;display:flex;justify-content:space-between;align-items:center">
+<div id="bloquePedidos">
+<div style="padding:12px 14px 0 14px;display:flex;justify-content:space-between;align-items:center">
 <div style="font-weight:900;font-size:14px;color:#111">Pedidos disponibles</div>
 <div style="font-size:11px;color:#666">Desliza →</div>
 </div>
 <div id="pedidosScroll" class="pedidos-scroll"></div>
-<div id="vacioPedidos" style="text-align:center;padding:30px;color:#999;font-size:12px;display:none">No hay pedidos por ahora<br><small>Cuando un cliente pida, aparecerá aquí</small></div>
+<div id="vacioPedidos" style="text-align:center;padding:30px;color:#999;font-size:12px;display:none">No hay pedidos de tu tipo<br><small id="vacioPedidosSub">Activa En Línea</small></div>
 </div>
+
+<div id="bloqueViajeActivo" style="display:none;padding:14px">
+<div style="background:#fff;border:2px solid #111;border-radius:18px;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,.12)">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="font-weight:900;font-size:13px;color:#111">Viaje en curso</div>
+<div id="viajeEstadoBadge" style="background:#E53935;color:#fff;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:900">EN CAMINO A RECOGER</div>
+</div>
+<div id="viajeInfo" style="margin-top:12px"></div>
+<button type="button" id="btnRecogido" onclick="marcarRecogido()" style="width:100%;margin-top:14px;height:52px;border:none;border-radius:14px;background:#16a34a;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="package-check" style="width:18px"></i> RECOGIDO</button>
+<button type="button" onclick="cancelarViaje()" style="width:100%;margin-top:8px;height:42px;border:1px solid #eee;border-radius:12px;background:#fff;color:#666;font-weight:800;font-size:12px">Cancelar viaje</button>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -355,7 +366,6 @@ function confirmarViajeFinal(){
  let msg=`🏢 *${cfg.nombre.toUpperCase()}*\n⏰ ${hora} - ${fecha}\n#${contador.toString().padStart(4,'0')} - ${tipo.toUpperCase()}\n${lluviaLinea}\n📍 ${pickupName}\n📌 ${linkPunto}\n🏁 ${datosViaje.destino}\n🗺️ ${linkRuta}\n📏 ${datosViaje.distKm} km - 💰 $${precio} MXN`;
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
  let hist=JSON.parse(localStorage.getItem('kigo_hist')||'[]'); hist.unshift({tipo:tipo,precio:precio,fecha:ahora.toLocaleString(),hora:ahora.getHours(),origen:pickupName,destino:destName,km:datosViaje.distKm}); if(hist.length>100) hist=hist.slice(0,100); localStorage.setItem('kigo_hist',JSON.stringify(hist));
- // guardar pedido para conductores
  let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
  pedidos.unshift({id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:ahora.toLocaleString()});
  if(pedidos.length>20) pedidos=pedidos.slice(0,20);
@@ -401,7 +411,15 @@ function abrirPanelConductor(c){
  document.getElementById('conductorPanelNombre').innerText=c.nombre||'Conductor';
  actualizarBotonEstado(c.estado||'en_linea');
  lucide.createIcons();
- setTimeout(()=>{ initMapConductor(); renderPedidosConductor(); },200);
+ // si hay viaje activo, mostrarlo
+ let viajeActivo=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
+ if(viajeActivo && viajeActivo.conductorId===c.id){
+   mostrarViajeActivo(viajeActivo);
+ } else {
+   document.getElementById('bloquePedidos').style.display='block';
+   document.getElementById('bloqueViajeActivo').style.display='none';
+   setTimeout(()=>{ initMapConductor(); renderPedidosConductor(); },200);
+ }
 }
 function initMapConductor(){
  if(!mapConductor){
@@ -418,7 +436,7 @@ function initMapConductor(){
 function getIconoTransporte(tipoConductor){
  let emoji = tipoConductor==='moto'? '🏍️' : tipoConductor==='carro'? '🚗' : '🚗';
  if(tipoConductor==='ambos') emoji='🚗';
- let bg = tipoConductor==='moto'? '#111' : '#111';
+ let bg = '#111';
  return L.divIcon({
    className:'custom-car-icon',
    html:`<div style="width:44px;height:44px;background:${bg};border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.35);font-size:22px">${emoji}</div>`,
@@ -450,18 +468,30 @@ function renderPedidosConductor(){
  const cont=document.getElementById('pedidosScroll');
  const vacio=document.getElementById('vacioPedidos');
  let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
- if(db){
-   // si hay pedidos en firebase también los mezclamos
+ let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ // si está ocupado no mostrar pedidos
+ if(ses && ses.estado==='ocupado'){
+   cont.innerHTML=''; vacio.style.display='block';
+   document.getElementById('vacioPedidosSub').innerText='Estás OCUPADO - cambia a EN LÍNEA para recibir pedidos';
+   return;
+ }
+ // filtrar por tipo de vehículo del conductor
+ if(ses){
+   let tipoCond = ses.tipo;
+   if(tipoCond==='moto'){ pedidos = pedidos.filter(p=>p.tipo==='moto'); }
+   else if(tipoCond==='carro'){ pedidos = pedidos.filter(p=>p.tipo==='carro'); }
+   // si es ambos, muestra todos
  }
  if(!pedidos.length){
-   // datos demo para que veas el efecto
    pedidos=[
-     {id:1,origen:"Hidalgo 15, Centro",destino:"Lindavista, Dolores",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo:"moto"},
-     {id:2,origen:"Plaza Principal",destino:"Col. San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94,km:"2.4",precio:55,tipo:"carro"},
-     {id:3,origen:"Cecyteg",destino:"Centro",origenLat:21.15,origenLng:-100.92,destLat:21.1561,destLng:-100.9333,km:"1.2",precio:35,tipo:"moto"}
+     {id:101,origen:"Hidalgo 15, Centro",destino:"Lindavista, Dolores",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo: ses?.tipo==='carro'?'carro':'moto'},
+     {id:102,origen:"Plaza Principal",destino:"Col. San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94,km:"2.4",precio:55,tipo: ses?.tipo||'moto'},
    ];
+   // filtrar demo también
+   if(ses?.tipo==='moto') pedidos=pedidos.filter(p=>p.tipo==='moto');
+   if(ses?.tipo==='carro') pedidos=pedidos.filter(p=>p.tipo==='carro');
  }
- if(!pedidos.length){ cont.innerHTML=''; vacio.style.display='block'; return; }
+ if(!pedidos.length){ cont.innerHTML=''; vacio.style.display='block'; document.getElementById('vacioPedidosSub').innerText='No hay pedidos de '+ (ses?.tipo||'tu tipo'); return; }
  vacio.style.display='none';
  cont.innerHTML=pedidos.map((p,i)=>`
    <div class="pedido-card ${i===0?'active':''}" data-idx="${i}" onclick="seleccionarPedido(${i})">
@@ -474,12 +504,11 @@ function renderPedidosConductor(){
        <div style="margin:8px 0 8px 3px;border-left:1px dashed #ddd;height:12px"></div>
        <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:8px;height:8px;background:#E53935;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666;font-weight:700">ENTREGAR</div><div style="font-size:12px;font-weight:800;color:#111">${p.destino}</div></div></div>
      </div>
-     <div style="margin-top:10px;display:flex;gap:8px;font-size:10px;color:#666"><span>📏 ${p.km} km</span><span>⏱️ ~8 min</span></div>
+     <div style="margin-top:10px;display:flex;gap:8px;font-size:10px;color:#666"><span>📏 ${p.km} km</span></div>
      <button class="btn-aceptar" onclick="event.stopPropagation(); aceptarPedido(${p.id})"><i data-lucide="check" style="width:16px"></i> ACEPTAR VIAJE</button>
    </div>
  `).join('');
  lucide.createIcons();
- // observar scroll para centrar
  cont.addEventListener('scroll', debounce(()=>{ detectarTarjetaCentro(); },100));
  setTimeout(()=>{ seleccionarPedido(0); },300);
 }
@@ -500,20 +529,14 @@ let pedidoActualIdx=0;
 async function seleccionarPedido(idx, scroll=true){
  const cont=document.getElementById('pedidosScroll');
  const cards=cont.querySelectorAll('.pedido-card');
+ if(!cards.length) return;
  cards.forEach(c=>c.classList.remove('active'));
  if(cards[idx]) cards[idx].classList.add('active');
  if(scroll && cards[idx]) cards[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
  pedidoActualIdx=idx;
  let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
- if(!pedidos.length){
-   pedidos=[
-     {id:1,origen:"Hidalgo 15, Centro",destino:"Lindavista",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233},
-     {id:2,origen:"Plaza Principal",destino:"Col. San Antonio",origenLat:21.158,origenLng:-100.93,destLat:21.14,destLng:-100.94},
-     {id:3,origen:"Cecyteg",destino:"Centro",origenLat:21.15,origenLng:-100.92,destLat:21.1561,destLng:-100.9333}
-   ];
- }
+ if(!pedidos.length) return;
  const p=pedidos[idx]; if(!p) return;
- // pintar ruta en mapa conductor
  try{
    const url=`https://router.project-osrm.org/route/v1/driving/${p.origenLng},${p.origenLat};${p.destLng},${p.destLat}?overview=full&geometries=geojson`;
    const r=await fetch(url); const d=await r.json();
@@ -531,7 +554,102 @@ async function seleccionarPedido(idx, scroll=true){
  }catch(e){}
 }
 function aceptarPedido(id){
- alert('✅ Pedido #'+id+' aceptado - Aquí conectaremos con WhatsApp del cliente');
+ let pedidos=JSON.parse(localStorage.getItem('kigo_pedidos')||'[]');
+ let pedido = pedidos.find(p=>p.id===id);
+ if(!pedido){
+   // demo fallback
+   pedido = {id:id,origen:"Hidalgo 15, Centro",destino:"Lindavista",origenLat:21.1561,origenLng:-100.9333,destLat:21.1661,destLng:-100.9233,km:"1.8",precio:45,tipo:"moto"};
+ }
+ let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ if(!ses) return;
+ // pasar a ocupado inmediatamente
+ ses.estado='ocupado';
+ localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
+ let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+ses.id+'/estado').set('ocupado'); }
+ actualizarBotonEstado('ocupado');
+ // guardar viaje activo
+ let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id,estado:'hacia_recogida',ts:Date.now()};
+ localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
+ mostrarViajeActivo(viajeActivo);
+ // trazar ruta desde ubicación actual del conductor hasta punto de recogida
+ trazarRutaHaciaRecogida(pedido);
+}
+function mostrarViajeActivo(viaje){
+ document.getElementById('bloquePedidos').style.display='none';
+ document.getElementById('bloqueViajeActivo').style.display='block';
+ const p=viaje.pedido;
+ document.getElementById('viajeInfo').innerHTML=`
+   <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:8px;height:8px;background:#16a34a;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666">RECOGER EN</div><div style="font-size:13px;font-weight:900;color:#111">${p.origen}</div></div></div>
+   <div style="margin:10px 0 10px 3px;border-left:1px dashed #ddd;height:12px"></div>
+   <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:8px;height:8px;background:#E53935;border-radius:50%;margin-top:5px"></span><div><div style="font-size:11px;color:#666">ENTREGAR EN</div><div style="font-size:13px;font-weight:900;color:#111">${p.destino}</div></div></div>
+   <div style="margin-top:10px;background:#f7f7f8;border-radius:10px;padding:8px 10px;display:flex;justify-content:space-between;font-size:11px"><span>💰 $${p.precio} MXN</span><span>📏 ${p.km} km</span><span>${p.tipo.toUpperCase()}</span></div>
+ `;
+ lucide.createIcons();
+}
+async function trazarRutaHaciaRecogida(pedido){
+ if(!mapConductor) return;
+ navigator.geolocation.getCurrentPosition(async pos=>{
+   const curLat=pos.coords.latitude, curLng=pos.coords.longitude;
+   try{
+     const url=`https://router.project-osrm.org/route/v1/driving/${curLng},${curLat};${pedido.origenLng},${pedido.origenLat}?overview=full&geometries=geojson`;
+     const r=await fetch(url); const d=await r.json();
+     if(d.routes && d.routes[0]){
+       if(routeConductorLayer) mapConductor.removeLayer(routeConductorLayer);
+       marcadoresPedido.forEach(m=>mapConductor.removeLayer(m)); marcadoresPedido=[];
+       routeConductorLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#16a34a",weight:6}}).addTo(mapConductor);
+       let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+       if(markerConductor){} else {
+         markerConductor=L.marker([curLat,curLng],{icon:getIconoTransporte(ses?.tipo||'moto')}).addTo(mapConductor);
+       }
+       const iconDest = L.divIcon({className:'',html:`<div style="width:14px;height:14px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`,iconSize:[14,14]});
+       let m1=L.marker([pedido.origenLat,pedido.origenLng],{icon:iconDest}).addTo(mapConductor);
+       marcadoresPedido=[m1];
+       mapConductor.fitBounds(routeConductorLayer.getBounds(),{padding:[50,50]});
+     }
+   }catch(e){}
+ });
+}
+function marcarRecogido(){
+ let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
+ if(!viaje) return;
+ alert('✅ Cliente recogido - Ahora sigue la entrega hasta: '+viaje.pedido.destino);
+ // aquí pausamos como pediste, luego continuamos con entrega
+ // por ahora solo cambiamos estado del botón
+ document.getElementById('btnRecogido').innerHTML='✅ RECOGIDO - EN CAMINO A ENTREGA';
+ document.getElementById('btnRecogido').style.background='#111';
+ document.getElementById('viajeEstadoBadge').innerText='EN CAMINO A ENTREGA';
+ // trazar ahora ruta de recogida a entrega
+ let p=viaje.pedido;
+ trazarRutaEntrega(p);
+}
+async function trazarRutaEntrega(pedido){
+ try{
+   const url=`https://router.project-osrm.org/route/v1/driving/${pedido.origenLng},${pedido.origenLat};${pedido.destLng},${pedido.destLat}?overview=full&geometries=geojson`;
+   const r=await fetch(url); const d=await r.json();
+   if(d.routes && d.routes[0]){
+     if(routeConductorLayer) mapConductor.removeLayer(routeConductorLayer);
+     marcadoresPedido.forEach(m=>mapConductor.removeLayer(m)); marcadoresPedido=[];
+     routeConductorLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#111",weight:6,dashArray:"10,10"}}).addTo(mapConductor);
+     const iconO = L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:#16a34a;border:2px solid #fff;border-radius:50%"></div>`,iconSize:[10,10]});
+     const iconD = L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:#E53935;border:2px solid #fff;border-radius:50%"></div>`,iconSize:[10,10]});
+     let m1=L.marker([pedido.origenLat,pedido.origenLng],{icon:iconO}).addTo(mapConductor);
+     let m2=L.marker([pedido.destLat,pedido.destLng],{icon:iconD}).addTo(mapConductor);
+     marcadoresPedido=[m1,m2];
+     mapConductor.fitBounds(routeConductorLayer.getBounds(),{padding:[40,40]});
+   }
+ }catch(e){}
+}
+function cancelarViaje(){
+ if(!confirm('¿Cancelar viaje? Volverás a EN LÍNEA')) return;
+ localStorage.removeItem('kigo_viaje_activo');
+ document.getElementById('bloquePedidos').style.display='block';
+ document.getElementById('bloqueViajeActivo').style.display='none';
+ // volver a en línea
+ cambiarEstado('en_linea');
+ renderPedidosConductor();
+ if(routeConductorLayer){ mapConductor.removeLayer(routeConductorLayer); routeConductorLayer=null; }
+ marcadoresPedido.forEach(m=>mapConductor.removeLayer(m)); marcadoresPedido=[];
+ mostrarUbicacionCarrito();
 }
 function cargarAdmin(){
  const g=(id)=>document.getElementById(id);
@@ -574,7 +692,7 @@ function borrarHistorial(){ if(confirm('Borrar?')){ localStorage.removeItem('kig
 function cerrarSesionAdmin(){ localStorage.removeItem('kigo_admin_sesion'); irInicioForzado(); }
 function cerrarSesionConductor(){
  if(watchConductor) navigator.geolocation.clearWatch(watchConductor);
- localStorage.removeItem('kigo_conductor_sesion'); irInicioForzado();
+ localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); irInicioForzado();
 }
 let conductores = JSON.parse(localStorage.getItem('kigo_conductores')||'[]');
 let tempFoto="", tempFotoINE="";
@@ -661,13 +779,21 @@ function toggleMenuEstado(){
 }
 function cambiarEstado(nuevo){
  let sesion=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!sesion) return;
+ // si tiene viaje activo no puede volver a en línea hasta cancelar
+ let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
+ if(viaje && nuevo==='en_linea'){ alert('Tienes un viaje activo, cancela o completa para volver a En Línea'); return; }
  sesion.estado=nuevo;
  localStorage.setItem('kigo_conductor_sesion', JSON.stringify(sesion));
  let idx=conductores.findIndex(x=>x.id===sesion.id); if(idx>=0){ conductores[idx].estado=nuevo; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+sesion.id+'/estado').set(nuevo); }
  document.getElementById('estadoMenu').classList.remove('show');
  actualizarBotonEstado(nuevo);
- if(nuevo==='en_linea'){ mostrarUbicacionCarrito(); renderPedidosConductor(); }
- else { if(markerConductor && mapConductor){ mapConductor.removeLayer(markerConductor); markerConductor=null; } if(watchConductor) navigator.geolocation.clearWatch(watchConductor); }
+ if(nuevo==='en_linea'){ mostrarUbicacionCarrito(); renderPedidosConductor(); document.getElementById('bloquePedidos').style.display='block'; document.getElementById('bloqueViajeActivo').style.display='none'; }
+ else {
+   if(markerConductor && mapConductor){ mapConductor.removeLayer(markerConductor); markerConductor=null; }
+   if(watchConductor) navigator.geolocation.clearWatch(watchConductor);
+   // si está ocupado sin viaje, no mostrar pedidos
+   if(!viaje){ document.getElementById('pedidosScroll').innerHTML=''; document.getElementById('vacioPedidos').style.display='block'; document.getElementById('vacioPedidosSub').innerText='Estás OCUPADO'; }
+ }
 }
 function actualizarBotonEstado(estado){
  const btn=document.getElementById('estadoBtn');

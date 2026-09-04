@@ -81,7 +81,6 @@
 .viaje-row.destino{background:#fff7ed;border:1px solid #fed7aa}
 .cancel-progress{height:4px;background:#fee2e2;border-radius:999px;overflow:hidden;margin-top:8px}
 .cancel-progress-bar{height:100%;background:#E53935;width:100%;transition:width 0.1s linear}
-/* BOTON CHAT FLOTANTE TIPO CARRITO */
 .btn-chat-flotante{position:absolute;bottom:88px;right:16px;z-index:1000;width:56px;height:56px;border-radius:50%;background:#111;color:#fff;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .btn-chat-flotante.badge{position:absolute;top:-6px;right:-6px;background:#E53935;color:#fff;border-radius:50%;min-width:22px;height:22px;padding:0 6px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;display:none}
 .btn-chat-flotante.badge.show{display:flex;animation:badgePop 0.3s ease}
@@ -114,10 +113,8 @@
 
 <div id="panelClienteViaje"><div style="height:68vh;position:relative"><div id="mapCliente"></div><div style="position:absolute;top:12px;left:12px;right:12px;z-index:999;background:#fff;border:1px solid #eee;border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center"><img id="clienteConductorFoto" src="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid #111"><div style="flex:1"><div id="clienteConductorNombre" style="font-weight:900;font-size:14px">Conductor</div><div id="clienteConductorPlaca" style="font-size:11px;color:#666">Moto • En camino</div><div id="clienteConductorTiempo" style="font-size:11px;color:#16a34a;font-weight:800">Calculando...</div><div id="clienteConductorEstadoRuta" style="font-size:10px;color:#2563eb;font-weight:800;display:none"><i data-lucide="navigation" style="width:10px"></i> En ruta - En vivo</div></div><div style="background:#111;color:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:900"><span id="clienteDistancia">-- km</span></div></div><div style="position:absolute;bottom:16px;left:12px;right:80px;z-index:999;background:rgba(17,17,17,0.9);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 1.5s infinite"></div><div style="font-size:11px;color:#fff;font-weight:700">Siguiendo conductor en tiempo real - Mapa libre</div></div><button id="btnChatCliente" class="btn-chat-flotante" onclick="abrirChatCliente()"><i data-lucide="message-circle" style="width:24px"></i><div id="badgeCliente" class="badge">0</div></button></div><div style="background:#fff;border-radius:28px 28px 0 0;margin-top:-22px;z-index:1000;padding:16px;flex:1;overflow-y:auto"><div style="background:#111;color:#fff;border-radius:16px;padding:12px;display:flex;gap:10px"><div style="width:32px;height:32px;background:#16a34a;border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="check" style="width:16px;color:#fff"></i></div><div><div style="font-weight:900;font-size:13px">Conductor en camino</div><div style="font-size:11px;opacity:.8" id="clienteEstadoTexto">En vivo en el mapa - Toca chat para hablar</div></div></div><div style="margin-top:10px;display:flex;gap:8px"><div style="flex:1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px"><div style="font-size:9px;font-weight:800;color:#16a34a">ORIGEN</div><div id="clienteOrigenTxt" style="font-size:11px;font-weight:800;color:#111"></div></div><div style="flex:1;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px"><div style="font-size:9px;font-weight:800;color:#E53935">DESTINO</div><div id="clienteDestinoTxt" style="font-size:11px;font-weight:800;color:#111"></div></div></div><div style="margin-top:12px"><button onclick="cancelarPedidoCliente()" style="width:100%;height:44px;border-radius:12px;border:none;background:#fff1f1;color:#E53935;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="x-circle" style="width:14px"></i> Cancelar viaje</button></div></div></div>
 
-<!-- MODAL CHAT CLIENTE -->
 <div id="modalChatCliente" class="modal-chat"><div class="chat-box-modal"><div class="chat-header-modal"><button onclick="cerrarChatCliente()" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px"></i></button><div style="flex:1;margin-left:8px"><div style="font-weight:900;font-size:13px">Chat con conductor</div><div style="font-size:10px;opacity:0.8">Tiempo real - Dolores Hidalgo</div></div><div style="width:8px;height:8px;background:#22c55e;border-radius:50%"></div></div><div id="chatClienteMessages" class="chat-messages-modal"><div style="text-align:center;color:#999;font-size:11px;padding:20px">Escribe mensaje al conductor, aparece en tiempo real</div></div><div class="chat-input-area"><input id="chatClienteInput" class="chat-input" placeholder="Escribe mensaje al conductor..." onkeypress="if(event.key==='Enter') enviarMensajeCliente()"><button class="chat-send" onclick="enviarMensajeCliente()"><i data-lucide="send" style="width:16px"></i></button></div></div></div>
 
-<!-- MODAL CHAT CONDUCTOR -->
 <div id="modalChatConductor" class="modal-chat"><div class="chat-box-modal"><div class="chat-header-modal"><button onclick="cerrarChatConductor()" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px"></i></button><div style="flex:1;margin-left:8px"><div style="font-weight:900;font-size:13px">Chat con cliente</div><div style="font-size:10px;opacity:0.8">Tiempo real - Responde rápido</div></div><div style="width:8px;height:8px;background:#22c55e;border-radius:50%"></div></div><div id="chatConductorMessages" class="chat-messages-modal"><div style="text-align:center;color:#999;font-size:11px;padding:20px">Chat en vivo con cliente</div></div><div class="chat-input-area"><input id="chatConductorInput" class="chat-input" placeholder="Escribe mensaje al cliente..." onkeypress="if(event.key==='Enter') enviarMensajeConductor()"><button class="chat-send" onclick="enviarMensajeConductor()"><i data-lucide="send" style="width:16px"></i></button></div></div></div>
 
 <div id="modalAdmin" class="modal-admin"><div class="box-admin"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:900;font-size:20px;color:#111">Panel Acceso</div></div><button type="button" onclick="cerrarAdmin()" style="width:36px;height:36px;border-radius:12px;border:1px solid #eee;background:#f9f9f9;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px"></i></button></div><input id="adminUser" class="input-admin" placeholder="Usuario"><input id="adminPass" type="password" class="input-admin" placeholder="Contraseña"><button type="button" class="btn-login" onclick="loginAdmin()">INGRESAR</button><div id="adminError" style="color:#E53935;font-size:12px;font-weight:700;margin-top:12px;display:none;text-align:center;background:#fff1f1;padding:8px;border-radius:8px">Datos incorrectos</div></div></div>
@@ -393,13 +390,13 @@ function mostrarConductorEnCamino(data){
  });
  actualizarInfoConductorEnCliente(data);
  iniciarChatCliente(pedido.id);
- // reset badge
  chatNoLeidosCliente=0; actualizarBadgeCliente();
 }
 function actualizarInfoConductorEnCliente(data){
  let pedido=data.pedido; let conductorId=data.conductorId;
  db.ref('conductores/'+conductorId).once('value').then(snap=>{
    let cond=snap.val(); if(!cond) return;
+   window.tipoConductorActual = cond.tipo;
    document.getElementById('clienteConductorFoto').src=cond.foto||'';
    document.getElementById('clienteConductorNombre').innerText=cond.nombre;
    document.getElementById('clienteConductorPlaca').innerText=`${cond.tipo.toUpperCase()} • ${cond.telefono||''}`;
@@ -415,6 +412,7 @@ function actualizarInfoConductorEnCliente(data){
    setTimeout(()=>{ initMapCliente(pedido, cond); },300);
    db.ref('conductores/'+conductorId).on('value',s=>{
      let c=s.val(); if(!c||!c.lat||!c.lng) return;
+     window.tipoConductorActual = c.tipo;
      actualizarConductorEnMapaCliente(c.lat,c.lng,pedido);
      if(c.estado==='en_ruta' || c.rutaIniciada){
        document.getElementById('clienteConductorEstadoRuta').style.display='block';
@@ -432,13 +430,27 @@ function initMapCliente(pedido, conductor){
 }
 function actualizarConductorEnMapaCliente(lat,lng,pedido){
  if(!mapCliente) return;
- let icon=L.divIcon({html:`<div style="width:44px;height:44px;background:#111;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff"><i data-lucide="navigation" style="width:18px;height:18px"></i></div>`,iconSize:[44,44],iconAnchor:[22,22]});
- if(!markerConductorCliente){ markerConductorCliente=L.marker([lat,lng],{icon:icon}).addTo(mapCliente); } else { markerConductorCliente.setLatLng([lat,lng]); }
- let dist=distMts(lat,lng,pedido.origenLat,pedido.origenLng); let km=(dist/1000).toFixed(1);
- document.getElementById('clienteDistancia').innerText=km+' km'; let mins=Math.ceil(dist/400);
+ let tipoActual = window.tipoConductorActual || pedido.tipo || 'moto';
+ let imgSrc = (tipoActual==='carro' || tipoActual==='ambos')? 'https://img.icons8.com/3d-fluency/94/car.png' : 'https://img.icons8.com/3d-fluency/94/motorcycle.png';
+ let icon=L.divIcon({
+   html:`<div style="width:56px;height:56px;background:#fff;border:2px solid #111;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.28)"><img src="${imgSrc}" style="width:40px;height:40px;object-fit:contain"></div>`,
+   iconSize:[56,56],
+   iconAnchor:[28,28]
+ });
+ if(!markerConductorCliente){
+   markerConductorCliente=L.marker([lat,lng],{icon:icon}).addTo(mapCliente);
+ } else {
+   markerConductorCliente.setLatLng([lat,lng]);
+   markerConductorCliente.setIcon(icon);
+ }
+ let dist=distMts(lat,lng,pedido.origenLat,pedido.origenLng);
+ let km=(dist/1000).toFixed(1);
+ document.getElementById('clienteDistancia').innerText=km+' km';
+ let mins=Math.ceil(dist/400);
  document.getElementById('clienteConductorTiempo').innerText=`Llega en ~${mins} min • ${km} km • En vivo`;
- if(mapCliente){ mapCliente.panTo([lat,lng], {animate:true, duration:1}); }
- lucide.createIcons();
+ if(mapCliente){
+   mapCliente.panTo([lat,lng], {animate:true, duration:1.5});
+ }
 }
 function abrirChatCliente(){ document.getElementById('modalChatCliente').classList.add('show'); chatAbiertoCliente=true; chatNoLeidosCliente=0; actualizarBadgeCliente(); setTimeout(()=>{ let cont=document.getElementById('chatClienteMessages'); cont.scrollTop=cont.scrollHeight; },100); lucide.createIcons(); }
 function cerrarChatCliente(){ document.getElementById('modalChatCliente').classList.remove('show'); chatAbiertoCliente=false; }
@@ -464,7 +476,6 @@ function iniciarChatCliente(pedidoId){
        chatNoLeidosCliente++;
        actualizarBadgeCliente();
        sonarMensaje();
-       // vibración si está disponible
        if(navigator.vibrate) navigator.vibrate(200);
      }
    }
@@ -539,9 +550,29 @@ function cancelarPedidoCliente(){
  localStorage.removeItem('kigo_pedido_activo_cliente');
  if(chatListenerCliente && pedidoId) db.ref('chats/'+pedidoId).off();
  cerrarChatCliente();
+ // RESTABLECER AL PANEL INICIAL COMPLETO
  document.getElementById('panelBuscando').classList.remove('show');
  document.getElementById('panelClienteViaje').classList.remove('show');
+ document.getElementById('panel2').classList.remove('show');
+ document.getElementById('panel3').classList.remove('show');
+ document.getElementById('modalChatCliente').classList.remove('show');
+ document.getElementById('modalChatConductor').classList.remove('show');
+ // limpiar destino y ruta
+ destinationInput.value='';
+ destinationLat=null; destinationLng=null; destName='';
+ if(destinationMarker){ map.removeLayer(destinationMarker); destinationMarker=null; }
+ if(routeLayer){ map.removeLayer(routeLayer); routeLayer=null; }
+ if(routeClienteLayer && mapCliente){ mapCliente.removeLayer(routeClienteLayer); routeClienteLayer=null; }
+ if(markerConductorCliente && mapCliente){ mapCliente.removeLayer(markerConductorCliente); markerConductorCliente=null; }
+ chatNoLeidosCliente=0; actualizarBadgeCliente();
+ // volver a detectar origen automatico
+ autoUbicacionInicial();
  irInicioForzado();
+ // asegurar que panel1 quede visible
+ setTimeout(()=>{
+   document.getElementById('panel1').style.display='block';
+   map.invalidateSize();
+ },300);
 }
 function getConductoresOrdenadosMotor(pedido, todosConductores){
  let lista = Object.values(todosConductores).filter(c=>c.estado==='en_linea');

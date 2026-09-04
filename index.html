@@ -75,14 +75,18 @@
 .estado-btn.en_linea{background:#16a34a;color:#fff;box-shadow:0 0 0 3px rgba(22,163,74,0.2)}.estado-btn.ocupado{background:#E53935;color:#fff;box-shadow:0 0 0 3px rgba(229,57,53,0.2)}
 .pulse-dot{width:10px;height:10px;background:#16a34a;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,0.7)}70%{box-shadow:0 0 0 8px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+.viaje-card-activo{background:#fff;border:2px solid #111;border-radius:20px;padding:16px;box-shadow:0 8px 20px rgba(0,0,0,.10)}
+.viaje-row{display:flex;gap:10px;padding:10px;border-radius:12px;margin-top:8px}
+.viaje-row.recogida{background:#f0fdf4;border:1px solid #bbf7d0}
+.viaje-row.destino{background:#fff7ed;border:1px solid #fed7aa}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="map-container"><div id="map"></div><div id="logoTop"><img src="https://cdn-icons-png.flaticon.com/512/3774/3774083.png"><span>Kigo Xpress</span></div><div id="climaBanner"><i id="climaIcon" data-lucide="sun" style="width:14px;color:#f59e0b"></i><div id="climaTexto" style="font-weight:800;font-size:10px;color:#111">Soleado</div><div id="climaTemp" style="font-weight:900;font-size:11px;color:#111;margin-left:6px">--°</div></div></div>
 <div id="panel1" class="panel">
-<div id="stepOrigen" class="step auto"><div style="font-size:12px;font-weight:900;color:#16a34a;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span class="pulse-dot"></span> ¿Dónde te recogemos? <span style="font-weight:700;color:#16a34a;font-size:10px;margin-left:6px" id="origenStatus">📍 Detectando ubicación automática...</span></div><div class="input-wrap"><i data-lucide="map-pin" style="position:absolute;left:12px;width:16px;color:#16a34a;z-index:2"></i><input id="pickupInput" class="colonia-input auto" placeholder="Detectando tu ubicación en Dolores Hidalgo..." autocomplete="off" readonly><div class="input-actions"><button id="btnClearOrigen" class="btn-icon clear" onclick="limpiarOrigen()" style="display:none"><i data-lucide="x" style="width:14px"></i></button><button id="btnUbicacion" class="btn-icon loc" onclick="usarMiUbicacion()" title="Actualizar mi ubicación GPS"><i data-lucide="crosshair" style="width:16px;color:#fff"></i></button></div><div id="pickupSuggestions" class="suggestions"></div></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:700;display:flex;align-items:center;gap:4px"><i data-lucide="check-circle" style="width:12px"></i> Se llena automáticamente con tu GPS - No necesitas escribir, solo confirma abajo</div></div>
-<div class="step"><div style="font-size:12px;font-weight:900;color:#111;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i data-lucide="flag" style="width:14px;color:#dc2626"></i> ¿A dónde vas? <span style="font-weight:700;color:#666;font-size:10px;margin-left:6px">Escribe destino en Dolores Hidalgo</span></div><div style="position:relative"><i data-lucide="search" style="position:absolute;left:12px;top:15px;width:16px;color:#999"></i><input id="destinationInput" class="colonia-input" style="padding-right:14px" placeholder="Ej: Nayarit 31, Tabasco 51, Guerrero 20, Centro..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div><div style="margin-top:6px;font-size:10px;color:#666">Escribe calle y número, te mostramos opciones solo de Dolores Hidalgo</div></div>
+<div id="stepOrigen" class="step auto"><div style="font-size:12px;font-weight:900;color:#16a34a;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span class="pulse-dot"></span> ¿Dónde te recogemos? <span style="font-weight:700;color:#16a34a;font-size:10px;margin-left:6px" id="origenStatus">📍 Detectando ubicación automática...</span></div><div class="input-wrap"><i data-lucide="map-pin" style="position:absolute;left:12px;width:16px;color:#16a34a;z-index:2"></i><input id="pickupInput" class="colonia-input auto" placeholder="Detectando tu ubicación en Dolores Hidalgo..." autocomplete="off" readonly><div class="input-actions"><button id="btnClearOrigen" class="btn-icon clear" onclick="limpiarOrigen()" style="display:none"><i data-lucide="x" style="width:14px"></i></button><button id="btnUbicacion" class="btn-icon loc" onclick="usarMiUbicacion()" title="Actualizar mi ubicación GPS"><i data-lucide="crosshair" style="width:16px;color:#fff"></i></button></div><div id="pickupSuggestions" class="suggestions"></div></div></div>
+<div class="step"><div style="font-size:12px;font-weight:900;color:#111;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i data-lucide="flag" style="width:14px;color:#dc2626"></i> ¿A dónde vas?</div><div style="position:relative"><i data-lucide="search" style="position:absolute;left:12px;top:15px;width:16px;color:#999"></i><input id="destinationInput" class="colonia-input" style="padding-right:14px" placeholder="Ej: Nayarit 31, Tabasco 51, Guerrero 20..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
 <button id="calculateButton" class="btn-cotizar">CONFIRMAR DIRECCIONES Y VER PRECIOS</button>
 </div>
 <div class="bottom-nav"><button class="btn-nav inicio" onclick="irInicio()"><i data-lucide="compass" style="width:18px"></i> Inicio</button><button class="btn-nav admin" onclick="abrirAdmin()"><i data-lucide="shield-check" style="width:18px"></i> Admin</button></div>
@@ -95,7 +99,9 @@
 <div id="modalAdmin" class="modal-admin"><div class="box-admin"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:900;font-size:20px;color:#111">Panel Acceso</div></div><button type="button" onclick="cerrarAdmin()" style="width:36px;height:36px;border-radius:12px;border:1px solid #eee;background:#f9f9f9;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px"></i></button></div><input id="adminUser" class="input-admin" placeholder="Usuario"><input id="adminPass" type="password" class="input-admin" placeholder="Contraseña"><button type="button" class="btn-login" onclick="loginAdmin()">INGRESAR</button><div id="adminError" style="color:#E53935;font-size:12px;font-weight:700;margin-top:12px;display:none;text-align:center;background:#fff1f1;padding:8px;border-radius:8px">Datos incorrectos</div></div></div>
 <div id="panelAdmin" style="position:fixed;inset:0;max-width:500px;margin:0 auto;background:#f8f8f9;z-index:4500;display:none;flex-direction:column;overflow-y:auto;padding-bottom:120px"><div style="background:#fff;padding:18px 20px 12px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px"><button type="button" onclick="irInicioForzado()" style="width:42px;height:42px;border-radius:14px;background:#111;color:#fff;border:none;display:flex;align-items:center;justify-content:center"><i data-lucide="arrow-left" style="width:18px"></i></button><div><div style="font-weight:900;font-size:18px;color:#111">Kigo Xpress • Admin</div></div><div style="margin-left:auto"><button type="button" onclick="cerrarSesionAdmin()" style="background:#fff1f1;border:1px solid #ffdede;color:#E53935;border-radius:10px;padding:8px 12px;font-weight:800;font-size:11px">Cerrar</button></div></div><div class="tabs"><button type="button" class="tab active" onclick="switchTab('conductores')"><i data-lucide="users" style="width:14px"></i> Conductores</button><button type="button" class="tab" onclick="switchTab('ajustes')"><i data-lucide="sliders-horizontal" style="width:14px"></i> Ajustes</button></div><div style="padding:16px"><div id="tab-conductores" class="tab-content active"><div class="admin-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:900;color:#111">Conductores</div><button type="button" onclick="abrirModalConductor()" style="background:#E53935;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:800;font-size:12px">Agregar</button></div><div id="listaConductores" style="margin-top:14px"></div></div></div><div id="tab-ajustes" class="tab-content"><div class="admin-card"><input id="cfgNombre" class="input-admin" value="Kigo Xpress"><div style="display:flex;gap:10px;margin-top:10px"><input id="cfgMoto" type="number" class="input-admin" value="35"><input id="cfgCarro" type="number" class="input-admin" value="55"></div><button type="button" onclick="guardarAjustes()" style="width:100%;margin-top:14px;padding:13px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:800">Guardar</button></div></div></div></div>
 
-<div id="panelConductor" style="position:fixed;inset:0;max-width:500px;margin:0 auto;background:#f8f8f9;z-index:4600;display:none;flex-direction:column;overflow-y:auto"><div style="background:#111;color:#fff;padding:14px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5000;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><img id="conductorPanelFoto" src="" style="width:44px;height:44px;border-radius:12px;object-fit:cover"><div style="font-weight:900;font-size:13px" id="conductorPanelNombre">Conductor</div></div><div class="estado-wrap-centro"><div id="estadoBtn" class="estado-btn en_linea"><span id="estadoBtnTxt">EN LÍNEA</span> • <span id="estadoSubTxt" style="font-size:9px;opacity:0.9">DISPONIBLE</span></div></div><button type="button" onclick="cerrarSesionConductor()" style="width:38px;height:38px;border-radius:12px;background:#fff;color:#111;border:1px solid #eee;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="log-out" style="width:16px"></i></button></div><div style="height:420px;position:relative"><div id="mapConductor" style="width:100%;height:100%"></div><div style="position:absolute;top:12px;left:12px;z-index:400;display:flex;gap:8px"><div style="background:#111;color:#fff;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px"><i data-lucide="route" style="width:12px"></i> Ruta recogida → entrega</div></div></div><div id="bloquePedidos"><div id="pedidosScroll" class="pedidos-scroll"></div><div id="vacioPedidos" style="display:none"><div class="buscando"><div class="buscando-icon"></div><div style="font-weight:900;font-size:14px;color:#111;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="search" style="width:18px"></i> Buscando pedidos cercanos...</div><div style="font-size:11px;color:#666;margin-top:6px">Estás EN LÍNEA - Los pedidos te llegarán rotando 10s cada uno</div></div></div></div><div id="bloqueViajeActivo" style="display:none;padding:14px"><div style="background:#fff;border:2px solid #111;border-radius:18px;padding:14px"><div id="viajeInfo"></div><button type="button" onclick="abrirGoogleMapsRecogida()" style="width:100%;margin-top:12px;height:46px;border:1px solid #111;border-radius:12px;background:#fff;color:#111;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="map" style="width:16px"></i> Google Maps</button><button type="button" onclick="cancelarViaje()" style="width:100%;margin-top:8px;height:42px;border:1px solid #eee;border-radius:12px;background:#fff;color:#666;font-weight:800">Cancelar viaje - Volver a En Línea</button></div></div></div>
+<div id="panelConductor" style="position:fixed;inset:0;max-width:500px;margin:0 auto;background:#f8f8f9;z-index:4600;display:none;flex-direction:column;overflow-y:auto"><div style="background:#111;color:#fff;padding:14px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5000;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><img id="conductorPanelFoto" src="" style="width:44px;height:44px;border-radius:12px;object-fit:cover"><div style="font-weight:900;font-size:13px" id="conductorPanelNombre">Conductor</div></div><div class="estado-wrap-centro"><div id="estadoBtn" class="estado-btn en_linea"><span id="estadoBtnTxt">EN LÍNEA</span> • <span id="estadoSubTxt" style="font-size:9px;opacity:0.9">DISPONIBLE</span></div></div><button type="button" onclick="cerrarSesionConductor()" style="width:38px;height:38px;border-radius:12px;background:#fff;color:#111;border:1px solid #eee;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="log-out" style="width:16px"></i></button></div><div style="height:420px;position:relative"><div id="mapConductor" style="width:100%;height:100%"></div><div style="position:absolute;top:12px;left:12px;z-index:400;display:flex;gap:8px"><div style="background:#111;color:#fff;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px"><i data-lucide="route" style="width:12px"></i> Ruta recogida → entrega</div></div></div><div id="bloquePedidos"><div id="pedidosScroll" class="pedidos-scroll"></div><div id="vacioPedidos" style="display:none"><div class="buscando"><div class="buscando-icon"></div><div style="font-weight:900;font-size:14px;color:#111;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="search" style="width:18px"></i> Buscando pedidos cercanos...</div><div style="font-size:11px;color:#666;margin-top:6px">Estás EN LÍNEA - Los pedidos te llegarán rotando 10s cada uno</div></div></div></div>
+<div id="bloqueViajeActivo" style="display:none;padding:14px"><div id="viajeInfo"></div></div>
+</div>
 
 <div id="modalConductor" style="position:fixed;inset:0;max-width:500px;margin:0 auto;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);z-index:6000;display:none;align-items:flex-end;justify-content:center"><div style="background:#fff;width:100%;border-radius:28px 28px 0 0;max-height:90vh;overflow-y:auto;padding:20px 20px 30px"><div style="display:flex;justify-content:space-between"><div style="font-weight:900;font-size:18px">Agregar Conductor</div><button type="button" onclick="cerrarModalConductor()" style="width:36px;height:36px;border-radius:12px;border:1px solid #eee;background:#f9f9f9"><i data-lucide="x" style="width:16px"></i></button></div><div id="fotoUpload" style="width:100%;height:140px;border:2px dashed #ddd;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafafa;overflow:hidden;position:relative;margin-top:12px" onclick="document.getElementById('inputFoto').click()"><span id="fotoPlaceholder">Foto</span><img id="previewFoto" style="display:none;width:100%;height:100%;object-fit:cover"></div><input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="cargarFoto(event)"><input id="cNombre" class="input-admin" placeholder="Nombre"><input id="cTelefono" class="input-admin" placeholder="Telefono"><input id="cUsuario" class="input-admin" placeholder="Usuario"><input id="cPass" class="input-admin" placeholder="Pass"><select id="cTipo" class="input-admin"><option value="moto">Moto</option><option value="carro">Carro</option><option value="ambos">Ambos</option></select><input type="hidden" id="cId"><button type="button" onclick="guardarConductor()" style="width:100%;margin-top:18px;padding:14px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900">GUARDAR</button></div></div>
 
@@ -119,34 +125,21 @@ actualizarClimaDolores();
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 const cacheBusqueda = new Map();
-
 async function buscarDestinoDolores(t){
  if(!t||t.trim().length<2) return [];
  const key = "dest_"+t.trim().toLowerCase();
  if(cacheBusqueda.has(key)) return cacheBusqueda.get(key);
  let resultados=[];
  try{
-   // BUSQUEDA 1 - Con numero, solo Dolores Hidalgo - PRIORIDAD
    const qEnc = encodeURIComponent(t.trim() + ", Dolores Hidalgo, Guanajuato");
    try{
      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&countrycodes=mx&limit=12&viewbox=-101.25,21.40,-100.60,20.90&bounded=0&addressdetails=1&accept-language=es`;
      const r = await fetch(url);
      const d = await r.json();
      d.forEach(x=>{
-       // Solo si es de Dolores Hidalgo
-       if(x.display_name.toLowerCase().includes("dolores") || x.display_name.toLowerCase().includes("guanajuato") || resultados.length<3){
-         resultados.push({
-           lat: parseFloat(x.lat),
-           lon: parseFloat(x.lon),
-           name: x.display_name.split(",")[0].substring(0,70),
-           exacta: x.display_name,
-           barrio: x.address?.neighbourhood || x.address?.suburb || "Dolores Hidalgo",
-           calle: x.address?.road || t
-         });
-       }
+       resultados.push({ lat: parseFloat(x.lat), lon: parseFloat(x.lon), name: x.display_name.split(",")[0].substring(0,70), exacta: x.display_name, barrio: x.address?.neighbourhood || x.address?.suburb || "Dolores Hidalgo", calle: x.address?.road || t });
      });
    }catch(e){}
-   // BUSQUEDA 2 - Photon para mejor precision con numeros
    if(resultados.length<5){
      try{
        const url2 = `https://photon.komoot.io/api/?q=${qEnc}&limit=6&lat=21.1561&lon=-100.9333&lang=es`;
@@ -156,14 +149,7 @@ async function buscarDestinoDolores(t){
          d2.features.forEach(f=>{
            let props=f.properties;
            if(!resultados.find(r=> Math.abs(r.lat-f.geometry.coordinates[1])<0.001 && Math.abs(r.lon-f.geometry.coordinates[0])<0.001)){
-             resultados.push({
-               lat: f.geometry.coordinates[1],
-               lon: f.geometry.coordinates[0],
-               name: (props.name || props.street || t).substring(0,70),
-               exacta: `${props.name||props.street||t} ${props.housenumber||''}, ${props.district||'Dolores Hidalgo'}, Guanajuato`,
-               barrio: props.district || "Dolores Hidalgo",
-               calle: props.street || t
-             });
+             resultados.push({ lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], name: (props.name || props.street || t).substring(0,70), exacta: `${props.name||props.street||t} ${props.housenumber||''}, ${props.district||'Dolores Hidalgo'}`, barrio: props.district || "Dolores Hidalgo", calle: props.street || t });
            }
          });
        }
@@ -172,37 +158,26 @@ async function buscarDestinoDolores(t){
  }catch(e){}
  let finalRes = resultados.slice(0,10);
  cacheBusqueda.set(key, finalRes);
- if(cacheBusqueda.size>80){ const fk=cacheBusqueda.keys().next().value; cacheBusqueda.delete(fk); }
  return finalRes;
 }
-
 function mostrarDestino(c,res,textoOriginal){
  c.innerHTML="";
  if(!res.length){
-   c.innerHTML=`<div style="padding:12px">
-     <div style="font-weight:800;font-size:12px;color:#111">¿No ves tu dirección?</div>
-     <div style="font-size:11px;color:#666;margin-top:4px">Escribe más: Ej: Nayarit 31, Tabasco 51, Morelos 10 - Solo Dolores Hidalgo</div>
-     <div style="margin-top:8px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;cursor:pointer" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')">
-       <div style="font-weight:900;font-size:12px;color:#16a34a">✅ USAR: ${textoOriginal.toUpperCase()}</div>
-       <div style="font-size:10px;color:#666">Usar tal cual escribiste - El conductor te encontrará por GPS</div>
-     </div>
-   </div>`;
+   c.innerHTML=`<div style="padding:12px"><div style="font-weight:800;font-size:12px;color:#111">¿No ves tu dirección?</div><div style="margin-top:8px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;cursor:pointer" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')"><div style="font-weight:900;font-size:12px;color:#16a34a">✅ USAR: ${textoOriginal.toUpperCase()}</div><div style="font-size:10px;color:#666">Usar tal cual escribiste</div></div></div>`;
    c.classList.add("show");
    return;
  }
  let html="";
- // Siempre mostrar opción de usar tal cual escribió
  if(textoOriginal && textoOriginal.trim().length>=3){
-   html+=`<div class="suggestion usar-escrito" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#16a34a;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="check" style="width:16px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:12px;color:#111">USAR: ${textoOriginal.toUpperCase()}</div><div style="font-size:10px;color:#16a34a;font-weight:700">Dirección tal cual escribiste - Para Nayarit 31, Tabasco 51, etc.</div></div></div></div>`;
+   html+=`<div class="suggestion usar-escrito" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#16a34a;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="check" style="width:16px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:12px;color:#111">USAR: ${textoOriginal.toUpperCase()}</div><div style="font-size:10px;color:#16a34a;font-weight:700">Dirección tal cual escribiste</div></div></div></div>`;
  }
  res.forEach(r=>{
-   html+=`<div class="suggestion" onclick="seleccionarDestino(${r.lat},${r.lon},'${r.exacta.replace(/'/g,"").substring(0,100)}','${r.name.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#111">${r.name}</div><div style="font-size:11px;color:#16a34a;font-weight:700">${r.calle} • ${r.barrio} • Dolores Hidalgo</div><div style="font-size:10px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.exacta.substring(0,90)}</div></div><div style="background:#E53935;color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:900">ELEGIR</div></div></div>`;
+   html+=`<div class="suggestion" onclick="seleccionarDestino(${r.lat},${r.lon},'${r.exacta.replace(/'/g,"").substring(0,100)}','${r.name.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#111">${r.name}</div><div style="font-size:11px;color:#16a34a;font-weight:700">${r.calle} • ${r.barrio} • Dolores Hidalgo</div></div><div style="background:#E53935;color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:900">ELEGIR</div></div></div>`;
  });
  c.innerHTML=html;
  c.classList.add("show");
  lucide.createIcons();
 }
-
 function seleccionarDestino(lat,lon,exacta,name){
  destinationLat=lat; destinationLng=lon; destName=exacta; destinationInput.value=name;
  destinationSuggestions.classList.remove("show");
@@ -219,7 +194,6 @@ function seleccionarDestino(lat,lon,exacta,name){
    });
  }
 }
-
 function usarDestinoEscrito(texto){
  let lat = CENTRO.lat + (Math.random()-0.5)*0.015;
  let lng = CENTRO.lng + (Math.random()-0.5)*0.015;
@@ -241,7 +215,6 @@ function usarDestinoEscrito(texto){
    });
  }
 }
-
 let t2=null;
 destinationInput.addEventListener("input",function(){
  if(t2)clearTimeout(t2);
@@ -254,8 +227,6 @@ destinationInput.addEventListener("input",function(){
    mostrarDestino(destinationSuggestions,res,v);
  },150);
 });
-
-// AUTO UBICACION AL ABRIR APP
 async function reverseGeocodeDolores(lat,lng){
  try{
    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
@@ -265,13 +236,11 @@ async function reverseGeocodeDolores(lat,lng){
    return `Ubicación GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)} - Dolores Hidalgo`;
  }catch(e){ return `Ubicación GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
 }
-
 async function autoUbicacionInicial(){
  document.getElementById("origenStatus").innerText="📍 Detectando tu ubicación GPS...";
  pickupInput.value="Obteniendo ubicación automática en Dolores Hidalgo...";
  if(!navigator.geolocation){
-   document.getElementById("origenStatus").innerText="⚠️ Activa GPS para auto-detectar";
-   pickupInput.value="Activa tu GPS y toca el botón de ubicación";
+   document.getElementById("origenStatus").innerText="⚠️ Activa GPS";
    return;
  }
  navigator.geolocation.getCurrentPosition(async pos=>{
@@ -283,20 +252,14 @@ async function autoUbicacionInicial(){
    let dir = await reverseGeocodeDolores(pickupLat,pickupLng);
    pickupName=dir;
    pickupInput.value="📍 Mi ubicación actual - "+dir.split(",")[0]+", Dolores Hidalgo";
-   document.getElementById("origenStatus").innerHTML="✅ <b>Ubicación detectada automática</b> - GPS exacto Dolores Hidalgo";
-   document.getElementById("stepOrigen").style.borderColor="#16a34a";
-   document.getElementById("stepOrigen").style.background="#f0fdf4";
-   document.getElementById("btnClearOrigen").style.display="none";
+   document.getElementById("origenStatus").innerHTML="✅ <b>Ubicación detectada automática</b>";
    lucide.createIcons();
  }, error=>{
    document.getElementById("origenStatus").innerText="⚠️ Permite ubicación GPS y recarga";
    pickupInput.value="Toca el botón negro para detectar tu ubicación GPS";
-   console.log("Error GPS inicial", error);
  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
 }
-
-function limpiarOrigen(){ pickupInput.value=""; pickupLat=null; pickupLng=null; pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show"); autoUbicacionInicial(); }
-
+function limpiarOrigen(){ pickupInput.value=""; pickupLat=null; pickupLng=null; pickupName=""; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show"); autoUbicacionInicial(); }
 async function usarMiUbicacion(){
  document.getElementById("origenStatus").innerText="📍 Actualizando GPS...";
  pickupInput.value="Obteniendo ubicación exacta...";
@@ -312,10 +275,9 @@ async function usarMiUbicacion(){
    document.getElementById("origenStatus").innerHTML="✅ Ubicación actualizada GPS exacto";
  },null,{enableHighAccuracy:true});
 }
-
 document.getElementById("calculateButton").onclick=async()=>{
- if(!pickupLat){ alert("Espera a que detecte tu ubicación GPS automática o toca el botón negro de ubicación"); autoUbicacionInicial(); return; }
- if(!destinationLat){ alert("Escribe a dónde vas en Dolores Hidalgo y selecciona una opción o usa 'USAR:...'"); return; }
+ if(!pickupLat){ alert("Espera a que detecte tu ubicación GPS automática"); autoUbicacionInicial(); return; }
+ if(!destinationLat){ alert("Escribe a dónde vas en Dolores Hidalgo y selecciona una opción"); return; }
  let km=1.5, tiempo=8, baseMoto=cfg.baseMoto||35, baseCarro=cfg.baseCarro||55;
  try{ const url=`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const r=await fetch(url);const d=await r.json(); if(d.routes&&d.routes[0]){ const route=d.routes[0]; km=route.distance/1000; tiempo=Math.ceil(route.duration/60); if(route.distance>2000){let e=route.distance-2000;baseMoto=cfg.baseMoto+Math.ceil(e/650)*5; baseCarro=cfg.baseCarro+Math.ceil(e/650)*8;} if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(map); } }catch(e){}
  datosViaje={origen:pickupName,destino:destName,distKm:km.toFixed(2),tiempoMin:tiempo,precioMoto:baseMoto,precioCarro:baseCarro,origenLat:pickupLat,origenLng:pickupLng,destLat:destinationLat,destLng:destinationLng};
@@ -484,6 +446,7 @@ async function loginAdmin(){
  document.getElementById('adminError').style.display='block';
 }
 let pedidosGlobales=[],timerPedido=null,tiempoRestante=10,ultimaPosConductor=null,sonidoInterval=null,audioCtx=null;
+let timerCancelViaje=null, tiempoCancelRestante=10;
 function playUberSound(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=880; o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.0001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.05); o.start(); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.25); o.stop(audioCtx.currentTime+0.26);}catch(e){} }
 function iniciarSonidoPedido(){ detenerSonidoPedido(); playUberSound(); sonidoInterval=setInterval(()=>playUberSound(),1200); }
 function detenerSonidoPedido(){ if(sonidoInterval){clearInterval(sonidoInterval);sonidoInterval=null;} }
@@ -504,13 +467,16 @@ function abrirPanelConductor(c){
    c.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(c));
    let idx=conductores.findIndex(x=>x.id===c.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+c.id+'/estado').set('ocupado'); }
    actualizarEstadoUI('ocupado');
-   document.getElementById('bloqueViajeActivo').style.display='block'; document.getElementById('bloquePedidos').style.display='none';
+   document.getElementById('bloquePedidos').style.display='none';
+   document.getElementById('bloqueViajeActivo').style.display='block';
+   mostrarViajeActivoTarjeta(viajeActivo.pedido, false);
    setTimeout(()=>{ initMapConductor(); trazarRutaCompletaConductor(viajeActivo.pedido); },400);
  } else {
    c.estado='en_linea'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(c));
    let idx=conductores.findIndex(x=>x.id===c.id); if(idx>=0){ conductores[idx].estado='en_linea'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+c.id+'/estado').set('en_linea'); }
    actualizarEstadoUI('en_linea');
-   document.getElementById('bloquePedidos').style.display='block'; document.getElementById('bloqueViajeActivo').style.display='none';
+   document.getElementById('bloquePedidos').style.display='block';
+   document.getElementById('bloqueViajeActivo').style.display='none';
    setTimeout(()=>{ initMapConductor(); },400);
  }
  lucide.createIcons();
@@ -541,9 +507,9 @@ function renderPedidosConductor(){
  const p=pedidosGlobales[0];
  let distConductor = "Calculando distancia...";
  if(ultimaPosConductor){ let d=distMts(ultimaPosConductor.lat,ultimaPosConductor.lng,p.origenLat,p.origenLng); distConductor=`Estás a ${(d/1000).toFixed(2)} km del cliente • SOLO A TI POR 10s`; }
- let origenMostrar = p.origen;
- if(p.origen.toLowerCase().includes("ubicación") || p.origen.toLowerCase().includes("gps")){ origenMostrar = `📍 UBICACIÓN GPS CLIENTE<br><span style="font-size:12px;color:#16a34a;font-weight:800">${p.origen.split(",")[0]}</span><br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`; }
- cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • EXCLUSIVO 10s</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800">${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 ${p.km} km • Si no aceptas en 10s pasa al otro conductor</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px">📍 Ver cliente en Maps</button></div>`;
+ let origenMostrar = p.origen.replace(" - Dirección exacta cliente","").replace(", Dolores Hidalgo, Guanajuato","");
+ let destinoMostrar = p.destino.replace(" - Dirección exacta cliente","").replace(", Dolores Hidalgo, Guanajuato","");
+ cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900;display:flex;align-items:center;gap:4px"><i data-lucide="clock" style="width:12px"></i> ${p.tipo.toUpperCase()} • EXCLUSIVO 10s</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800;display:flex;align-items:center;gap:4px"><i data-lucide="navigation" style="width:12px"></i> ${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800;display:flex;align-items:center;gap:4px"><i data-lucide="map-pin" style="width:12px;color:#16a34a"></i> RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800;display:flex;align-items:center;gap:4px"><i data-lucide="flag" style="width:12px;color:#E53935"></i> ENTREGAR EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px;margin-top:4px">${destinoMostrar}</div></div><div style="margin-top:8px;font-size:10px;color:#666;display:flex;align-items:center;gap:4px"><i data-lucide="route" style="width:12px"></i> ${p.km} km • Si no aceptas en 10s pasa al otro conductor</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2;display:flex;align-items:center;gap:6px"><i data-lucide="check-circle" style="width:16px"></i> ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="map" style="width:14px"></i> Ver cliente en Maps</button></div>`;
  iniciarTimerPedido(); iniciarSonidoPedido(); lucide.createIcons();
 }
 function abrirGoogleMapsRecogidaDirecta(lat,lng){ window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,'_blank'); }
@@ -561,6 +527,88 @@ function tiempoAgotado(){
  }
  pedidosGlobales=[]; renderPedidosConductor();
 }
+
+// NUEVA TARJETA DE VIAJE ACTIVO CON DIRECCIONES EXACTAS Y BOTONES CON ICONOS
+function mostrarViajeActivoTarjeta(pedido, iniciarCancelTimer=true){
+ let origenLimpio = pedido.origen.replace(" - Dirección exacta cliente","").replace(", Dolores Hidalgo, Guanajuato","").replace(" - Dirección exacta escrita por cliente","").replace("Ubicación GPS: ","");
+ let destinoLimpio = pedido.destino.replace(" - Dirección exacta cliente","").replace(", Dolores Hidalgo, Guanajuato","").replace(" - Dirección exacta escrita por cliente","");
+ let html = `
+ <div class="viaje-card-activo">
+   <div style="display:flex;justify-content:space-between;align-items:center">
+     <div style="display:flex;align-items:center;gap:8px">
+       <div style="width:36px;height:36px;background:#16a34a;border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="package-check" style="width:18px;color:#fff"></i></div>
+       <div>
+         <div style="font-weight:900;font-size:13px;color:#111;display:flex;align-items:center;gap:6px"><i data-lucide="clock" style="width:12px"></i> VIAJE EN CURSO</div>
+         <div style="font-size:11px;color:#16a34a;font-weight:800">ESTÁS OCUPADO • NO RECIBES MÁS PEDIDOS</div>
+       </div>
+     </div>
+     <div style="background:#111;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:900">$${pedido.precio} MXN</div>
+   </div>
+
+   <div class="viaje-row recogida">
+     <div style="width:32px;height:32px;background:#16a34a;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="map-pin" style="width:16px;color:#fff"></i></div>
+     <div style="flex:1">
+       <div style="font-size:10px;font-weight:900;color:#16a34a;letter-spacing:0.5px">📍 RECOGER CLIENTE AQUÍ - DIRECCIÓN EXACTA</div>
+       <div style="font-weight:900;font-size:13px;color:#111;margin-top:2px;line-height:1.3">${origenLimpio}</div>
+       <div style="font-size:10px;color:#666;margin-top:2px;display:flex;align-items:center;gap:4px"><i data-lucide="navigation" style="width:10px"></i> GPS: ${pedido.origenLat.toFixed(5)}, ${pedido.origenLng.toFixed(5)}</div>
+     </div>
+   </div>
+
+   <div style="display:flex;justify-content:center;margin:4px 0"><i data-lucide="arrow-down" style="width:16px;color:#999"></i></div>
+
+   <div class="viaje-row destino">
+     <div style="width:32px;height:32px;background:#E53935;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="flag" style="width:16px;color:#fff"></i></div>
+     <div style="flex:1">
+       <div style="font-size:10px;font-weight:900;color:#E53935;letter-spacing:0.5px">🏁 ENTREGAR CLIENTE AQUÍ - DESTINO EXACTO</div>
+       <div style="font-weight:900;font-size:13px;color:#111;margin-top:2px;line-height:1.3">${destinoLimpio}</div>
+       <div style="font-size:10px;color:#666;margin-top:2px;display:flex;align-items:center;gap:4px"><i data-lucide="navigation" style="width:10px"></i> GPS: ${pedido.destLat.toFixed(5)}, ${pedido.destLng.toFixed(5)}</div>
+     </div>
+   </div>
+
+   <div style="margin-top:12px;display:flex;gap:6px;background:#f7f7f8;border:1px solid #eee;border-radius:10px;padding:8px;align-items:center">
+     <i data-lucide="route" style="width:14px;color:#666"></i>
+     <span style="font-size:11px;font-weight:700;color:#666">${pedido.km} km • ${pedido.tipo.toUpperCase()}</span>
+     <span style="margin-left:auto;font-size:10px;font-weight:800;color:#111;background:#fff;border:1px solid #eee;border-radius:6px;padding:2px 6px;display:flex;align-items:center;gap:4px"><i data-lucide="wallet" style="width:10px"></i> $${pedido.precio}</span>
+   </div>
+
+   <button type="button" onclick="abrirGoogleMapsRecogida()" style="width:100%;margin-top:14px;height:48px;border:none;border-radius:12px;background:#111;color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="map" style="width:16px"></i> ABRIR GOOGLE MAPS - RUTA COMPLETA</button>
+
+   <div id="cancelContainer" style="margin-top:10px">
+     <button type="button" id="btnCancelarViaje" onclick="cancelarViaje()" style="width:100%;height:44px;border:1px solid #ffdede;border-radius:12px;background:#fff1f1;color:#E53935;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px"><i data-lucide="x-circle" style="width:16px"></i> <span id="txtCancelar">CANCELAR VIAJE - 10s PARA CANCELAR</span> <span id="timerCancel" style="background:#E53935;color:#fff;border-radius:6px;padding:2px 6px;font-size:10px">10s</span></button>
+     <div style="font-size:9px;color:#999;text-align:center;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:4px"><i data-lucide="info" style="width:10px"></i> Solo puedes cancelar en los primeros 10 segundos, después debes completar el servicio</div>
+   </div>
+
+   <div id="cancelBloqueado" style="display:none;margin-top:10px;background:#111;color:#fff;border-radius:12px;padding:10px;text-align:center;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;gap:6px"><i data-lucide="lock" style="width:14px"></i> Cancelación bloqueada - Debes completar el viaje</div>
+ </div>
+ `;
+ document.getElementById('viajeInfo').innerHTML=html;
+ lucide.createIcons();
+ if(iniciarCancelTimer){
+   iniciarTemporizadorCancelacion();
+ }
+}
+
+function iniciarTemporizadorCancelacion(){
+ if(timerCancelViaje) clearInterval(timerCancelViaje);
+ tiempoCancelRestante=10;
+ let btn = document.getElementById('btnCancelarViaje');
+ let txtTimer = document.getElementById('timerCancel');
+ let txtCancelar = document.getElementById('txtCancelar');
+ timerCancelViaje=setInterval(()=>{
+   tiempoCancelRestante-=0.1;
+   if(txtTimer) txtTimer.innerText=Math.ceil(tiempoCancelRestante)+'s';
+   if(tiempoCancelRestante<=0){
+     clearInterval(timerCancelViaje);
+     if(btn){
+       btn.style.display='none';
+       document.getElementById('cancelContainer').style.display='none';
+       let bloqueado=document.getElementById('cancelBloqueado');
+       if(bloqueado){ bloqueado.style.display='flex'; }
+     }
+   }
+ },100);
+}
+
 function aceptarPedido(id){
  detenerTimerPedido(); detenerSonidoPedido();
  let pedido=pedidosGlobales.find(p=>p.id===id); if(!pedido) return;
@@ -568,16 +616,17 @@ function aceptarPedido(id){
  if(db){
    db.ref('asignaciones/'+id).once('value').then(snap=>{
      let asig=snap.val();
-     if(!asig || asig.conductorId!==ses.id){ alert('Este pedido ya rotó a otro conductor'); pedidosGlobales=[]; renderPedidosConductor(); return; }
+     if(!asig || asig.conductorId!==ses.id){ alert('Este pedido ya rotó a otro conductor, espera que te vuelva a tocar'); pedidosGlobales=[]; renderPedidosConductor(); return; }
      ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
      let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); }
      if(db) db.ref('conductores/'+ses.id+'/estado').set('ocupado');
      actualizarEstadoUI('ocupado');
      db.ref('pedidos_disponibles/'+id).remove(); db.ref('pedidos/'+id).remove(); db.ref('asignaciones/'+id).remove();
      db.ref('pedidos_aceptados/'+id).set({pedido:pedido,conductorId:ses.id,fecha:Date.now()});
-     pedidosGlobales=[]; let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id}; localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
-     document.getElementById('bloquePedidos').style.display='none'; document.getElementById('bloqueViajeActivo').style.display='block';
-     document.getElementById('viajeInfo').innerHTML=`<div style="font-size:11px;color:#666">VIAJE EN CURSO - ESTÁS OCUPADO</div><b style="color:#111">${pedido.origen}</b><br>→ ${pedido.destino}<br><span style="color:#E53935;font-weight:900">$${pedido.precio}</span>`;
+     pedidosGlobales=[]; let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id, aceptadoEn: Date.now()}; localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
+     document.getElementById('bloquePedidos').style.display='none';
+     document.getElementById('bloqueViajeActivo').style.display='block';
+     mostrarViajeActivoTarjeta(pedido, true);
      trazarRutaCompletaConductor(pedido);
    });
  }
@@ -593,7 +642,12 @@ function trazarRutaCompletaConductor(pedido){
 }
 function abrirGoogleMapsRecogida(){ let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null'); if(!viaje) return; let p=viaje.pedido; window.open(`https://www.google.com/maps/dir/${ultimaPosConductor?.lat||''},${ultimaPosConductor?.lng||''}/${p.origenLat},${p.origenLng}/${p.destLat},${p.destLng}/`,'_blank'); }
 function cancelarViaje(){
- if(!confirm('¿Cancelar? Volverás a EN LÍNEA')) return;
+ if(tiempoCancelRestante<=0){
+   alert('Ya no puedes cancelar, debes completar el viaje. Pasaron los 10 segundos permitidos.');
+   return;
+ }
+ if(!confirm('¿Cancelar viaje? Volverás a EN LÍNEA y el pedido rotará a otro conductor. Tienes '+Math.ceil(tiempoCancelRestante)+'s para cancelar')) return;
+ if(timerCancelViaje) clearInterval(timerCancelViaje);
  let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null');
  if(viaje&&db){ let pedido=viaje.pedido; db.ref('pedidos/'+pedido.id).set(pedido); db.ref('pedidos_disponibles/'+pedido.id).set(pedido); db.ref('pedidos_aceptados/'+pedido.id).remove(); db.ref('asignaciones/'+pedido.id).remove(); setTimeout(()=>asignarPorCercania(pedido.id, []),500); }
  localStorage.removeItem('kigo_viaje_activo');
@@ -609,7 +663,7 @@ function guardarConductor(){ const nombre=document.getElementById('cNombre').val
 function renderConductores(){ const box=document.getElementById('listaConductores'); if(!conductores.length){ box.innerHTML='<div style="text-align:center;padding:20px;color:#999">Sin conductores</div>'; return; } box.innerHTML=conductores.map(c=>`<div class="conductor-card"><img src="${c.foto||'https://cdn-icons-png.flaticon.com/512/3774/3774083.png'}" class="conductor-foto"><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:14px;color:#111;display:flex;align-items:center;gap:6px">${c.nombre} <span style="font-size:9px;background:${c.estado==='en_linea'?'#16a34a':'#E53935'};color:#fff;border-radius:6px;padding:2px 6px">${c.estado}</span></div><div style="font-size:11px;color:#666">${c.usuario} • ${c.tipo} • ${c.telefono}</div></div><div style="display:flex;gap:6px"><button onclick="abrirModalConductor('${c.id}')" style="width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb;display:flex;align-items:center;justify-content:center"><i data-lucide="pencil" style="width:14px"></i></button><button onclick="eliminarConductor('${c.id}')" style="width:36px;height:36px;border-radius:10px;border:1px solid #ffdede;background:#fff1f1;display:flex;align-items:center;justify-content:center"><i data-lucide="trash-2" style="width:14px;color:#E53935"></i></button></div></div>`).join(''); lucide.createIcons(); }
 function eliminarConductor(id){ if(!confirm('¿Eliminar?')) return; conductores=conductores.filter(x=>x.id!==id); localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); if(db) db.ref('conductores/'+id).remove(); renderConductores(); }
 function cerrarSesionAdmin(){ localStorage.removeItem('kigo_admin_sesion'); irInicioForzado(); }
-function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(ses && db) db.ref('conductores/'+ses.id+'/estado').set('en_linea'); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); irInicioForzado(); }
+function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); if(timerCancelViaje) clearInterval(timerCancelViaje); let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(ses && db) db.ref('conductores/'+ses.id+'/estado').set('en_linea'); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); irInicioForzado(); }
 function guardarAjustes(){ let cfg2={nombre:document.getElementById('cfgNombre').value,baseMoto:parseInt(document.getElementById('cfgMoto').value),baseCarro:parseInt(document.getElementById('cfgCarro').value)}; localStorage.setItem('kigo_cfg',JSON.stringify({...cfg,...cfg2})); if(db) db.ref('config').set({...cfg,...cfg2}); alert('Guardado'); }
 if(db){
   db.ref('asignaciones').on('value',snap=>{
@@ -653,7 +707,6 @@ if(db){
   });
 }
 lucide.createIcons(); renderConductores();
-// AUTO-DETECCION AL ABRIR LA APP EN CUALQUIER CELULAR
 window.addEventListener('load',()=>{
   setTimeout(()=>{ autoUbicacionInicial(); },800);
 });

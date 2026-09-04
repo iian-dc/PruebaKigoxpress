@@ -25,9 +25,11 @@
 #panelBuscando,#panelClienteViaje{position:fixed;inset:0;max-width:500px;margin:0 auto;width:100%;background:#fff;z-index:4500;display:none;flex-direction:column;overflow:hidden}
 #panelBuscando.show,#panelClienteViaje.show{display:flex}
 .step{background:#f7f7f8;border:1px solid #eee;padding:12px;border-radius:14px;margin-bottom:12px}
+.step.auto{background:#f0fdf4;border:2px solid #16a34a}
 .input-wrap{position:relative;display:flex;align-items:center}
 .colonia-input{width:100%;padding:14px 68px 14px 38px;border:1.5px solid #ddd;border-radius:12px;font-size:14px;font-weight:600;outline:none}
 .colonia-input:focus{border-color:#111;background:#fff}
+.colonia-input.auto{border-color:#16a34a;background:#fff;font-weight:800;color:#111}
 .input-actions{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;gap:4px}
 .btn-icon{width:32px;height:32px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .btn-icon.loc{background:#111}.btn-icon.clear{display:none}
@@ -71,15 +73,17 @@
 .estado-wrap-centro{position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;z-index:10;display:flex;align-items:center}
 .estado-btn{height:32px;padding:0 14px;border-radius:999px;border:none;font-weight:900;font-size:11px;display:flex;align-items:center;gap:6px;cursor:default;pointer-events:none;letter-spacing:0.5px}
 .estado-btn.en_linea{background:#16a34a;color:#fff;box-shadow:0 0 0 3px rgba(22,163,74,0.2)}.estado-btn.ocupado{background:#E53935;color:#fff;box-shadow:0 0 0 3px rgba(229,57,53,0.2)}
+.pulse-dot{width:10px;height:10px;background:#16a34a;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,0.7)}70%{box-shadow:0 0 0 8px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="map-container"><div id="map"></div><div id="logoTop"><img src="https://cdn-icons-png.flaticon.com/512/3774/3774083.png"><span>Kigo Xpress</span></div><div id="climaBanner"><i id="climaIcon" data-lucide="sun" style="width:14px;color:#f59e0b"></i><div id="climaTexto" style="font-weight:800;font-size:10px;color:#111">Soleado</div><div id="climaTemp" style="font-weight:900;font-size:11px;color:#111;margin-left:6px">--°</div></div></div>
 <div id="panel1" class="panel">
-<div class="step"><div style="font-size:12px;font-weight:900;color:#111;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:14px;color:#16a34a"></i> ¿Dónde te recogemos? - Dolores Hidalgo</div><div class="input-wrap"><i data-lucide="search" style="position:absolute;left:12px;width:16px;color:#999;z-index:2"></i><input id="pickupInput" class="colonia-input" placeholder="Ej: Tabasco 51 esquina Tamaulipas, Dolores Hidalgo" autocomplete="off"><div class="input-actions"><button id="btnClearOrigen" class="btn-icon clear" onclick="limpiarOrigen()"><i data-lucide="x" style="width:14px"></i></button><button id="btnUbicacion" class="btn-icon loc" onclick="usarMiUbicacion()"><i data-lucide="crosshair" style="width:16px;color:#fff"></i></button></div><div id="pickupSuggestions" class="suggestions"></div></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:700">💡 Tip: Escribe con número y todo: Tabasco 51, Morelos 10, etc. Si no aparece exacto te damos opción de usarlo tal cual</div></div>
-<div class="step"><div style="font-size:12px;font-weight:900;color:#111;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i data-lucide="flag" style="width:14px;color:#dc2626"></i> ¿A dónde vas? - Dolores Hidalgo</div><div style="position:relative"><i data-lucide="search" style="position:absolute;left:12px;top:15px;width:16px;color:#999"></i><input id="destinationInput" class="colonia-input" style="padding-right:14px" placeholder="Ej: Guerrero 20 esquina Hidalgo, Centro" autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
-<button id="calculateButton" class="btn-cotizar">CONFIRMAR DIRECCIÓN Y VER PRECIOS</button>
+<div id="stepOrigen" class="step auto"><div style="font-size:12px;font-weight:900;color:#16a34a;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span class="pulse-dot"></span> ¿Dónde te recogemos? <span style="font-weight:700;color:#16a34a;font-size:10px;margin-left:6px" id="origenStatus">📍 Detectando ubicación automática...</span></div><div class="input-wrap"><i data-lucide="map-pin" style="position:absolute;left:12px;width:16px;color:#16a34a;z-index:2"></i><input id="pickupInput" class="colonia-input auto" placeholder="Detectando tu ubicación en Dolores Hidalgo..." autocomplete="off" readonly><div class="input-actions"><button id="btnClearOrigen" class="btn-icon clear" onclick="limpiarOrigen()" style="display:none"><i data-lucide="x" style="width:14px"></i></button><button id="btnUbicacion" class="btn-icon loc" onclick="usarMiUbicacion()" title="Actualizar mi ubicación GPS"><i data-lucide="crosshair" style="width:16px;color:#fff"></i></button></div><div id="pickupSuggestions" class="suggestions"></div></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:700;display:flex;align-items:center;gap:4px"><i data-lucide="check-circle" style="width:12px"></i> Se llena automáticamente con tu GPS - No necesitas escribir, solo confirma abajo</div></div>
+<div class="step"><div style="font-size:12px;font-weight:900;color:#111;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i data-lucide="flag" style="width:14px;color:#dc2626"></i> ¿A dónde vas? <span style="font-weight:700;color:#666;font-size:10px;margin-left:6px">Escribe destino en Dolores Hidalgo</span></div><div style="position:relative"><i data-lucide="search" style="position:absolute;left:12px;top:15px;width:16px;color:#999"></i><input id="destinationInput" class="colonia-input" style="padding-right:14px" placeholder="Ej: Nayarit 31, Tabasco 51, Guerrero 20, Centro..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div><div style="margin-top:6px;font-size:10px;color:#666">Escribe calle y número, te mostramos opciones solo de Dolores Hidalgo</div></div>
+<button id="calculateButton" class="btn-cotizar">CONFIRMAR DIRECCIONES Y VER PRECIOS</button>
 </div>
 <div class="bottom-nav"><button class="btn-nav inicio" onclick="irInicio()"><i data-lucide="compass" style="width:18px"></i> Inicio</button><button class="btn-nav admin" onclick="abrirAdmin()"><i data-lucide="shield-check" style="width:18px"></i> Admin</button></div>
 </div>
@@ -97,7 +101,7 @@
 
 <div id="panel2" class="panel2"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><button type="button" onclick="volver()" style="width:42px;height:42px;border-radius:50%;background:#f1f1f1;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center"><i data-lucide="arrow-left" style="width:18px"></i></button><b id="destTxt" style="font-size:11px">Destino</b><b id="tiempoTxt" style="font-size:11px;margin-left:auto">--</b></div><h2 style="color:#111;margin:0 0 4px;font-size:22px;font-weight:900">Elige tu viaje</h2><div id="rutaSub" style="color:#666;font-size:12px;margin-bottom:14px"></div><div id="cardMoto" class="card" onclick="seleccionar('moto')"><div class="card-left"><img src="https://img.icons8.com/3d-fluency/94/motorcycle.png" style="width:70px"></div><div style="flex:1"><div class="card-title" style="font-weight:900">Moto</div><div class="card-pass"><i data-lucide="user" style="width:12px"></i> 1 pasajero</div><div id="motoTime">--</div></div><div class="price" id="motoPrice">$--</div></div><div id="cardCarro" class="card" onclick="seleccionar('carro')"><div class="card-left"><img src="https://img.icons8.com/3d-fluency/94/car.png" style="width:70px"></div><div style="flex:1"><div class="card-title" style="font-weight:900">Carro</div><div class="card-pass"><i data-lucide="users" style="width:12px"></i> Hasta 4</div><div id="carroTime">--</div></div><div class="price" id="carroPrice">$--</div></div><button type="button" id="btnElegir" class="btn-elegir" onclick="abrirMapaConfirm()"><span id="btnTxt">Selecciona</span></button></div>
 
-<div id="panel3" class="panel3"><div style="position:relative;height:58vh"><div id="mapConfirm"></div><div style="position:absolute;top:12px;left:12px;right:12px;z-index:999;background:#fff;border:1px solid #eee;border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:center"><button type="button" onclick="volverMapa()" style="width:36px;height:36px;border-radius:50%;background:#f1f1f1;border:1px solid #e5e7eb"><i data-lucide="arrow-left" style="width:16px"></i></button><div><div style="font-weight:900;font-size:13px">Confirma tu punto de recogida</div><div style="font-size:11px;color:#666">Toca el mapa donde quieres que te recojan</div></div></div><div style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:999;background:#111;color:#fff;border-radius:999px;padding:8px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px"><i data-lucide="hand" style="width:14px"></i> Toca el mapa para mover punto</div></div><div style="background:#fff;flex:1;border-radius:28px 28px 0 0;margin-top:-28px;z-index:1000;padding:20px;box-shadow:0 -10px 30px rgba(0,0,0,.15)"><div style="display:flex;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#f1f1f1;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:18px;color:#16a34a"></i></div><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#666">PUNTO DE RECOGIDA (TOCA MAPA)</div><div id="txtPickupConfirm" style="font-weight:900;font-size:14px;color:#111;margin-top:2px">--</div></div></div><div style="margin-top:16px;display:flex;gap:10px"><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">DISTANCIA</div><div id="txtDistConfirm" style="font-weight:900;font-size:13px;color:#111">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">TOTAL</div><div id="txtPrecioConfirm" style="font-weight:900;font-size:13px;color:#E53935">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px"><img id="imgTransporteConfirm" style="width:32px;height:32px"><div><div style="font-size:10px;font-weight:800;color:#666">VIAJE</div><div id="txtTransporteConfirm" style="font-weight:900;font-size:12px;color:#111">--</div></div></div></div><button type="button" onclick="confirmarViajeFinal()" style="width:100%;height:56px;border-radius:16px;border:none;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="check" style="width:18px"></i> CONFIRMAR RECOGIDA</button></div></div>
+<div id="panel3" class="panel3"><div style="position:relative;height:58vh"><div id="mapConfirm"></div><div style="position:absolute;top:12px;left:12px;right:12px;z-index:999;background:#fff;border:1px solid #eee;border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:center"><button type="button" onclick="volverMapa()" style="width:36px;height:36px;border-radius:50%;background:#f1f1f1;border:1px solid #e5e7eb"><i data-lucide="arrow-left" style="width:16px"></i></button><div><div style="font-weight:900;font-size:13px">Confirma tu punto de recogida</div><div style="font-size:11px;color:#666">Toca el mapa si quieres ajustar</div></div></div><div style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:999;background:#111;color:#fff;border-radius:999px;padding:8px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px"><i data-lucide="hand" style="width:14px"></i> Toca el mapa para ajustar punto exacto</div></div><div style="background:#fff;flex:1;border-radius:28px 28px 0 0;margin-top:-28px;z-index:1000;padding:20px;box-shadow:0 -10px 30px rgba(0,0,0,.15)"><div style="display:flex;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#f1f1f1;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:18px;color:#16a34a"></i></div><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#666">PUNTO DE RECOGIDA GPS</div><div id="txtPickupConfirm" style="font-weight:900;font-size:14px;color:#111;margin-top:2px">--</div></div></div><div style="margin-top:16px;display:flex;gap:10px"><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">DISTANCIA</div><div id="txtDistConfirm" style="font-weight:900;font-size:13px;color:#111">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">TOTAL</div><div id="txtPrecioConfirm" style="font-weight:900;font-size:13px;color:#E53935">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px"><img id="imgTransporteConfirm" style="width:32px;height:32px"><div><div style="font-size:10px;font-weight:800;color:#666">VIAJE</div><div id="txtTransporteConfirm" style="font-weight:900;font-size:12px;color:#111">--</div></div></div></div><button type="button" onclick="confirmarViajeFinal()" style="width:100%;height:56px;border-radius:16px;border:none;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="check" style="width:18px"></i> CONFIRMAR RECOGIDA</button></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -114,258 +118,204 @@ async function actualizarClimaDolores(){ try{ const res = await fetch(`https://a
 actualizarClimaDolores();
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-
-const BARRIOS_DOLORES = [
-  {name:"Centro Histórico", exacta:"Centro Histórico, Dolores Hidalgo", lat:21.1561, lon:-100.9333, barrio:"Centro"},
-  {name:"Colonia Lindavista", exacta:"Colonia Lindavista, Dolores Hidalgo", lat:21.158, lon:-100.930, barrio:"Lindavista"},
-  {name:"Colonia Morelos", exacta:"Colonia Morelos, Dolores Hidalgo", lat:21.154, lon:-100.935, barrio:"Morelos"},
-  {name:"Calle Tabasco", exacta:"Calle Tabasco, Dolores Hidalgo, Guanajuato", lat:21.1575, lon:-100.9315, barrio:"Lindavista", calle:"Tabasco"},
-  {name:"Calle Tamaulipas", exacta:"Calle Tamaulipas, Dolores Hidalgo", lat:21.1578, lon:-100.9310, barrio:"Lindavista", calle:"Tamaulipas"},
-  {name:"Avenida Hidalgo", exacta:"Avenida Miguel Hidalgo, Centro, Dolores Hidalgo", lat:21.1565, lon:-100.9330, barrio:"Centro", calle:"Hidalgo"},
-  {name:"Calle Guerrero", exacta:"Calle Guerrero, Centro, Dolores Hidalgo", lat:21.1568, lon:-100.9325, barrio:"Centro", calle:"Guerrero"}
-];
-
 const cacheBusqueda = new Map();
-function buscarLocalDolores(t){
-  if(!t) return [];
-  const q = t.toLowerCase();
-  return BARRIOS_DOLORES.filter(b=> b.name.toLowerCase().includes(q) || b.barrio.toLowerCase().includes(q) || (b.calle && b.calle.toLowerCase().includes(q)) ).slice(0,6);
-}
 
-async function buscarConNumeroReal(t){
-  // Intenta buscar CON numero usando Photon que es mejor para numeros de casa
-  try{
-    const qEnc = encodeURIComponent(t + ", Dolores Hidalgo, Guanajuato");
-    // Photon + Nominatim en paralelo
-    let promesas = [];
-    promesas.push(fetch(`https://photon.komoot.io/api/?q=${qEnc}&limit=5&lat=21.1561&lon=-100.9333&lang=es`).then(r=>r.json()).then(d=>{
-      if(!d.features) return [];
-      return d.features.map(f=>{
-        let props = f.properties;
-        return {
-          lat: f.geometry.coordinates[1],
-          lon: f.geometry.coordinates[0],
-          name: (props.name || props.street || t).substring(0,70),
-          exacta: `${props.name||props.street||t}, ${props.city||'Dolores Hidalgo'}, ${props.state||'Guanajuato'} - ${props.housenumber? 'No. '+props.housenumber:''} ${props.street||''}`.trim(),
-          barrio: props.district || props.city || "Dolores Hidalgo",
-          calle: props.street || t,
-          numero: props.housenumber || "",
-          esExacto:!!props.housenumber
-        };
-      });
-    }).catch(()=>[]));
-
-    promesas.push(fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&countrycodes=mx&limit=8&addressdetails=1&accept-language=es`).then(r=>r.json()).then(d=>{
-      return d.map(x=>{
-        let num = x.address?.house_number || "";
-        return {
-          lat: parseFloat(x.lat),
-          lon: parseFloat(x.lon),
-          name: (x.display_name.split(",")[0] + (num? " "+num:"")).substring(0,70),
-          exacta: x.display_name + (num? ` - No. ${num}`:""),
-          barrio: x.address?.neighbourhood || x.address?.suburb || "Dolores Hidalgo",
-          calle: x.address?.road || t,
-          numero: num,
-          esExacto:!!num
-        };
-      });
-    }).catch(()=>[]));
-
-    let resultados = await Promise.all(promesas);
-    return resultados.flat();
-  }catch(e){ return []; }
-}
-
-async function buscarColoniasExactas(t){
- if(!t||t.trim().length<1) return [];
- const key = t.trim().toLowerCase();
+async function buscarDestinoDolores(t){
+ if(!t||t.trim().length<2) return [];
+ const key = "dest_"+t.trim().toLowerCase();
  if(cacheBusqueda.has(key)) return cacheBusqueda.get(key);
- let resultados = [];
- // 1. Local instantaneo
- resultados = [...buscarLocalDolores(t)];
- // 2. Si tiene numero (ej: Tabasco 51) buscar con numero real
- let tieneNumero = /\d/.test(t);
- if(tieneNumero){
-   let conNumero = await buscarConNumeroReal(t);
-   conNumero.forEach(r=>{
-     if(!resultados.find(x=>x.exacta===r.exacta)) resultados.push(r);
-   });
- }
- // 3. Si no tiene suficientes, buscar general
- if(resultados.length<4){
+ let resultados=[];
+ try{
+   // BUSQUEDA 1 - Con numero, solo Dolores Hidalgo - PRIORIDAD
+   const qEnc = encodeURIComponent(t.trim() + ", Dolores Hidalgo, Guanajuato");
    try{
-     const qEnc = encodeURIComponent(t + ", Dolores Hidalgo, Guanajuato");
-     const r1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&countrycodes=mx&limit=10&addressdetails=1&accept-language=es`);
-     const d1 = await r1.json();
-     d1.forEach(x=>{
-       if(!resultados.find(r=>r.exacta===x.display_name)){
+     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&countrycodes=mx&limit=12&viewbox=-101.25,21.40,-100.60,20.90&bounded=0&addressdetails=1&accept-language=es`;
+     const r = await fetch(url);
+     const d = await r.json();
+     d.forEach(x=>{
+       // Solo si es de Dolores Hidalgo
+       if(x.display_name.toLowerCase().includes("dolores") || x.display_name.toLowerCase().includes("guanajuato") || resultados.length<3){
          resultados.push({
            lat: parseFloat(x.lat),
            lon: parseFloat(x.lon),
            name: x.display_name.split(",")[0].substring(0,70),
            exacta: x.display_name,
-           barrio: x.address?.neighbourhood || "Dolores Hidalgo",
-           calle: x.address?.road || t,
-           numero: x.address?.house_number || ""
+           barrio: x.address?.neighbourhood || x.address?.suburb || "Dolores Hidalgo",
+           calle: x.address?.road || t
          });
        }
      });
    }catch(e){}
- }
- // Guardar cache
- cacheBusqueda.set(key, resultados.slice(0,12));
- if(cacheBusqueda.size>60){ const fk = cacheBusqueda.keys().next().value; cacheBusqueda.delete(fk); }
- return resultados.slice(0,12);
+   // BUSQUEDA 2 - Photon para mejor precision con numeros
+   if(resultados.length<5){
+     try{
+       const url2 = `https://photon.komoot.io/api/?q=${qEnc}&limit=6&lat=21.1561&lon=-100.9333&lang=es`;
+       const r2 = await fetch(url2);
+       const d2 = await r2.json();
+       if(d2.features){
+         d2.features.forEach(f=>{
+           let props=f.properties;
+           if(!resultados.find(r=> Math.abs(r.lat-f.geometry.coordinates[1])<0.001 && Math.abs(r.lon-f.geometry.coordinates[0])<0.001)){
+             resultados.push({
+               lat: f.geometry.coordinates[1],
+               lon: f.geometry.coordinates[0],
+               name: (props.name || props.street || t).substring(0,70),
+               exacta: `${props.name||props.street||t} ${props.housenumber||''}, ${props.district||'Dolores Hidalgo'}, Guanajuato`,
+               barrio: props.district || "Dolores Hidalgo",
+               calle: props.street || t
+             });
+           }
+         });
+       }
+     }catch(e){}
+   }
+ }catch(e){}
+ let finalRes = resultados.slice(0,10);
+ cacheBusqueda.set(key, finalRes);
+ if(cacheBusqueda.size>80){ const fk=cacheBusqueda.keys().next().value; cacheBusqueda.delete(fk); }
+ return finalRes;
 }
 
-function mostrar(c,res,tipoS, textoOriginal){
+function mostrarDestino(c,res,textoOriginal){
  c.innerHTML="";
- let html = "";
- // BOTON ESPECIAL: USAR DIRECCION TAL CUAL LA ESCRIBIO EL CLIENTE - ESTO SOLUCIONA TABASCO 51
- if(textoOriginal && textoOriginal.trim().length>=4){
-   let tieneNumero = /\d/.test(textoOriginal);
-   if(tieneNumero){
-     html += `<div class="suggestion usar-escrito" id="usarExacto"><div style="display:flex;align-items:center;gap:12px;width:100%"><div style="width:42px;height:42px;background:#16a34a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="check" style="width:18px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#111">✅ USAR: ${textoOriginal.toUpperCase()}</div><div style="font-size:11px;color:#16a34a;font-weight:800">Dirección exacta como la escribiste - Tabasco 51 esquina Tamaulipas</div><div style="font-size:10px;color:#666">El conductor verá tu dirección tal cual + tu ubicación GPS en el mapa</div></div><div style="background:#16a34a;color:#fff;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:900">USAR ESTA</div></div></div>`;
-   }
- }
-
- if(!res.length &&!textoOriginal){
-   c.innerHTML=`<div style="padding:14px;text-align:center;color:#999;font-size:12px">Escribe barrio o calle de Dolores...</div>`;
+ if(!res.length){
+   c.innerHTML=`<div style="padding:12px">
+     <div style="font-weight:800;font-size:12px;color:#111">¿No ves tu dirección?</div>
+     <div style="font-size:11px;color:#666;margin-top:4px">Escribe más: Ej: Nayarit 31, Tabasco 51, Morelos 10 - Solo Dolores Hidalgo</div>
+     <div style="margin-top:8px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;cursor:pointer" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')">
+       <div style="font-weight:900;font-size:12px;color:#16a34a">✅ USAR: ${textoOriginal.toUpperCase()}</div>
+       <div style="font-size:10px;color:#666">Usar tal cual escribiste - El conductor te encontrará por GPS</div>
+     </div>
+   </div>`;
    c.classList.add("show");
    return;
  }
-
- res.forEach(r=>{
-   let etiquetaNumero = r.numero? `<span style="background:#111;color:#fff;border-radius:6px;padding:2px 6px;font-size:9px;margin-left:6px">No. ${r.numero}</span>` : (/\d/.test(textoOriginal)? `<span style="background:#f59e0b;color:#fff;border-radius:6px;padding:2px 6px;font-size:8px;margin-left:6px">CERCANO AL ${textoOriginal.match(/\d+/)?.[0]||''}</span>`:'');
-   let exactitud = r.esExacto? '<span style="color:#16a34a;font-size:9px;font-weight:800">• NÚMERO EXACTO EN MAPA</span>' : '<span style="color:#999;font-size:9px">• Calle encontrada, número aproximado</span>';
-   html += `<div class="suggestion" data-lat="${r.lat}" data-lon="${r.lon}" data-exacta="${r.exacta.replace(/"/g,'&quot;')}" data-name="${r.name.replace(/"/g,'&quot;')}"><div style="display:flex;align-items:center;gap:12px;width:100%"><div style="width:38px;height:38px;background:#111;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="map-pin" style="width:16px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#111">${r.name} ${etiquetaNumero}</div><div style="font-size:11px;color:#16a34a;font-weight:700">${r.calle?r.calle+' • ':''}${r.barrio} ${exactitud}</div><div style="font-size:10px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.exacta.substring(0,90)}</div></div><div style="background:#E53935;color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:900">ELEGIR</div></div></div>`;
- });
-
- c.innerHTML = html;
-
- // Click en USAR DIRECCION TAL CUAL
- let btnExacto = c.querySelector("#usarExacto");
- if(btnExacto){
-   btnExacto.onclick=()=>{
-     let lat = CENTRO.lat + (Math.random()-0.5)*0.02;
-     let lng = CENTRO.lng + (Math.random()-0.5)*0.02;
-     // Si ya tenemos un pin cercano, usar ese
-     if(tipoS==="pickup" && pickupLat){ lat=pickupLat; lng=pickupLng; }
-     if(tipoS==="destination" && destinationLat){ lat=destinationLat; lng=destinationLng; }
-     // Para Tabasco 51 usamos coordenadas aproximadas de esa zona si las tenemos
-     let calleMatch = res.find(r=> r.calle && textoOriginal.toLowerCase().includes(r.calle.toLowerCase()));
-     if(calleMatch){ lat=calleMatch.lat; lng=calleMatch.lon; }
-
-     if(tipoS==="pickup"){
-       pickupLat=lat; pickupLng=lng; pickupName=textoOriginal + ", Dolores Hidalgo, Guanajuato - Dirección exacta escrita por cliente";
-       pickupInput.value=textoOriginal;
-       pickupSuggestions.classList.remove("show");
-       document.getElementById('btnClearOrigen').style.display='flex';
-       if(pickupMarker)map.removeLayer(pickupMarker);
-       pickupMarker=L.marker([lat,lng]).addTo(map).bindPopup(textoOriginal).openPopup();
-       map.setView([lat,lng],17);
-     } else {
-       destinationLat=lat; destinationLng=lng; destName=textoOriginal + ", Dolores Hidalgo, Guanajuato - Dirección exacta escrita por cliente";
-       destinationInput.value=textoOriginal;
-       destinationSuggestions.classList.remove("show");
-       if(destinationMarker)map.removeLayer(destinationMarker);
-       destinationMarker=L.marker([lat,lng]).addTo(map).bindPopup(textoOriginal).openPopup();
-       map.setView([lat,lng],17);
-     }
-     if(pickupLat&&destinationLat){
-       fetch(`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
-         if(d.routes&&d.routes[0]){
-           if(routeLayer)map.removeLayer(routeLayer);
-           routeLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map);
-           map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
-         }
-       });
-     }
-   };
+ let html="";
+ // Siempre mostrar opción de usar tal cual escribió
+ if(textoOriginal && textoOriginal.trim().length>=3){
+   html+=`<div class="suggestion usar-escrito" onclick="usarDestinoEscrito('${textoOriginal.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#16a34a;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="check" style="width:16px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:12px;color:#111">USAR: ${textoOriginal.toUpperCase()}</div><div style="font-size:10px;color:#16a34a;font-weight:700">Dirección tal cual escribiste - Para Nayarit 31, Tabasco 51, etc.</div></div></div></div>`;
  }
-
- // Click en resultados normales
- c.querySelectorAll(".suggestion:not(#usarExacto)").forEach(el=>{
-   el.onclick=()=>{
-     let lat=parseFloat(el.getAttribute("data-lat"));
-     let lon=parseFloat(el.getAttribute("data-lon"));
-     let exacta=el.getAttribute("data-exacta");
-     let name=el.getAttribute("data-name");
-     // Si el cliente escribió número, mantenerlo en el nombre
-     let numeroEscrito = textoOriginal.match(/\d+/)?.[0];
-     if(numeroEscrito &&!name.includes(numeroEscrito)){
-       name = `${textoOriginal.split(" ")[0]} ${numeroEscrito} - ${name}`;
-       exacta = `${textoOriginal}, ${exacta}`;
-     }
-     if(tipoS==="pickup"){
-       pickupLat=lat; pickupLng=lon; pickupName=exacta; pickupInput.value=name;
-       pickupSuggestions.classList.remove("show");
-       document.getElementById('btnClearOrigen').style.display='flex';
-       if(pickupMarker)map.removeLayer(pickupMarker);
-       pickupMarker=L.marker([lat,lon]).addTo(map);
-       map.setView([lat,lon],17);
-     } else {
-       destinationLat=lat; destinationLng=lon; destName=exacta; destinationInput.value=name;
-       destinationSuggestions.classList.remove("show");
-       if(destinationMarker)map.removeLayer(destinationMarker);
-       destinationMarker=L.marker([lat,lon]).addTo(map);
-       map.setView([lat,lon],17);
-     }
-     if(pickupLat&&destinationLat){
-       fetch(`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
-         if(d.routes&&d.routes[0]){
-           if(routeLayer)map.removeLayer(routeLayer);
-           routeLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map);
-           map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
-         }
-       });
-     }
-   };
+ res.forEach(r=>{
+   html+=`<div class="suggestion" onclick="seleccionarDestino(${r.lat},${r.lon},'${r.exacta.replace(/'/g,"").substring(0,100)}','${r.name.replace(/'/g,"")}')"><div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:36px;height:36px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#fff"></i></div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#111">${r.name}</div><div style="font-size:11px;color:#16a34a;font-weight:700">${r.calle} • ${r.barrio} • Dolores Hidalgo</div><div style="font-size:10px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.exacta.substring(0,90)}</div></div><div style="background:#E53935;color:#fff;border-radius:8px;padding:5px 8px;font-size:9px;font-weight:900">ELEGIR</div></div></div>`;
  });
- c.classList.add("show"); lucide.createIcons();
+ c.innerHTML=html;
+ c.classList.add("show");
+ lucide.createIcons();
 }
 
-let t1=null;pickupInput.addEventListener("input",function(){
- if(t1)clearTimeout(t1);
- const v=this.value.trim();
- if(v.length<1){pickupSuggestions.classList.remove("show");document.getElementById('btnClearOrigen').style.display='none';return;}
- document.getElementById('btnClearOrigen').style.display='flex';
- let instant = buscarLocalDolores(v);
- if(instant.length>0){ mostrar(pickupSuggestions,instant,"pickup", v); }
- t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup", v);},100);
-});
-let t2=null;destinationInput.addEventListener("input",function(){
+function seleccionarDestino(lat,lon,exacta,name){
+ destinationLat=lat; destinationLng=lon; destName=exacta; destinationInput.value=name;
+ destinationSuggestions.classList.remove("show");
+ if(destinationMarker)map.removeLayer(destinationMarker);
+ destinationMarker=L.marker([lat,lon]).addTo(map).bindPopup(name).openPopup();
+ map.setView([lat,lon],16);
+ if(pickupLat&&destinationLat){
+   fetch(`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
+     if(d.routes&&d.routes[0]){
+       if(routeLayer)map.removeLayer(routeLayer);
+       routeLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map);
+       map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
+     }
+   });
+ }
+}
+
+function usarDestinoEscrito(texto){
+ let lat = CENTRO.lat + (Math.random()-0.5)*0.015;
+ let lng = CENTRO.lng + (Math.random()-0.5)*0.015;
+ if(destinationLat){ lat=destinationLat; lng=destinationLng; }
+ destinationLat=lat; destinationLng=lng;
+ destName=texto + ", Dolores Hidalgo, Guanajuato - Dirección exacta cliente";
+ destinationInput.value=texto;
+ destinationSuggestions.classList.remove("show");
+ if(destinationMarker)map.removeLayer(destinationMarker);
+ destinationMarker=L.marker([lat,lng]).addTo(map).bindPopup(texto).openPopup();
+ map.setView([lat,lng],16);
+ if(pickupLat&&destinationLat){
+   fetch(`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
+     if(d.routes&&d.routes[0]){
+       if(routeLayer)map.removeLayer(routeLayer);
+       routeLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map);
+       map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});
+     }
+   });
+ }
+}
+
+let t2=null;
+destinationInput.addEventListener("input",function(){
  if(t2)clearTimeout(t2);
- if(this.value.length<1){destinationSuggestions.classList.remove("show");return;}
- let instant = buscarLocalDolores(this.value.trim());
- if(instant.length>0){ mostrar(destinationSuggestions,instant,"destination", this.value.trim()); }
- t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination", this.value.trim());},100);
+ const v=this.value.trim();
+ if(v.length<2){destinationSuggestions.classList.remove("show");return;}
+ destinationSuggestions.innerHTML=`<div style="padding:10px;text-align:center;font-size:11px;color:#666">🔍 Buscando en Dolores Hidalgo: ${v}...</div>`;
+ destinationSuggestions.classList.add("show");
+ t2=setTimeout(async()=>{
+   const res=await buscarDestinoDolores(v);
+   mostrarDestino(destinationSuggestions,res,v);
+ },150);
 });
-function limpiarOrigen(){pickupInput.value="";pickupLat=null;pickupLng=null;pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show");}
+
+// AUTO UBICACION AL ABRIR APP
 async function reverseGeocodeDolores(lat,lng){
  try{
    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
    const r = await fetch(url);
    const d = await r.json();
    if(d && d.display_name){ return d.display_name; }
-   return `Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)} - Dolores Hidalgo`;
- }catch(e){ return `Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
+   return `Ubicación GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)} - Dolores Hidalgo`;
+ }catch(e){ return `Ubicación GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
 }
+
+async function autoUbicacionInicial(){
+ document.getElementById("origenStatus").innerText="📍 Detectando tu ubicación GPS...";
+ pickupInput.value="Obteniendo ubicación automática en Dolores Hidalgo...";
+ if(!navigator.geolocation){
+   document.getElementById("origenStatus").innerText="⚠️ Activa GPS para auto-detectar";
+   pickupInput.value="Activa tu GPS y toca el botón de ubicación";
+   return;
+ }
+ navigator.geolocation.getCurrentPosition(async pos=>{
+   pickupLat=pos.coords.latitude; pickupLng=pos.coords.longitude;
+   pickupInput.value="Ubicación GPS obtenida, buscando dirección exacta...";
+   if(pickupMarker)map.removeLayer(pickupMarker);
+   pickupMarker=L.marker([pickupLat,pickupLng]).addTo(map);
+   map.setView([pickupLat,pickupLng],17);
+   let dir = await reverseGeocodeDolores(pickupLat,pickupLng);
+   pickupName=dir;
+   pickupInput.value="📍 Mi ubicación actual - "+dir.split(",")[0]+", Dolores Hidalgo";
+   document.getElementById("origenStatus").innerHTML="✅ <b>Ubicación detectada automática</b> - GPS exacto Dolores Hidalgo";
+   document.getElementById("stepOrigen").style.borderColor="#16a34a";
+   document.getElementById("stepOrigen").style.background="#f0fdf4";
+   document.getElementById("btnClearOrigen").style.display="none";
+   lucide.createIcons();
+ }, error=>{
+   document.getElementById("origenStatus").innerText="⚠️ Permite ubicación GPS y recarga";
+   pickupInput.value="Toca el botón negro para detectar tu ubicación GPS";
+   console.log("Error GPS inicial", error);
+ }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+}
+
+function limpiarOrigen(){ pickupInput.value=""; pickupLat=null; pickupLng=null; pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show"); autoUbicacionInicial(); }
+
 async function usarMiUbicacion(){
+ document.getElementById("origenStatus").innerText="📍 Actualizando GPS...";
+ pickupInput.value="Obteniendo ubicación exacta...";
  navigator.geolocation.getCurrentPosition(async pos=>{
    pickupLat=pos.coords.latitude;pickupLng=pos.coords.longitude;
    pickupInput.value="Obteniendo dirección exacta en Dolores...";
-   document.getElementById('btnClearOrigen').style.display='flex';
    if(pickupMarker)map.removeLayer(pickupMarker);
    pickupMarker=L.marker([pickupLat,pickupLng]).addTo(map);
    map.setView([pickupLat,pickupLng],17);
    let direccionExacta = await reverseGeocodeDolores(pickupLat,pickupLng);
    pickupName=direccionExacta;
-   pickupInput.value="Mi ubicación - "+direccionExacta.split(",")[0];
- });
+   pickupInput.value="📍 Mi ubicación - "+direccionExacta.split(",")[0]+", Dolores Hidalgo";
+   document.getElementById("origenStatus").innerHTML="✅ Ubicación actualizada GPS exacto";
+ },null,{enableHighAccuracy:true});
 }
+
 document.getElementById("calculateButton").onclick=async()=>{
- if(!pickupLat||!destinationLat){alert("Por favor selecciona una dirección de la lista o usa 'USAR ESTA DIRECCIÓN'");return;}
+ if(!pickupLat){ alert("Espera a que detecte tu ubicación GPS automática o toca el botón negro de ubicación"); autoUbicacionInicial(); return; }
+ if(!destinationLat){ alert("Escribe a dónde vas en Dolores Hidalgo y selecciona una opción o usa 'USAR:...'"); return; }
  let km=1.5, tiempo=8, baseMoto=cfg.baseMoto||35, baseCarro=cfg.baseCarro||55;
  try{ const url=`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const r=await fetch(url);const d=await r.json(); if(d.routes&&d.routes[0]){ const route=d.routes[0]; km=route.distance/1000; tiempo=Math.ceil(route.duration/60); if(route.distance>2000){let e=route.distance-2000;baseMoto=cfg.baseMoto+Math.ceil(e/650)*5; baseCarro=cfg.baseCarro+Math.ceil(e/650)*8;} if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(map); } }catch(e){}
  datosViaje={origen:pickupName,destino:destName,distKm:km.toFixed(2),tiempoMin:tiempo,precioMoto:baseMoto,precioCarro:baseCarro,origenLat:pickupLat,origenLng:pickupLng,destLat:destinationLat,destLng:destinationLng};
@@ -592,8 +542,8 @@ function renderPedidosConductor(){
  let distConductor = "Calculando distancia...";
  if(ultimaPosConductor){ let d=distMts(ultimaPosConductor.lat,ultimaPosConductor.lng,p.origenLat,p.origenLng); distConductor=`Estás a ${(d/1000).toFixed(2)} km del cliente • SOLO A TI POR 10s`; }
  let origenMostrar = p.origen;
- if(p.origen.toLowerCase().includes("ubicación actual") || p.origen.toLowerCase().includes("dirección exacta escrita")){ origenMostrar = `📍 DIRECCIÓN EXACTA CLIENTE<br><span style="font-size:12px;color:#16a34a;font-weight:800">${p.origen.replace(" - Dirección exacta escrita por cliente","").replace(", Dolores Hidalgo, Guanajuato","")}</span><br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`; } else { origenMostrar = `📍 ${p.origen}<br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`; }
- cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • EXCLUSIVO PARA TI 10s</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800">${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 ${p.km} km • Si no aceptas en 10s pasa al otro conductor</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px">📍 Ver cliente en Maps</button></div>`;
+ if(p.origen.toLowerCase().includes("ubicación") || p.origen.toLowerCase().includes("gps")){ origenMostrar = `📍 UBICACIÓN GPS CLIENTE<br><span style="font-size:12px;color:#16a34a;font-weight:800">${p.origen.split(",")[0]}</span><br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`; }
+ cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • EXCLUSIVO 10s</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800">${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 ${p.km} km • Si no aceptas en 10s pasa al otro conductor</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px">📍 Ver cliente en Maps</button></div>`;
  iniciarTimerPedido(); iniciarSonidoPedido(); lucide.createIcons();
 }
 function abrirGoogleMapsRecogidaDirecta(lat,lng){ window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,'_blank'); }
@@ -618,7 +568,7 @@ function aceptarPedido(id){
  if(db){
    db.ref('asignaciones/'+id).once('value').then(snap=>{
      let asig=snap.val();
-     if(!asig || asig.conductorId!==ses.id){ alert('Este pedido ya rotó a otro conductor, espera que te vuelva a tocar'); pedidosGlobales=[]; renderPedidosConductor(); return; }
+     if(!asig || asig.conductorId!==ses.id){ alert('Este pedido ya rotó a otro conductor'); pedidosGlobales=[]; renderPedidosConductor(); return; }
      ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
      let idx=conductores.findIndex(x=>x.id===ses.id); if(idx>=0){ conductores[idx].estado='ocupado'; localStorage.setItem('kigo_conductores', JSON.stringify(conductores)); }
      if(db) db.ref('conductores/'+ses.id+'/estado').set('ocupado');
@@ -703,6 +653,10 @@ if(db){
   });
 }
 lucide.createIcons(); renderConductores();
+// AUTO-DETECCION AL ABRIR LA APP EN CUALQUIER CELULAR
+window.addEventListener('load',()=>{
+  setTimeout(()=>{ autoUbicacionInicial(); },800);
+});
 </script>
 </body>
 </html>

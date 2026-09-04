@@ -13,7 +13,6 @@
 .app{max-width:500px;margin:0 auto;background:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
 .map-container{position:relative;width:100%;height:48vh;min-height:300px;flex-shrink:0}
 #map,#mapConfirm,#mapConductor,#mapCliente{width:100%;height:100%}
-/* LOGO CHIQUITICO ARRIBA CENTRADO - NO TAPA MAPA */
 #logoTop{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:900;background:#fff;border-radius:999px;padding:4px 10px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.12);border:1px solid #eee;pointer-events:none}
 #logoTop img{width:18px;height:18px}
 #logoTop span{font-weight:900;font-size:11px;color:#111}
@@ -119,49 +118,47 @@ function centrarMapa(){ map.setView([CENTRO.lat,CENTRO.lng],14); }
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
-// BUSQUEDA MEJORADA - MAS OPCIONES POR CADA LETRA
+// BUSQUEDA CORREGIDA ULTRA RAPIDA - AHORA SI FUNCIONA
 async function buscarColoniasExactas(t){
- if(!t||t.length<1) return [];
+ if(!t||t.trim().length<1) return [];
  try{
-   const q = encodeURIComponent(t.trim());
-   const viewbox = "-101.10,21.30,-100.75,21.00";
-   // 3 busquedas combinadas para mas opciones
-   let resultados = [];
-   // 1) Calle exacta en Dolores
-   try{
-     const url1 = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&city=Dolores Hidalgo&state=Guanajuato&countrycodes=mx&limit=12&viewbox=${viewbox}&bounded=0&addressdetails=1`;
-     let r1 = await fetch(url1); let d1 = await r1.json();
-     resultados = resultados.concat(d1);
-   }catch(e){}
-   // 2) Si escribe poco, busca con photon-like mas amplio
-   if(resultados.length<5){
-     try{
-       const url2 = `https://nominatim.openstreetmap.org/search?format=json&street=${q}&city=Dolores Hidalgo&countrycodes=mx&limit=12&addressdetails=1`;
-       let r2 = await fetch(url2); let d2 = await r2.json();
-       resultados = resultados.concat(d2);
-     }catch(e){}
+   const query = t.trim();
+   const q = encodeURIComponent(query + " Dolores Hidalgo");
+   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=12&countrycodes=mx&addressdetails=1&accept-language=es`;
+   const r = await fetch(url);
+   const data = await r.json();
+   if(data && data.length>0){
+     return data.map(x=>({
+       lat: parseFloat(x.lat),
+       lon: parseFloat(x.lon),
+       name: (x.display_name.split(",")[0] || x.display_name).substring(0,70),
+       exacta: x.display_name
+     }));
    }
-   // Deduplicar por display_name
-   let unicos = [];
-   let seen = new Set();
-   resultados.forEach(x=>{
-     if(!seen.has(x.display_name)){
-       seen.add(x.display_name);
-       unicos.push({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:(x.address?.road||x.address?.neighbourhood||x.name||x.display_name.split(",")[0]).substring(0,60),direccion:x.display_name,exacta:x.display_name});
-     }
-   });
-   return unicos.slice(0,12);
- }catch(e){ return []; }
+   // Fallback rapido si no encuentra con ciudad
+   const url2 = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=12&countrycodes=mx&addressdetails=1`;
+   const r2 = await fetch(url2);
+   const data2 = await r2.json();
+   return data2.map(x=>({
+     lat: parseFloat(x.lat),
+     lon: parseFloat(x.lon),
+     name: (x.display_name.split(",")[0]).substring(0,70),
+     exacta: x.display_name
+   }));
+ }catch(e){
+   console.log("Error búsqueda", e);
+   return [];
+ }
 }
 function mostrar(c,res,tipoS){
  c.innerHTML="";
- if(!res.length){ c.innerHTML=`<div style="padding:12px;text-align:center;color:#999;font-size:11px">Sigue escribiendo para más opciones exactas...</div>`; c.classList.add("show"); return; }
+ if(!res.length){ c.innerHTML=`<div style="padding:10px;text-align:center;color:#999;font-size:11px">Sin resultados, sigue escribiendo...</div>`; c.classList.add("show"); return; }
  res.forEach(r=>{
    const el=document.createElement("div"); el.className="suggestion";
    el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:32px;height:32px;background:#f1f1f1;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#E53935"></i></div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.exacta}</div></div><div style="background:#111;color:#fff;border-radius:6px;padding:4px 8px;font-size:8px;font-weight:800">EXACTA</div></div>`;
    el.onclick=async()=>{
-     if(tipoS==="pickup"){ pickupLat=r.lat;pickupLng=r.lon;pickupName=r.exacta;pickupInput.value=r.name;pickupSuggestions.classList.remove("show"); document.getElementById('btnClearOrigen').style.display='flex'; if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map); }
-     else{ destinationLat=r.lat;destinationLng=r.lon;destName=r.exacta;destinationInput.value=r.name;destinationSuggestions.classList.remove("show"); if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map); }
+     if(tipoS==="pickup"){ pickupLat=r.lat;pickupLng=r.lon;pickupName=r.exacta;pickupInput.value=r.name;pickupSuggestions.classList.remove("show"); document.getElementById('btnClearOrigen').style.display='flex'; if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map); map.setView([r.lat,r.lon],16); }
+     else{ destinationLat=r.lat;destinationLng=r.lon;destName=r.exacta;destinationInput.value=r.name;destinationSuggestions.classList.remove("show"); if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map); map.setView([r.lat,r.lon],16); }
      if(pickupLat&&destinationLat){ try{ const url=`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const rr=await fetch(url);const dd=await rr.json(); if(dd.routes&&dd.routes[0]){ if(routeLayer)map.removeLayer(routeLayer); routeLayer=L.geoJSON(dd.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map); map.fitBounds(routeLayer.getBounds(),{padding:[40,40]}); } }catch(e){} }
      lucide.createIcons();
    };
@@ -174,13 +171,12 @@ let t1=null;pickupInput.addEventListener("input",function(){
  const v=this.value.trim();
  if(v.length<1){pickupSuggestions.classList.remove("show");document.getElementById('btnClearOrigen').style.display='none';return;}
  document.getElementById('btnClearOrigen').style.display='flex';
- // MAS RAPIDO - 150ms POR CADA LETRA
- t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup");},150);
+ t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup");},80);
 });
 let t2=null;destinationInput.addEventListener("input",function(){
  if(t2)clearTimeout(t2);
  if(this.value.length<1){destinationSuggestions.classList.remove("show");return;}
- t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination");},150);
+ t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination");},80);
 });
 function limpiarOrigen(){pickupInput.value="";pickupLat=null;pickupLng=null;pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show");}
 async function usarMiUbicacion(){navigator.geolocation.getCurrentPosition(async pos=>{pickupLat=pos.coords.latitude;pickupLng=pos.coords.longitude;pickupInput.value="Mi ubicación actual";pickupName="Mi ubicación actual";document.getElementById('btnClearOrigen').style.display='flex';if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([pickupLat,pickupLng]).addTo(map);map.setView([pickupLat,pickupLng],17);});}
@@ -301,8 +297,6 @@ function actualizarConductorEnMapaCliente(lat,lng,pedido){
 function centrarMapaCliente(){ if(ultimaPosCliente&&mapCliente) mapCliente.setView([ultimaPosCliente.lat,ultimaPosCliente.lng],17,{animate:true}); }
 function contactarConductor(){ let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(!ultimo) return; db.ref('pedidos_aceptados/'+ultimo.id).once('value').then(s=>{ let d=s.val(); if(!d) return; db.ref('conductores/'+d.conductorId).once('value').then(cs=>{ let c=cs.val(); if(c&&c.telefono) window.open(`https://wa.me/52${c.telefono}`,'_blank'); }); }); }
 function cancelarPedidoCliente(){ if(!confirm('¿Cancelar pedido?')) return; let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(ultimo && db){ db.ref('pedidos/'+ultimo.id).remove(); db.ref('pedidos_disponibles/'+ultimo.id).remove(); db.ref('asignaciones/'+ultimo.id).remove(); db.ref('pedidos_aceptados/'+ultimo.id).remove(); } localStorage.removeItem('kigo_ultimo_pedido_cliente'); document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.remove('show'); irInicioForzado(); }
-
-// MOTOR 3 PASOS COMO PEDISTE - CERCANIA + ALFABETICO A-Z + REINICIO CICLICO
 function getConductoresOrdenadosMotor(pedido, todosConductores){
  let lista = Object.values(todosConductores).filter(c=>c.estado==='en_linea');
  lista = lista.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===pedido.tipo; });
@@ -311,7 +305,6 @@ function getConductoresOrdenadosMotor(pedido, todosConductores){
    if(c.lat && c.lng){ dist = distMts(c.lat,c.lng,pedido.origenLat,pedido.origenLng); }
    return {...c, distancia:dist};
  });
- // Orden: primero por distancia (si tienen GPS), luego alfabético A-Z
  lista.sort((a,b)=>{
    if(a.distancia!==9999999 && b.distancia!==9999999){ if(a.distancia!==b.distancia) return a.distancia-b.distancia; }
    if(a.distancia===9999999 && b.distancia!==9999999) return 1;
@@ -328,25 +321,19 @@ function asignarPorCercania(pedidoId, excluidosPrevios){
      let ped=s.val(); if(!ped) return;
      let ordenadosCompleto = getConductoresOrdenadosMotor(ped, todos);
      if(ordenadosCompleto.length===0){
-       console.log("No hay conductores en línea, reintentando en 10s...");
        setTimeout(()=>{ asignarPorCercania(pedidoId, []); },10000);
        return;
      }
-     // Filtrar excluidos
      let disponibles = ordenadosCompleto.filter(c=>!excluidosPrevios.includes(c.id));
-     // Si ya pasamos por todos (llegamos a Z), REINICIAMOS CICLO como pediste
      if(disponibles.length===0){
-       console.log("Llegamos a Z, reiniciando ciclo desde A...");
        disponibles = ordenadosCompleto;
        excluidosPrevios = [];
      }
      let masCercano = disponibles[0];
-     console.log(`Asignando a: ${masCercano.nombre} - ${(masCercano.distancia/1000).toFixed(2)}km - Excluidos: ${excluidosPrevios.length}`);
      db.ref('asignaciones/'+pedidoId).set({conductorId:masCercano.id, conductorNombre:masCercano.nombre, expira:Date.now()+10000, excluidos:excluidosPrevios, distanciaKm:(masCercano.distancia/1000).toFixed(2), totalConductores:ordenadosCompleto.length});
    });
  });
 }
-
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); const tabs=document.querySelectorAll('.tab'); if(name==='conductores') tabs[0].classList.add('active'); else tabs[1].classList.add('active'); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
 function cerrarAdmin(){ document.getElementById('modalAdmin').classList.remove('show'); }

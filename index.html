@@ -117,40 +117,48 @@ actualizarClimaDolores();
 function centrarMapa(){ map.setView([CENTRO.lat,CENTRO.lng],14); }
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+
+// BUSQUEDA REPARADA 100% - PRIORIDAD DOLORES HIDALGO RAPIDA
 const cacheBusqueda = new Map();
 async function buscarColoniasExactas(t){
- if(!t||t.trim().length<2) return [];
+ if(!t||t.trim().length<1) return [];
  const key = t.trim().toLowerCase();
  if(cacheBusqueda.has(key)) return cacheBusqueda.get(key);
  try{
    const q = t.trim();
    const qEnc = encodeURIComponent(q);
    let resultados = [];
+   // 1 - Busqueda directa Dolores Hidalgo - SIN BLOQUEO bounded=0 para que siempre de resultados
    try{
-     const urlLocal = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&city=Dolores Hidalgo&state=Guanajuato&countrycodes=mx&limit=12&viewbox=-101.08,21.26,-100.78,21.04&bounded=1&addressdetails=1&accept-language=es`;
-     const r1 = await fetch(urlLocal);
+     const url1 = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}, Dolores Hidalgo&countrycodes=mx&limit=12&viewbox=-101.2,21.35,-100.65,20.95&bounded=0&addressdetails=1&accept-language=es`;
+     const r1 = await fetch(url1);
      const d1 = await r1.json();
      if(d1 && d1.length>0){
-       resultados = d1.map(x=>({
-         lat: parseFloat(x.lat),
-         lon: parseFloat(x.lon),
-         name: (x.address?.road || x.address?.neighbourhood || x.address?.suburb || x.name || x.display_name.split(",")[0]).substring(0,70),
-         exacta: x.display_name,
-         barrio: x.address?.neighbourhood || x.address?.suburb || ""
-       }));
+       d1.forEach(x=>{
+         if(x.display_name.toLowerCase().includes("dolores") || x.display_name.toLowerCase().includes("guanajuato") || resultados.length<3){
+           resultados.push({
+             lat: parseFloat(x.lat),
+             lon: parseFloat(x.lon),
+             name: (x.display_name.split(",")[0]).substring(0,70),
+             exacta: x.display_name,
+             barrio: x.address?.neighbourhood || x.address?.suburb || x.address?.quarter || ""
+           });
+         }
+       });
      }
    }catch(e){}
-   if(resultados.length<4){
+   // 2 - Busqueda calle especifica en Dolores
+   if(resultados.length<8){
      try{
-       const urlCalle = `https://nominatim.openstreetmap.org/search?format=json&street=${qEnc}&city=Dolores Hidalgo&county=Dolores Hidalgo&state=Guanajuato&countrycodes=mx&limit=12&addressdetails=1`;
-       const r2 = await fetch(urlCalle);
+       const url2 = `https://nominatim.openstreetmap.org/search?format=json&street=${qEnc}&city=Dolores Hidalgo&countrycodes=mx&limit=12&addressdetails=1`;
+       const r2 = await fetch(url2);
        const d2 = await r2.json();
        d2.forEach(x=>{
          if(!resultados.find(r=>r.exacta===x.display_name)){
            resultados.push({
              lat: parseFloat(x.lat),
              lon: parseFloat(x.lon),
-             name: (x.address?.road || x.display_name.split(",")[0]).substring(0,70),
+             name: (x.display_name.split(",")[0]).substring(0,70),
              exacta: x.display_name,
              barrio: x.address?.neighbourhood || ""
            });
@@ -158,35 +166,30 @@ async function buscarColoniasExactas(t){
        });
      }catch(e){}
    }
-   if(resultados.length<4){
+   // 3 - Fallback general Mexico para no dejar sin opciones
+   if(resultados.length===0){
      try{
-       const urlBarrio = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}, Dolores Hidalgo, Guanajuato&limit=12&countrycodes=mx&addressdetails=1`;
-       const r3 = await fetch(urlBarrio);
+       const url3 = `https://nominatim.openstreetmap.org/search?format=json&q=${qEnc}&countrycodes=mx&limit=12&addressdetails=1`;
+       const r3 = await fetch(url3);
        const d3 = await r3.json();
-       d3.forEach(x=>{
-         if(x.display_name.toLowerCase().includes("dolores")){
-           if(!resultados.find(r=>r.exacta===x.display_name)){
-             resultados.push({
-               lat: parseFloat(x.lat),
-               lon: parseFloat(x.lon),
-               name: (x.display_name.split(",")[0]).substring(0,70),
-               exacta: x.display_name,
-               barrio: x.address?.neighbourhood || ""
-             });
-           }
-         }
-       });
+       resultados = d3.map(x=>({
+         lat: parseFloat(x.lat),
+         lon: parseFloat(x.lon),
+         name: (x.display_name.split(",")[0]).substring(0,70),
+         exacta: x.display_name,
+         barrio: x.address?.neighbourhood || ""
+       }));
      }catch(e){}
    }
    const finalRes = resultados.slice(0,12);
    cacheBusqueda.set(key, finalRes);
-   if(cacheBusqueda.size>50){ const firstKey = cacheBusqueda.keys().next().value; cacheBusqueda.delete(firstKey); }
+   if(cacheBusqueda.size>60){ const fk = cacheBusqueda.keys().next().value; cacheBusqueda.delete(fk); }
    return finalRes;
- }catch(e){ console.log("Error búsqueda Dolores", e); return []; }
+ }catch(e){ return []; }
 }
 function mostrar(c,res,tipoS){
  c.innerHTML="";
- if(!res.length){ c.innerHTML=`<div style="padding:10px;text-align:center;color:#999;font-size:11px">Sin resultados, sigue escribiendo barrio o calle de Dolores...</div>`; c.classList.add("show"); return; }
+ if(!res.length){ c.innerHTML=`<div style="padding:10px;text-align:center;color:#999;font-size:11px">Escribe barrio o calle de Dolores...</div>`; c.classList.add("show"); return; }
  res.forEach(r=>{
    const el=document.createElement("div"); el.className="suggestion";
    el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:32px;height:32px;background:#f1f1f1;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#E53935"></i></div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.barrio?r.barrio+' • ':''}${r.exacta}</div></div><div style="background:#16a34a;color:#fff;border-radius:6px;padding:4px 8px;font-size:8px;font-weight:800">DOLORES</div></div>`;
@@ -203,30 +206,24 @@ function mostrar(c,res,tipoS){
 let t1=null;pickupInput.addEventListener("input",function(){
  if(t1)clearTimeout(t1);
  const v=this.value.trim();
- if(v.length<2){pickupSuggestions.classList.remove("show");document.getElementById('btnClearOrigen').style.display='none';return;}
+ if(v.length<1){pickupSuggestions.classList.remove("show");document.getElementById('btnClearOrigen').style.display='none';return;}
  document.getElementById('btnClearOrigen').style.display='flex';
- t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup");},80);
+ t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup");},60);
 });
 let t2=null;destinationInput.addEventListener("input",function(){
  if(t2)clearTimeout(t2);
- if(this.value.length<2){destinationSuggestions.classList.remove("show");return;}
- t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination");},80);
+ if(this.value.length<1){destinationSuggestions.classList.remove("show");return;}
+ t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination");},60);
 });
 function limpiarOrigen(){pickupInput.value="";pickupLat=null;pickupLng=null;pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show");}
-
-// REVERSE GEOCODING PARA UBICACION ACTUAL - NUEVO
 async function reverseGeocodeDolores(lat,lng){
  try{
    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
    const r = await fetch(url);
    const d = await r.json();
-   if(d && d.display_name){
-     return d.display_name;
-   }
-   return `Ubicación actual del cliente: ${lat.toFixed(5)}, ${lng.toFixed(5)} - Dolores Hidalgo`;
- }catch(e){
-   return `Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
- }
+   if(d && d.display_name){ return d.display_name; }
+   return `Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)} - Dolores Hidalgo`;
+ }catch(e){ return `Ubicación actual: ${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
 }
 async function usarMiUbicacion(){
  navigator.geolocation.getCurrentPosition(async pos=>{
@@ -239,10 +236,8 @@ async function usarMiUbicacion(){
    let direccionExacta = await reverseGeocodeDolores(pickupLat,pickupLng);
    pickupName=direccionExacta;
    pickupInput.value="Mi ubicación actual - "+direccionExacta.split(",")[0];
-   console.log("Ubicación actual reverse:", direccionExacta);
  });
 }
-
 document.getElementById("calculateButton").onclick=async()=>{
  if(!pickupLat||!destinationLat){alert("Llena origen y destino exactos");return;}
  let km=1.5, tiempo=8, baseMoto=cfg.baseMoto||35, baseCarro=cfg.baseCarro||55;
@@ -360,8 +355,6 @@ function actualizarConductorEnMapaCliente(lat,lng,pedido){
 function centrarMapaCliente(){ if(ultimaPosCliente&&mapCliente) mapCliente.setView([ultimaPosCliente.lat,ultimaPosCliente.lng],17,{animate:true}); }
 function contactarConductor(){ let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(!ultimo) return; db.ref('pedidos_aceptados/'+ultimo.id).once('value').then(s=>{ let d=s.val(); if(!d) return; db.ref('conductores/'+d.conductorId).once('value').then(cs=>{ let c=cs.val(); if(c&&c.telefono) window.open(`https://wa.me/52${c.telefono}`,'_blank'); }); }); }
 function cancelarPedidoCliente(){ if(!confirm('¿Cancelar pedido?')) return; let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(ultimo && db){ db.ref('pedidos/'+ultimo.id).remove(); db.ref('pedidos_disponibles/'+ultimo.id).remove(); db.ref('asignaciones/'+ultimo.id).remove(); db.ref('pedidos_aceptados/'+ultimo.id).remove(); } localStorage.removeItem('kigo_ultimo_pedido_cliente'); document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.remove('show'); irInicioForzado(); }
-
-// MOTOR CORREGIDO - ROTACION OBLIGATORIA ENTRE TODOS LOS CONDUCTORES
 function getConductoresOrdenadosMotor(pedido, todosConductores){
  let lista = Object.values(todosConductores).filter(c=>c.estado==='en_linea');
  lista = lista.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===pedido.tipo; });
@@ -386,24 +379,19 @@ function asignarPorCercania(pedidoId, excluidosPrevios){
      let ped=s.val(); if(!ped) return;
      let ordenadosCompleto = getConductoresOrdenadosMotor(ped, todos);
      if(ordenadosCompleto.length===0){
-       console.log("No hay conductores en línea, reintentando en 5s...");
        setTimeout(()=>{ asignarPorCercania(pedidoId, []); },5000);
        return;
      }
-     // ROTACION OBLIGATORIA - si ya se le envio a todos, reinicia ciclo inmediatamente
      let disponibles = ordenadosCompleto.filter(c=>!excluidosPrevios.includes(c.id));
      if(disponibles.length===0){
-       console.log("Rotación completa, reiniciando entre los 2 conductores...");
        disponibles = ordenadosCompleto;
        excluidosPrevios = [];
      }
      let masCercano = disponibles[0];
-     console.log(`[ROTACION] Enviando a: ${masCercano.nombre} - ${(masCercano.distancia/1000).toFixed(2)}km - Vuelta ${excluidosPrevios.length+1}/${ordenadosCompleto.length} - Excluidos: [${excluidosPrevios.join(",")}]`);
      db.ref('asignaciones/'+pedidoId).set({conductorId:masCercano.id, conductorNombre:masCercano.nombre, expira:Date.now()+10000, excluidos:excluidosPrevios, distanciaKm:(masCercano.distancia/1000).toFixed(2), totalConductores:ordenadosCompleto.length, rotacion:excluidosPrevios.length+1});
    });
  });
 }
-
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); const tabs=document.querySelectorAll('.tab'); if(name==='conductores') tabs[0].classList.add('active'); else tabs[1].classList.add('active'); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
 function cerrarAdmin(){ document.getElementById('modalAdmin').classList.remove('show'); }
@@ -440,15 +428,14 @@ function renderPedidosConductor(){
  vacio.style.display='none';
  const p=pedidosGlobales[0];
  let distConductor = "Calculando distancia...";
- if(ultimaPosConductor){ let d=distMts(ultimaPosConductor.lat,ultimaPosConductor.lng,p.origenLat,p.origenLng); distConductor=`Estás a ${(d/1000).toFixed(2)} km del cliente • Prioridad cercanía`; }
- // Mostrar direccion exacta si es ubicacion actual
+ if(ultimaPosConductor){ let d=distMts(ultimaPosConductor.lat,ultimaPosConductor.lng,p.origenLat,p.origenLng); distConductor=`Estás a ${(d/1000).toFixed(2)} km del cliente`; }
  let origenMostrar = p.origen;
  if(p.origen.toLowerCase().includes("ubicación actual") || p.origen.toLowerCase().includes("ubicacion actual")){
-   origenMostrar = `📍 UBICACIÓN ACTUAL DEL CLIENTE<br><span style="font-size:12px;color:#16a34a;font-weight:800">${p.origen.replace("Mi ubicación actual - ","").replace("Mi ubicación actual","")}</span><br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)} • El cliente está aquí ahora mismo</span>`;
+   origenMostrar = `📍 UBICACIÓN ACTUAL DEL CLIENTE<br><span style="font-size:12px;color:#16a34a;font-weight:800">${p.origen.replace("Mi ubicación actual - ","").replace("Mi ubicación actual","")}</span><br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`;
  } else {
    origenMostrar = `📍 ${p.origen}<br><span style="font-size:10px;color:#666">GPS: ${p.origenLat.toFixed(5)}, ${p.origenLng.toFixed(5)}</span>`;
  }
- cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • ROTANDO ENTRE CONDUCTORES</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800">${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 Viaje ${p.km} km • 10s para aceptar • Si no aceptas pasa al otro conductor</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px">📍 Ver ubicación exacta del cliente en Maps</button></div>`;
+ cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#16a34a;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • ROTANDO</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:6px;font-size:10px;color:#16a34a;font-weight:800">${distConductor}</div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:12px;color:#111;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px;margin-top:4px">${origenMostrar}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 ${p.km} km • 10s para aceptar • Rota a otro si no aceptas</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button><button onclick="abrirGoogleMapsRecogidaDirecta(${p.origenLat},${p.origenLng})" style="width:100%;margin-top:8px;height:40px;border:1px solid #16a34a;border-radius:10px;background:#f0fdf4;color:#16a34a;font-weight:800;font-size:11px">📍 Ver ubicación cliente en Maps</button></div>`;
  iniciarTimerPedido(); iniciarSonidoPedido(); lucide.createIcons();
 }
 function abrirGoogleMapsRecogidaDirecta(lat,lng){ window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,'_blank'); }
@@ -460,9 +447,8 @@ function tiempoAgotado(){
    db.ref('asignaciones/'+p.id).once('value').then(snap=>{
      let asig=snap.val(); if(!asig) return;
      let excluidos = asig.excluidos||[]; excluidos.push(asig.conductorId);
-     console.log(`Tiempo agotado ${asig.conductorNombre}, rotando a siguiente...`);
      db.ref('asignaciones/'+p.id).remove();
-     setTimeout(()=>{ asignarPorCercania(p.id, excluidos); },800);
+     setTimeout(()=>{ asignarPorCercania(p.id, excluidos); },600);
    });
  }
  pedidosGlobales=[]; renderPedidosConductor();
@@ -474,7 +460,7 @@ function aceptarPedido(id){
  if(db){
    db.ref('asignaciones/'+id).once('value').then(snap=>{
      let asig=snap.val();
-     if(asig && asig.conductorId!==ses.id){ alert('Este pedido ya rotó a otro conductor, espera el siguiente ciclo'); pedidosGlobales=[]; renderPedidosConductor(); return; }
+     if(asig && asig.conductorId!==ses.id){ alert('Ya rotó a otro conductor'); pedidosGlobales=[]; renderPedidosConductor(); return; }
      ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
      db.ref('conductores/'+ses.id+'/estado').set('ocupado');
      db.ref('pedidos_disponibles/'+id).remove();
@@ -486,7 +472,7 @@ function aceptarPedido(id){
      localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
      document.getElementById('bloquePedidos').style.display='none';
      document.getElementById('bloqueViajeActivo').style.display='block';
-     document.getElementById('viajeInfo').innerHTML=`<div style="font-size:11px;color:#666">VIAJE EN CURSO - RUTA COMPLETA</div><b style="color:#111">${pedido.origen}</b><br>→ ${pedido.destino}<br><span style="color:#E53935;font-weight:900">$${pedido.precio}</span><br><span style="font-size:10px;color:#666">Cliente GPS: ${pedido.origenLat.toFixed(5)}, ${pedido.origenLng.toFixed(5)}</span>`;
+     document.getElementById('viajeInfo').innerHTML=`<div style="font-size:11px;color:#666">VIAJE EN CURSO</div><b style="color:#111">${pedido.origen}</b><br>→ ${pedido.destino}<br><span style="color:#E53935;font-weight:900">$${pedido.precio}</span>`;
      trazarRutaCompletaConductor(pedido);
    });
  }
@@ -541,7 +527,6 @@ if(db){
         if(Date.now()>data[pid].expira){
           let excluidos = data[pid].excluidos||[];
           excluidos.push(data[pid].conductorId);
-          console.log(`[CRON] Expiró ${data[pid].conductorNombre}, rotando... excluidos: ${excluidos.length}`);
           db.ref('asignaciones/'+pid).remove();
           setTimeout(()=>{ asignarPorCercania(pid, excluidos); },500);
         }

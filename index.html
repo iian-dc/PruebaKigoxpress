@@ -14,9 +14,7 @@
 .map-container{position:relative;width:100%;height:48vh;min-height:300px;flex-shrink:0}
 #map,#mapConfirm,#mapConductor,#mapCliente{width:100%;height:100%}
 #logoTop{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:900;background:#fff;border-radius:12px;padding:6px 14px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,.15);border:1px solid #eee}
-#logoTop img{width:24px;height:24px}
-#logoTop span{font-weight:900;font-size:13px;color:#111}
-#climaBanner{position:absolute;bottom:16px;left:12px;z-index:900;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.06);border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+#climaBanner{position:absolute;bottom:16px;left:12px;z-index:900;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.06);border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
 .map-controls{position:absolute;bottom:16px;right:12px;z-index:900;display:flex;flex-direction:column;gap:8px}
 .btn-map{width:42px;height:42px;border-radius:12px;border:1px solid #eee;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer}
 .panel{padding:16px 16px 110px 16px;border-radius:22px 22px 0 0;margin-top:-22px;position:relative;z-index:1000;background:#fff;flex:1;overflow-y:auto}
@@ -58,14 +56,11 @@
 .conductor-foto{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#f1f1f1;border:1px solid #eee}
 .pedidos-scroll{display:flex;justify-content:center;padding:14px}
 .pedido-card{width:92%;background:#fff;border:2px solid #111;border-radius:20px;padding:16px;box-shadow:0 10px 25px rgba(0,0,0,.12);position:relative;overflow:hidden}
-.timer-bar{position:absolute;bottom:0;left:0;height:5px;background:#16a34a;width:100%}
+.timer-bar{position:absolute;bottom:0;left:0;height:5px;background:#16a34a;width:100%;transition:width 0.1s linear}
 .btn-aceptar{width:100%;margin-top:14px;height:52px;border:none;border-radius:14px;background:#111;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
 .btn-aceptar-progress{position:absolute;left:0;top:0;bottom:0;background:rgba(22,163,74,.25);width:100%}
 .buscando{padding:40px 20px;text-align:center}.buscando-icon{width:56px;height:56px;border:3px solid #eee;border-top:3px solid #111;border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.pulse{width:80px;height:80px;background:#E53935;border-radius:50%;margin:0 auto;animation:pulse 1.5s infinite;display:flex;align-items:center;justify-content:center}
-@keyframes pulse{0%{transform:scale(.9)}50%{transform:scale(1.1)}100%{transform:scale(.9)}}
-/* ANIMACION LUPA BUSCANDO MOTO/CARRO */
 .buscando-anim-container{position:relative;width:140px;height:140px;margin:0 auto}
 .buscando-transporte{width:90px;height:90px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#f7f7f8;border:2px solid #eee;border-radius:20px;display:flex;align-items:center;justify-content:center}
 .lupa-anim{position:absolute;width:46px;height:46px;background:#111;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,.3);animation:buscarMoviendo 2.2s ease-in-out infinite}
@@ -80,36 +75,16 @@
 </head>
 <body>
 <div class="app">
-<div class="map-container">
-<div id="map"></div>
-<div id="logoTop"><img src="https://cdn-icons-png.flaticon.com/512/3774/3774083.png"><span>Kigo Xpress</span></div>
-<div id="climaBanner"><i id="climaIcon" data-lucide="sun" style="width:14px;color:#f59e0b"></i><div id="climaTexto" style="font-weight:800;font-size:10px;color:#111">Soleado</div><div id="climaTemp" style="font-weight:900;font-size:11px;color:#111;margin-left:6px">--°</div></div>
-<div class="map-controls"><button class="btn-map" onclick="centrarMapa()"><i data-lucide="crosshair" style="width:18px"></i></button></div>
-</div>
+<div class="map-container"><div id="map"></div><div id="logoTop"><img src="https://cdn-icons-png.flaticon.com/512/3774/3774083.png"><span>Kigo Xpress</span></div><div id="climaBanner"><i id="climaIcon" data-lucide="sun" style="width:14px;color:#f59e0b"></i><div id="climaTexto" style="font-weight:800;font-size:10px;color:#111">Soleado</div><div id="climaTemp" style="font-weight:900;font-size:11px;color:#111;margin-left:6px">--°</div></div><div class="map-controls"><button class="btn-map" onclick="centrarMapa()"><i data-lucide="crosshair" style="width:18px"></i></button></div></div>
 <div id="panel1" class="panel">
 <div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i data-lucide="map-pin" style="width:12px"></i> Dirección de Origen.</div><div class="input-wrap"><i data-lucide="map-pin" style="position:absolute;left:12px;width:16px;color:#16a34a;z-index:2"></i><input id="pickupInput" class="colonia-input" placeholder="Ej: Hidalgo 15, Centro..." autocomplete="off"><div class="input-actions"><button id="btnClearOrigen" class="btn-icon clear" onclick="limpiarOrigen()"><i data-lucide="x" style="width:14px"></i></button><button id="btnUbicacion" class="btn-icon loc" onclick="usarMiUbicacion()"><i data-lucide="crosshair" style="width:16px;color:#fff"></i></button></div><div id="pickupSuggestions" class="suggestions"></div></div></div>
 <div class="step"><div style="font-size:11px;font-weight:800;color:#666;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i data-lucide="flag" style="width:12px"></i> Dirección de Destino.</div><div style="position:relative"><i data-lucide="flag" style="position:absolute;left:12px;top:15px;width:16px;color:#dc2626"></i><input id="destinationInput" class="colonia-input" style="padding-right:14px" placeholder="Ej: Guerrero 20, Lindavista..." autocomplete="off"><div id="destinationSuggestions" class="suggestions"></div></div></div>
-<button id="calculateButton" class="btn-cotizar"><i data-lucide="search" style="width:16px;display:inline-block;vertical-align:middle;margin-right:6px"></i> CONFIRMAR DIRECCIÓN</button>
+<button id="calculateButton" class="btn-cotizar">CONFIRMAR DIRECCIÓN</button>
 </div>
-<div class="bottom-nav">
-<button class="btn-nav inicio" onclick="irInicio()"><i data-lucide="compass" style="width:18px"></i> Inicio</button>
-<button class="btn-nav admin" onclick="abrirAdmin()"><i data-lucide="shield-check" style="width:18px"></i> Admin</button>
-</div>
+<div class="bottom-nav"><button class="btn-nav inicio" onclick="irInicio()"><i data-lucide="compass" style="width:18px"></i> Inicio</button><button class="btn-nav admin" onclick="abrirAdmin()"><i data-lucide="shield-check" style="width:18px"></i> Admin</button></div>
 </div>
 
-<!-- BUSCANDO CONDUCTOR - MODIFICADO COMO PEDISTE, SIN DIRECCIONES -->
-<div id="panelBuscando">
-<div style="padding:20px;text-align:center;background:#fff;border-bottom:1px solid #eee"><div style="font-weight:900;font-size:18px;color:#111">Buscando conductor</div><div style="font-size:11px;color:#666;margin-top:4px">Estamos buscando tu transporte</div></div>
-<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px">
-<div class="buscando-anim-container">
-<div class="buscando-transporte"><img id="buscandoTransporteImg" src="https://img.icons8.com/3d-fluency/94/motorcycle.png" style="width:70px;height:70px;object-fit:contain"></div>
-<div class="lupa-anim"><i data-lucide="search" style="width:20px;height:20px;color:#fff"></i></div>
-</div>
-<div style="margin-top:28px;font-weight:900;font-size:18px;color:#111;text-align:center" id="buscandoTitulo">Buscando moto cercana...</div>
-<div id="buscandoInfo" style="margin-top:8px;font-size:12px;color:#666;text-align:center">Moviendo lupa para encontrar conductor</div>
-</div>
-<div style="padding:16px"><button onclick="cancelarPedidoCliente()" style="width:100%;height:48px;border-radius:14px;border:1px solid #eee;background:#fff;color:#666;font-weight:800">Cancelar pedido</button></div>
-</div>
+<div id="panelBuscando"><div style="padding:20px;text-align:center;background:#fff;border-bottom:1px solid #eee"><div style="font-weight:900;font-size:18px;color:#111">Buscando conductor</div></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px"><div class="buscando-anim-container"><div class="buscando-transporte"><img id="buscandoTransporteImg" src="https://img.icons8.com/3d-fluency/94/motorcycle.png" style="width:70px;height:70px;object-fit:contain"></div><div class="lupa-anim"><i data-lucide="search" style="width:20px;height:20px;color:#fff"></i></div></div><div style="margin-top:28px;font-weight:900;font-size:18px;color:#111;text-align:center" id="buscandoTitulo">Buscando moto cercana...</div><div id="buscandoInfo" style="margin-top:8px;font-size:12px;color:#666;text-align:center"></div></div><div style="padding:16px"><button onclick="cancelarPedidoCliente()" style="width:100%;height:48px;border-radius:14px;border:1px solid #eee;background:#fff;color:#666;font-weight:800">Cancelar pedido</button></div></div>
 
 <div id="panelClienteViaje"><div style="height:55vh;position:relative"><div id="mapCliente"></div><div style="position:absolute;top:12px;left:12px;right:12px;z-index:999;background:#fff;border:1px solid #eee;border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center"><img id="clienteConductorFoto" src="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid #111"><div style="flex:1"><div id="clienteConductorNombre" style="font-weight:900;font-size:14px">Conductor</div><div id="clienteConductorPlaca" style="font-size:11px;color:#666">Moto • En camino</div><div id="clienteConductorTiempo" style="font-size:11px;color:#16a34a;font-weight:800">Calculando...</div></div><div style="background:#111;color:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:900"><span id="clienteDistancia">-- km</span></div></div></div><div style="background:#fff;border-radius:28px 28px 0 0;margin-top:-22px;z-index:1000;padding:20px;flex:1;overflow-y:auto"><div id="clientePrecio" style="display:none"></div><div id="clienteOrigenTxt" style="display:none"></div><div id="clienteDestinoTxt" style="display:none"></div><div style="background:#111;color:#fff;border-radius:16px;padding:14px;display:flex;gap:10px"><div style="width:36px;height:36px;background:#16a34a;border-radius:10px;display:flex;align-items:center;justify-content:center"><i data-lucide="check" style="width:18px;color:#fff"></i></div><div><div style="font-weight:900;font-size:13px">Conductor asignado</div><div style="font-size:11px;opacity:.8">Te está buscando</div></div></div><div style="margin-top:18px;display:flex;gap:10px"><button onclick="contactarConductor()" style="flex:1;height:48px;border-radius:12px;border:1px solid #111;background:#fff;color:#111;font-weight:800">Llamar</button><button onclick="cancelarPedidoCliente()" style="flex:1;height:48px;border-radius:12px;border:none;background:#fff1f1;color:#E53935;font-weight:800">Cancelar</button></div></div></div>
 
@@ -122,7 +97,6 @@
 
 <div id="panel2" class="panel2"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><button type="button" onclick="volver()" style="width:42px;height:42px;border-radius:50%;background:#f1f1f1;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center"><i data-lucide="arrow-left" style="width:18px"></i></button><b id="destTxt" style="font-size:11px">Destino</b><b id="tiempoTxt" style="font-size:11px;margin-left:auto">--</b></div><h2 style="color:#111;margin:0 0 4px;font-size:22px;font-weight:900">Elige tu viaje</h2><div id="rutaSub" style="color:#666;font-size:12px;margin-bottom:14px"></div><div id="cardMoto" class="card" onclick="seleccionar('moto')"><div class="card-left"><img src="https://img.icons8.com/3d-fluency/94/motorcycle.png" style="width:70px"></div><div style="flex:1"><div class="card-title" style="font-weight:900">Moto</div><div class="card-pass"><i data-lucide="user" style="width:12px"></i> 1 pasajero</div><div id="motoTime">--</div></div><div class="price" id="motoPrice">$--</div></div><div id="cardCarro" class="card" onclick="seleccionar('carro')"><div class="card-left"><img src="https://img.icons8.com/3d-fluency/94/car.png" style="width:70px"></div><div style="flex:1"><div class="card-title" style="font-weight:900">Carro</div><div class="card-pass"><i data-lucide="users" style="width:12px"></i> Hasta 4</div><div id="carroTime">--</div></div><div class="price" id="carroPrice">$--</div></div><button type="button" id="btnElegir" class="btn-elegir" onclick="abrirMapaConfirm()"><span id="btnTxt">Selecciona</span></button></div>
 
-<!-- PANEL CONFIRMA PUNTO - MODIFICADO PARA RECALCULAR AL MOVER -->
 <div id="panel3" class="panel3"><div style="position:relative;height:58vh"><div id="mapConfirm"></div><div style="position:absolute;top:12px;left:12px;right:12px;z-index:999;background:#fff;border:1px solid #eee;border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:center"><button type="button" onclick="volverMapa()" style="width:36px;height:36px;border-radius:50%;background:#f1f1f1;border:1px solid #e5e7eb"><i data-lucide="arrow-left" style="width:16px"></i></button><div><div style="font-weight:900;font-size:13px">Confirma tu punto de recogida</div><div style="font-size:11px;color:#666">Toca el mapa donde quieres que te recojan - se recalcula ruta</div></div></div><div style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:999;background:#111;color:#fff;border-radius:999px;padding:8px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px"><i data-lucide="hand" style="width:14px"></i> Toca el mapa para mover punto</div></div><div style="background:#fff;flex:1;border-radius:28px 28px 0 0;margin-top:-28px;z-index:1000;padding:20px;box-shadow:0 -10px 30px rgba(0,0,0,.15)"><div style="display:flex;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#f1f1f1;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:18px;color:#16a34a"></i></div><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#666">PUNTO DE RECOGIDA (TOCA MAPA)</div><div id="txtPickupConfirm" style="font-weight:900;font-size:14px;color:#111;margin-top:2px">--</div></div></div><div style="margin-top:16px;display:flex;gap:10px"><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">DISTANCIA</div><div id="txtDistConfirm" style="font-weight:900;font-size:13px;color:#111">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px"><div style="font-size:10px;font-weight:800;color:#666">TOTAL</div><div id="txtPrecioConfirm" style="font-weight:900;font-size:13px;color:#E53935">--</div></div><div style="flex:1;background:#f7f7f8;border:1px solid #eee;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px"><img id="imgTransporteConfirm" style="width:32px;height:32px"><div><div style="font-size:10px;font-weight:800;color:#666">VIAJE</div><div id="txtTransporteConfirm" style="font-weight:900;font-size:12px;color:#111">--</div></div></div></div><button type="button" onclick="confirmarViajeFinal()" style="width:100%;height:56px;border-radius:16px;border:none;background:#E53935;color:#fff;font-weight:900;font-size:15px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px"><i data-lucide="check" style="width:18px"></i> CONFIRMAR RECOGIDA</button></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -142,7 +116,7 @@ function centrarMapa(){ map.setView([CENTRO.lat,CENTRO.lng],14); }
 const pickupInput=document.getElementById("pickupInput"),destinationInput=document.getElementById("destinationInput"),pickupSuggestions=document.getElementById("pickupSuggestions"),destinationSuggestions=document.getElementById("destinationSuggestions");
 function distMts(a,b,c,d){const R=6371000;const dLat=(c-a)*Math.PI/180;const dLon=(d-b)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 async function buscarColoniasExactas(t){ if(!t||t.length<2) return []; try{ const q = encodeURIComponent(t); const viewbox = "-101.05,21.25,-100.82,21.05"; const url1 = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&city=Dolores Hidalgo&state=Guanajuato&countrycodes=mx&limit=10&viewbox=${viewbox}&bounded=1&addressdetails=1`; let r1 = await fetch(url1); let d1 = await r1.json(); if(d1 && d1.length>0){ return d1.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:(x.address.road||x.name||x.display_name.split(",")[0]).substring(0,60),direccion:x.display_name,exacta:x.display_name})); } const url2 = `https://nominatim.openstreetmap.org/search?format=json&q=${q}, Dolores Hidalgo, Guanajuato&format=json&limit=8&countrycodes=mx&addressdetails=1`; let r2 = await fetch(url2); let d2 = await r2.json(); return d2.map(x=>({lat:parseFloat(x.lat),lon:parseFloat(x.lon),name:(x.address.road||x.display_name.split(",")[0]).substring(0,60),direccion:x.display_name,exacta:x.display_name})); }catch(e){ return []; } }
-function mostrar(c,res,tipoS){ c.innerHTML=""; if(!res.length){ c.innerHTML=`<div style="padding:12px;text-align:center;color:#999;font-size:12px">No se encontró "${tipoS==="pickup"?pickupInput.value:destinationInput.value}"</div>`; c.classList.add("show"); return; } res.forEach(r=>{ const el=document.createElement("div"); el.className="suggestion"; el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:32px;height:32px;background:#f1f1f1;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#E53935"></i></div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div><div style="font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.exacta}</div></div><div style="background:#111;color:#fff;border-radius:6px;padding:4px 8px;font-size:9px;font-weight:800">EXACTA</div></div>`; el.onclick=async()=>{ if(tipoS==="pickup"){ pickupLat=r.lat;pickupLng=r.lon;pickupName=r.exacta;pickupInput.value=r.name+" - "+r.exacta.split(",")[0];pickupSuggestions.classList.remove("show"); document.getElementById('btnClearOrigen').style.display='flex'; if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map); }else{ destinationLat=r.lat;destinationLng=r.lon;destName=r.exacta;destinationInput.value=r.name+" - "+r.exacta.split(",")[0];destinationSuggestions.classList.remove("show"); if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map); } if(pickupLat&&destinationLat){ try{ const url=`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const rr=await fetch(url);const dd=await rr.json(); if(dd.routes&&dd.routes[0]){ if(routeLayer)map.removeLayer(routeLayer); routeLayer=L.geoJSON(dd.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map); map.fitBounds(routeLayer.getBounds(),{padding:[40,40]}); } }catch(e){} } lucide.createIcons(); }; c.appendChild(el); }); c.classList.add("show"); lucide.createIcons(); }
+function mostrar(c,res,tipoS){ c.innerHTML=""; if(!res.length){ c.innerHTML=`<div style="padding:12px;text-align:center;color:#999;font-size:12px">No se encontró</div>`; c.classList.add("show"); return; } res.forEach(r=>{ const el=document.createElement("div"); el.className="suggestion"; el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;width:100%"><div style="width:32px;height:32px;background:#f1f1f1;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="map-pin" style="width:14px;color:#E53935"></i></div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;color:#111">${r.name}</div><div style="font-size:10px;color:#666">${r.exacta}</div></div><div style="background:#111;color:#fff;border-radius:6px;padding:4px 8px;font-size:9px;font-weight:800">EXACTA</div></div>`; el.onclick=async()=>{ if(tipoS==="pickup"){ pickupLat=r.lat;pickupLng=r.lon;pickupName=r.exacta;pickupInput.value=r.name+" - "+r.exacta.split(",")[0];pickupSuggestions.classList.remove("show"); document.getElementById('btnClearOrigen').style.display='flex'; if(pickupMarker)map.removeLayer(pickupMarker);pickupMarker=L.marker([r.lat,r.lon]).addTo(map); }else{ destinationLat=r.lat;destinationLng=r.lon;destName=r.exacta;destinationInput.value=r.name+" - "+r.exacta.split(",")[0];destinationSuggestions.classList.remove("show"); if(destinationMarker)map.removeLayer(destinationMarker);destinationMarker=L.marker([r.lat,r.lon]).addTo(map); } if(pickupLat&&destinationLat){ try{ const url=`https://router.project-osrm.org/route/v1/driving/${pickupLng},${pickupLat};${destinationLng},${destinationLat}?overview=full&geometries=geojson`; const rr=await fetch(url);const dd=await rr.json(); if(dd.routes&&dd.routes[0]){ if(routeLayer)map.removeLayer(routeLayer); routeLayer=L.geoJSON(dd.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(map); map.fitBounds(routeLayer.getBounds(),{padding:[40,40]}); } }catch(e){} } lucide.createIcons(); }; c.appendChild(el); }); c.classList.add("show"); lucide.createIcons(); }
 let t1=null;pickupInput.addEventListener("input",function(){ if(t1)clearTimeout(t1); const v=this.value.trim(); if(v.length<2){pickupSuggestions.classList.remove("show");document.getElementById('btnClearOrigen').style.display='none';return;} document.getElementById('btnClearOrigen').style.display='flex'; t1=setTimeout(async()=>{const res=await buscarColoniasExactas(v);mostrar(pickupSuggestions,res,"pickup");},400);});
 let t2=null;destinationInput.addEventListener("input",function(){ if(t2)clearTimeout(t2); if(this.value.length<2){destinationSuggestions.classList.remove("show");return;} t2=setTimeout(async()=>{const res=await buscarColoniasExactas(this.value.trim());mostrar(destinationSuggestions,res,"destination");},400);});
 function limpiarOrigen(){pickupInput.value="";pickupLat=null;pickupLng=null;pickupName=""; document.getElementById('btnClearOrigen').style.display='none'; if(pickupMarker)map.removeLayer(pickupMarker); if(routeLayer)map.removeLayer(routeLayer); pickupSuggestions.classList.remove("show");}
@@ -156,8 +130,6 @@ document.getElementById("calculateButton").onclick=async()=>{
 };
 function volver(){ document.getElementById('panel2').classList.remove('show'); }
 function seleccionar(t){ tipo=t; document.querySelectorAll('.card').forEach(c=>c.classList.remove('active')); document.getElementById('card'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active'); const btn=document.getElementById('btnElegir'); btn.classList.add('ready'); document.getElementById('btnTxt').innerText=t==='moto'?`Elegir Moto $${datosViaje.precioMoto}`:`Elegir Carro $${datosViaje.precioCarro}`; }
-
-// PANEL 3 MODIFICADO - RECALCULA AL TOCAR MAPA
 function abrirMapaConfirm(){
  if(!tipo){alert('Selecciona transporte');return;}
  document.getElementById('panel2').classList.remove('show');
@@ -173,9 +145,7 @@ function abrirMapaConfirm(){
      mapConfirm=L.map("mapConfirm",{zoomControl:false}).setView([pickupLat,pickupLng],18);
      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapConfirm);
      markerConfirm=L.marker([pickupLat,pickupLng],{draggable:true}).addTo(mapConfirm);
-     // AL ARRASTRAR RECALCULA
      markerConfirm.on('dragend',function(){ let p=markerConfirm.getLatLng(); finalPickupLat=p.lat; finalPickupLng=p.lng; recalcularRutaConfirm(); });
-     // AL TOCAR MAPA MUEVE PIN Y RECALCULA
      mapConfirm.on('click',function(e){ finalPickupLat=e.latlng.lat; finalPickupLng=e.latlng.lng; markerConfirm.setLatLng([finalPickupLat,finalPickupLng]); recalcularRutaConfirm(); });
    }
    mapConfirm.invalidateSize();
@@ -184,17 +154,9 @@ function abrirMapaConfirm(){
  },200);
  lucide.createIcons();
 }
-function trazarRutaConfirmInicial(){
- if(!mapConfirm) return;
- fetch(`https://router.project-osrm.org/route/v1/driving/${finalPickupLng},${finalPickupLat};${datosViaje.destLng},${datosViaje.destLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
-   if(d.routes&&d.routes[0]){
-     if(routeConfirmLayer) mapConfirm.removeLayer(routeConfirmLayer);
-     routeConfirmLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(mapConfirm);
-   }
- });
-}
+function trazarRutaConfirmInicial(){ if(!mapConfirm) return; fetch(`https://router.project-osrm.org/route/v1/driving/${finalPickupLng},${finalPickupLat};${datosViaje.destLng},${datosViaje.destLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{ if(d.routes&&d.routes[0]){ if(routeConfirmLayer) mapConfirm.removeLayer(routeConfirmLayer); routeConfirmLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#E53935",weight:6}}).addTo(mapConfirm); } }); }
 async function recalcularRutaConfirm(){
- document.getElementById('txtPickupConfirm').innerText=`Recogida ajustada: ${finalPickupLat.toFixed(5)}, ${finalPickupLng.toFixed(5)}`;
+ document.getElementById('txtPickupConfirm').innerText=`Punto ajustado: ${finalPickupLat.toFixed(5)}, ${finalPickupLng.toFixed(5)}`;
  try{
    const url=`https://router.project-osrm.org/route/v1/driving/${finalPickupLng},${finalPickupLat};${datosViaje.destLng},${datosViaje.destLat}?overview=full&geometries=geojson`;
    const r=await fetch(url); const d=await r.json();
@@ -205,18 +167,10 @@ async function recalcularRutaConfirm(){
      let baseMoto=cfg.baseMoto||35, baseCarro=cfg.baseCarro||55;
      if(route.distance>2000){ let e=route.distance-2000; baseMoto=cfg.baseMoto+Math.ceil(e/650)*5; baseCarro=cfg.baseCarro+Math.ceil(e/650)*8; }
      const precio = tipo==='moto'?baseMoto:baseCarro;
-     // Actualiza datos
-     datosViaje.distKm=km.toFixed(2);
-     datosViaje.tiempoMin=tiempo;
-     datosViaje.precioMoto=baseMoto;
-     datosViaje.precioCarro=baseCarro;
-     datosViaje.origenLat=finalPickupLat;
-     datosViaje.origenLng=finalPickupLng;
-     // Actualiza UI
+     datosViaje.distKm=km.toFixed(2); datosViaje.tiempoMin=tiempo; datosViaje.precioMoto=baseMoto; datosViaje.precioCarro=baseCarro; datosViaje.origenLat=finalPickupLat; datosViaje.origenLng=finalPickupLng;
      document.getElementById('txtDistConfirm').innerText=`${km.toFixed(2)} km`;
      document.getElementById('txtPrecioConfirm').innerText=`$${precio} MXN`;
      document.getElementById('txtTransporteConfirm').innerText=`${tipo.toUpperCase()} • ${tiempo} min`;
-     // Traza nueva ruta
      if(routeConfirmLayer) mapConfirm.removeLayer(routeConfirmLayer);
      routeConfirmLayer=L.geoJSON(route.geometry,{style:{color:"#E53935",weight:6}}).addTo(mapConfirm);
      mapConfirm.fitBounds(routeConfirmLayer.getBounds(),{padding:[40,40]});
@@ -225,18 +179,23 @@ async function recalcularRutaConfirm(){
 }
 function volverMapa(){ document.getElementById('panel3').classList.remove('show'); document.getElementById('panel2').classList.add('show'); }
 
+// ENLAZADO CLIENTE -> CONDUCTOR RESTABLECIDO
 function confirmarViajeFinal(){
  let precio=tipo==='moto'?datosViaje.precioMoto:datosViaje.precioCarro;
  let nuevoPedido={id:Date.now(),origen:pickupName,destino:destName,origenLat:finalPickupLat,origenLng:finalPickupLng,destLat:datosViaje.destLat,destLng:datosViaje.destLng,km:datosViaje.distKm,precio:precio,tipo:tipo,fecha:new Date().toLocaleString(),estado:'pendiente'};
  localStorage.setItem('kigo_ultimo_pedido_cliente', JSON.stringify(nuevoPedido));
- if(db){ db.ref('pedidos/'+nuevoPedido.id).set(nuevoPedido); db.ref('pedidos_disponibles/'+nuevoPedido.id).set(nuevoPedido).then(()=>{ asignarPorOrdenAlfabetico(nuevoPedido.id); }); }
+ if(db){
+   db.ref('pedidos/'+nuevoPedido.id).set(nuevoPedido);
+   db.ref('pedidos_disponibles/'+nuevoPedido.id).set(nuevoPedido).then(()=>{
+     asignarPorOrdenAlfabetico(nuevoPedido.id);
+   });
+ }
  mostrarBuscandoConductor(nuevoPedido);
 }
 function mostrarBuscandoConductor(pedido){
  document.getElementById('panel3').classList.remove('show');
  document.getElementById('panel2').classList.remove('show');
  document.getElementById('panelBuscando').classList.add('show');
- // AQUI QUITE LAS DIRECCIONES Y PUSE MOTO/CARRO SEGUN ELEGIDO
  if(pedido.tipo==='moto'){
    document.getElementById('buscandoTransporteImg').src='https://img.icons8.com/3d-fluency/94/motorcycle.png';
    document.getElementById('buscandoTitulo').innerText='Buscando moto cercana...';
@@ -244,37 +203,181 @@ function mostrarBuscandoConductor(pedido){
    document.getElementById('buscandoTransporteImg').src='https://img.icons8.com/3d-fluency/94/car.png';
    document.getElementById('buscandoTitulo').innerText='Buscando carro cercano...';
  }
- document.getElementById('buscandoInfo').innerText=`${pedido.tipo.toUpperCase()} • $${pedido.precio} MXN • ${pedido.km} km - Lupa buscando...`;
+ document.getElementById('buscandoInfo').innerText=`${pedido.tipo.toUpperCase()} • $${pedido.precio} MXN • ${pedido.km} km`;
  lucide.createIcons();
- if(db){ db.ref('pedidos_aceptados/'+pedido.id).on('value',snap=>{ let data=snap.val(); if(data){ mostrarConductorEnCamino(data); } }); }
+ if(db){
+   db.ref('pedidos_aceptados/'+pedido.id).on('value',snap=>{ let data=snap.val(); if(data){ mostrarConductorEnCamino(data); } });
+ }
 }
-function mostrarConductorEnCamino(data){ document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.add('show'); let pedido=data.pedido; let conductorId=data.conductorId; db.ref('conductores/'+conductorId).once('value').then(snap=>{ let cond=snap.val(); if(!cond) return; document.getElementById('clienteConductorFoto').src=cond.foto||''; document.getElementById('clienteConductorNombre').innerText=cond.nombre; document.getElementById('clienteConductorPlaca').innerText=`${cond.tipo.toUpperCase()} • ${cond.telefono||''}`; document.getElementById('clientePrecio').innerText=`$${pedido.precio} MXN`; document.getElementById('clienteOrigenTxt').innerText=pedido.origen; document.getElementById('clienteDestinoTxt').innerText=pedido.destino; setTimeout(()=>{ initMapCliente(pedido, cond); },300); db.ref('conductores/'+conductorId).on('value',s=>{ let c=s.val(); if(!c||!c.lat||!c.lng) return; actualizarConductorEnMapaCliente(c.lat,c.lng,pedido); }); }); lucide.createIcons(); }
+function mostrarConductorEnCamino(data){
+ document.getElementById('panelBuscando').classList.remove('show');
+ document.getElementById('panelClienteViaje').classList.add('show');
+ let pedido=data.pedido; let conductorId=data.conductorId;
+ db.ref('conductores/'+conductorId).once('value').then(snap=>{
+   let cond=snap.val(); if(!cond) return;
+   document.getElementById('clienteConductorFoto').src=cond.foto||'';
+   document.getElementById('clienteConductorNombre').innerText=cond.nombre;
+   document.getElementById('clienteConductorPlaca').innerText=`${cond.tipo.toUpperCase()} • ${cond.telefono||''}`;
+   document.getElementById('clientePrecio').innerText=`$${pedido.precio} MXN`;
+   document.getElementById('clienteOrigenTxt').innerText=pedido.origen;
+   document.getElementById('clienteDestinoTxt').innerText=pedido.destino;
+   setTimeout(()=>{ initMapCliente(pedido, cond); },300);
+   db.ref('conductores/'+conductorId).on('value',s=>{ let c=s.val(); if(!c||!c.lat||!c.lng) return; actualizarConductorEnMapaCliente(c.lat,c.lng,pedido); });
+ });
+ lucide.createIcons();
+}
 let ultimaPosCliente=null;
-function initMapCliente(pedido, conductor){ if(!mapCliente){ mapCliente=L.map("mapCliente",{zoomControl:false}).setView([pedido.origenLat,pedido.origenLng],16); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapCliente); } else { mapCliente.invalidateSize(); } fetch(`https://router.project-osrm.org/route/v1/driving/${pedido.origenLng},${pedido.origenLat};${pedido.destLng},${pedido.destLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{ if(d.routes&&d.routes[0]){ if(routeClienteLayer) mapCliente.removeLayer(routeClienteLayer); routeClienteLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#111",weight:5,dashArray:"8,8"}}).addTo(mapCliente); mapCliente.fitBounds(routeClienteLayer.getBounds(),{padding:[60,60]}); } }); L.marker([pedido.origenLat,pedido.origenLng]).addTo(mapCliente); L.marker([pedido.destLat,pedido.destLng]).addTo(mapCliente); if(conductor.lat&&conductor.lng){ actualizarConductorEnMapaCliente(conductor.lat,conductor.lng,pedido); } }
-function actualizarConductorEnMapaCliente(lat,lng,pedido){ if(!mapCliente) return; let icon=L.divIcon({html:`<div style="width:44px;height:44px;background:#111;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff">🏍️</div>`,iconSize:[44,44],iconAnchor:[22,22]}); if(!markerConductorCliente){ markerConductorCliente=L.marker([lat,lng],{icon:icon}).addTo(mapCliente); } else { markerConductorCliente.setLatLng([lat,lng]); } let dist=distMts(lat,lng,pedido.origenLat,pedido.origenLng); let km=(dist/1000).toFixed(1); document.getElementById('clienteDistancia').innerText=km+' km'; let mins=Math.ceil(dist/400); document.getElementById('clienteConductorTiempo').innerText=`Llega en ~${mins} min • ${km} km`; ultimaPosCliente={lat,lng}; }
+function initMapCliente(pedido, conductor){
+ if(!mapCliente){ mapCliente=L.map("mapCliente",{zoomControl:false}).setView([pedido.origenLat,pedido.origenLng],16); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapCliente); } else { mapCliente.invalidateSize(); }
+ fetch(`https://router.project-osrm.org/route/v1/driving/${pedido.origenLng},${pedido.origenLat};${pedido.destLng},${pedido.destLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{ if(d.routes&&d.routes[0]){ if(routeClienteLayer) mapCliente.removeLayer(routeClienteLayer); routeClienteLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#111",weight:5,dashArray:"8,8"}}).addTo(mapCliente); mapCliente.fitBounds(routeClienteLayer.getBounds(),{padding:[60,60]}); } });
+ L.marker([pedido.origenLat,pedido.origenLng]).addTo(mapCliente); L.marker([pedido.destLat,pedido.destLng]).addTo(mapCliente);
+ if(conductor.lat&&conductor.lng){ actualizarConductorEnMapaCliente(conductor.lat,conductor.lng,pedido); }
+}
+function actualizarConductorEnMapaCliente(lat,lng,pedido){
+ if(!mapCliente) return;
+ let icon=L.divIcon({html:`<div style="width:44px;height:44px;background:#111;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff">🏍️</div>`,iconSize:[44,44],iconAnchor:[22,22]});
+ if(!markerConductorCliente){ markerConductorCliente=L.marker([lat,lng],{icon:icon}).addTo(mapCliente); } else { markerConductorCliente.setLatLng([lat,lng]); }
+ let dist=distMts(lat,lng,pedido.origenLat,pedido.origenLng); let km=(dist/1000).toFixed(1);
+ document.getElementById('clienteDistancia').innerText=km+' km'; let mins=Math.ceil(dist/400);
+ document.getElementById('clienteConductorTiempo').innerText=`Llega en ~${mins} min • ${km} km`; ultimaPosCliente={lat,lng};
+}
 function centrarMapaCliente(){ if(ultimaPosCliente&&mapCliente) mapCliente.setView([ultimaPosCliente.lat,ultimaPosCliente.lng],17,{animate:true}); }
 function contactarConductor(){ let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(!ultimo) return; db.ref('pedidos_aceptados/'+ultimo.id).once('value').then(s=>{ let d=s.val(); if(!d) return; db.ref('conductores/'+d.conductorId).once('value').then(cs=>{ let c=cs.val(); if(c&&c.telefono) window.open(`https://wa.me/52${c.telefono}`,'_blank'); }); }); }
-function asignarPorOrdenAlfabetico(pedidoId){ if(!db) return; db.ref('conductores').once('value').then(snap=>{ let conds=Object.values(snap.val()||{}).filter(c=>c.estado==='en_linea'); db.ref('pedidos_disponibles/'+pedidoId).once('value').then(s=>{ let ped=s.val(); if(!ped) return; let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; }); compatibles.sort((a,b)=>a.nombre.localeCompare(b.nombre)); if(compatibles.length>0){ let primero=compatibles[0]; db.ref('asignaciones/'+pedidoId).set({conductorId:primero.id, conductorNombre:primero.nombre, expira:Date.now()+10000}); } }); }); }
-function cancelarPedidoCliente(){ if(!confirm('¿Cancelar pedido?')) return; let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null'); if(ultimo && db){ db.ref('pedidos/'+ultimo.id).remove(); db.ref('pedidos_disponibles/'+ultimo.id).remove(); db.ref('asignaciones/'+ultimo.id).remove(); db.ref('pedidos_aceptados/'+ultimo.id).remove(); db.ref('pedidos_cancelados_cliente/'+ultimo.id).set({id:ultimo.id, fecha:Date.now()}); } localStorage.removeItem('kigo_ultimo_pedido_cliente'); document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.remove('show'); irInicioForzado(); }
+
+// ASIGNACION ALFABETICA 10 SEGUNDOS - RESTABLECIDO
+function asignarPorOrdenAlfabetico(pedidoId){
+ if(!db) return;
+ db.ref('conductores').once('value').then(snap=>{
+   let todos = snap.val()||{};
+   let conds = Object.values(todos).filter(c=>c.estado==='en_linea');
+   db.ref('pedidos_disponibles/'+pedidoId).once('value').then(s=>{
+     let ped=s.val(); if(!ped) return;
+     let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; });
+     compatibles.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+     console.log("Conductores compatibles orden A-Z:", compatibles.map(c=>c.nombre));
+     if(compatibles.length>0){
+       let primero=compatibles[0];
+       db.ref('asignaciones/'+pedidoId).set({conductorId:primero.id, conductorNombre:primero.nombre, expira:Date.now()+10000});
+     }
+   });
+ });
+}
+function cancelarPedidoCliente(){
+ if(!confirm('¿Cancelar pedido?')) return;
+ let ultimo=JSON.parse(localStorage.getItem('kigo_ultimo_pedido_cliente')||'null');
+ if(ultimo && db){ db.ref('pedidos/'+ultimo.id).remove(); db.ref('pedidos_disponibles/'+ultimo.id).remove(); db.ref('asignaciones/'+ultimo.id).remove(); db.ref('pedidos_aceptados/'+ultimo.id).remove(); }
+ localStorage.removeItem('kigo_ultimo_pedido_cliente'); document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.remove('show'); irInicioForzado();
+}
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById('tab-'+name).classList.add('active'); const tabs=document.querySelectorAll('.tab'); if(name==='conductores') tabs[0].classList.add('active'); else tabs[1].classList.add('active'); }
 function abrirAdmin(){ if(localStorage.getItem('kigo_admin_sesion')==='1'){ document.getElementById('panelAdmin').style.display='flex'; return; } if(localStorage.getItem('kigo_conductor_sesion')){ const c=JSON.parse(localStorage.getItem('kigo_conductor_sesion')); abrirPanelConductor(c); return; } document.getElementById('modalAdmin').classList.add('show'); }
 function cerrarAdmin(){ document.getElementById('modalAdmin').classList.remove('show'); }
 function irInicioForzado(){ document.getElementById('panelAdmin').style.display='none'; document.getElementById('panelConductor').style.display='none'; document.getElementById('panel2').classList.remove('show'); document.getElementById('panel3').classList.remove('show'); document.getElementById('panelBuscando').classList.remove('show'); document.getElementById('panelClienteViaje').classList.remove('show'); document.getElementById('modalAdmin').classList.remove('show'); document.getElementById('modalConductor').style.display='none'; detenerTimerPedido(); detenerSonidoPedido(); setTimeout(()=>{ map.invalidateSize(); if(mapConfirm) mapConfirm.invalidateSize(); if(mapConductor) mapConductor.invalidateSize(); if(mapCliente) mapCliente.invalidateSize(); },200); }
 function irInicio(){ irInicioForzado(); }
 function loginAdmin(){ const u=document.getElementById('adminUser').value.trim(); const p=document.getElementById('adminPass').value.trim(); if(u==='admin' && p==='0831'){ localStorage.setItem('kigo_admin_sesion','1'); document.getElementById('modalAdmin').classList.remove('show'); document.getElementById('panelAdmin').style.display='flex'; renderConductores(); return; } const conductor = conductores.find(c=> (c.usuario===u && c.pass===p) ); if(conductor){ localStorage.setItem('kigo_conductor_sesion', JSON.stringify(conductor)); document.getElementById('modalAdmin').classList.remove('show'); abrirPanelConductor(conductor); return; } document.getElementById('adminError').style.display='block'; }
+
+// LOGICA CONDUCTOR - TARJETA 10 SEGUNDOS RESTABLECIDA
 let pedidosGlobales=[],timerPedido=null,tiempoRestante=10,ultimaPosConductor=null,sonidoInterval=null,audioCtx=null;
 function playUberSound(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=880; o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.0001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.3,audioCtx.currentTime+0.05); o.start(); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.25); o.stop(audioCtx.currentTime+0.26);}catch(e){} }
 function iniciarSonidoPedido(){ detenerSonidoPedido(); playUberSound(); sonidoInterval=setInterval(()=>playUberSound(),1200); }
 function detenerSonidoPedido(){ if(sonidoInterval){clearInterval(sonidoInterval);sonidoInterval=null;} }
 function abrirPanelConductor(c){ document.getElementById('panelConductor').style.display='flex'; document.getElementById('conductorPanelFoto').src=c.foto||''; document.getElementById('conductorPanelNombre').innerText=c.nombre||'Conductor'; document.getElementById('estadoBtnTxt').innerText=c.estado==='en_linea'?'EN LÍNEA':'OCUPADO'; let viajeActivo=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null'); if(viajeActivo && viajeActivo.conductorId===c.id){ document.getElementById('bloqueViajeActivo').style.display='block'; document.getElementById('bloquePedidos').style.display='none'; setTimeout(()=>{ initMapConductor(); trazarRutaConductorARecogida(viajeActivo.pedido); },400); } else { document.getElementById('bloquePedidos').style.display='block'; document.getElementById('bloqueViajeActivo').style.display='none'; setTimeout(()=>{ initMapConductor(); },400); } lucide.createIcons(); }
 function initMapConductor(){ if(!mapConductor){ mapConductor=L.map("mapConductor",{zoomControl:false}).setView([CENTRO.lat,CENTRO.lng],16); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapConductor); } else { mapConductor.invalidateSize(); } mostrarUbicacionConductor(true); }
-function mostrarUbicacionConductor(centrar=true){ if(!mapConductor) return; let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); navigator.geolocation.getCurrentPosition(pos=>{ ultimaPosConductor={lat:pos.coords.latitude,lng:pos.coords.longitude}; if(markerConductor) mapConductor.removeLayer(markerConductor); markerConductor=L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(mapConductor); if(centrar) mapConductor.setView([pos.coords.latitude,pos.coords.longitude],17); if(ses&&db){ db.ref('conductores/'+ses.id+'/lat').set(pos.coords.latitude); db.ref('conductores/'+ses.id+'/lng').set(pos.coords.longitude); } },null,{enableHighAccuracy:true}); if(watchConductor) navigator.geolocation.clearWatch(watchConductor); watchConductor=navigator.geolocation.watchPosition(pos=>{ ultimaPosConductor={lat:pos.coords.latitude,lng:pos.coords.longitude}; if(markerConductor) markerConductor.setLatLng([pos.coords.latitude,pos.coords.longitude]); let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(ses && db){ db.ref('conductores/'+ses.id+'/lat').set(pos.coords.latitude); db.ref('conductores/'+ses.id+'/lng').set(pos.coords.longitude); } },null,{enableHighAccuracy:true}); }
+function mostrarUbicacionConductor(centrar=true){
+ if(!mapConductor) return; let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+ navigator.geolocation.getCurrentPosition(pos=>{
+   ultimaPosConductor={lat:pos.coords.latitude,lng:pos.coords.longitude};
+   if(markerConductor) mapConductor.removeLayer(markerConductor);
+   markerConductor=L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(mapConductor);
+   if(centrar) mapConductor.setView([pos.coords.latitude,pos.coords.longitude],17);
+   if(ses&&db){ db.ref('conductores/'+ses.id+'/lat').set(pos.coords.latitude); db.ref('conductores/'+ses.id+'/lng').set(pos.coords.longitude); }
+ },null,{enableHighAccuracy:true});
+ if(watchConductor) navigator.geolocation.clearWatch(watchConductor);
+ watchConductor=navigator.geolocation.watchPosition(pos=>{
+   ultimaPosConductor={lat:pos.coords.latitude,lng:pos.coords.longitude};
+   if(markerConductor) markerConductor.setLatLng([pos.coords.latitude,pos.coords.longitude]);
+   let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(ses && db){ db.ref('conductores/'+ses.id+'/lat').set(pos.coords.latitude); db.ref('conductores/'+ses.id+'/lng').set(pos.coords.longitude); }
+ },null,{enableHighAccuracy:true});
+}
 function centrarMapaConductor(){ if(ultimaPosConductor) mapConductor.setView([ultimaPosConductor.lat,ultimaPosConductor.lng],18); }
-function renderPedidosConductor(){ const cont=document.getElementById('pedidosScroll'); const vacio=document.getElementById('vacioPedidos'); if(!pedidosGlobales.length){ cont.innerHTML=''; vacio.style.display='block'; detenerTimerPedido(); detenerSonidoPedido(); return; } vacio.style.display='none'; const p=pedidosGlobales[0]; cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between"><span style="background:#111;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} EXCLUSIVO</span><span style="font-weight:900">$${p.precio}</span></div><div style="margin-top:10px"><div><b>RECOGER</b> ${p.origen}</div><div><b>ENTREGAR</b> ${p.destino}</div></div><div style="margin-top:8px;font-size:10px">📏 ${p.km} km</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt">ACEPTAR <span id="timerTxt">10s</span></span></button></div>`; iniciarTimerPedido(); iniciarSonidoPedido(); }
-function iniciarTimerPedido(){ detenerTimerPedido(); tiempoRestante=10; timerPedido=setInterval(()=>{ tiempoRestante-=0.1; let pct=(tiempoRestante/10)*100; let bar=document.getElementById('timerBar'); let btnBar=document.getElementById('btnProgress'); let txt=document.getElementById('timerTxt'); if(bar) bar.style.width=pct+'%'; if(btnBar) btnBar.style.width=pct+'%'; if(txt) txt.innerText=Math.ceil(tiempoRestante)+'s'; if(tiempoRestante<=0){ clearInterval(timerPedido); tiempoAgotado(); } },100); }
+
+// TARJETA QUE DURA 10 SEGUNDOS
+function renderPedidosConductor(){
+ const cont=document.getElementById('pedidosScroll');
+ const vacio=document.getElementById('vacioPedidos');
+ if(!pedidosGlobales.length){ cont.innerHTML=''; vacio.style.display='block'; detenerTimerPedido(); detenerSonidoPedido(); return; }
+ vacio.style.display='none';
+ const p=pedidosGlobales[0];
+ cont.innerHTML=`<div class="pedido-card"><div id="timerBar" class="timer-bar"></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#111;color:#fff;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:900">${p.tipo.toUpperCase()} • EXCLUSIVO PARA TI</span><span style="font-weight:900;font-size:16px;color:#E53935">$${p.precio}</span></div><div style="margin-top:10px"><div style="font-size:11px;color:#666;font-weight:800">RECOGER EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.origen}</div><div style="margin-top:8px;font-size:11px;color:#666;font-weight:800">ENTREGAR EN:</div><div style="font-weight:900;font-size:13px;color:#111">${p.destino}</div></div><div style="margin-top:8px;font-size:10px;color:#666">📏 ${p.km} km • Tienes 10 segundos</div><button class="btn-aceptar" onclick="aceptarPedido(${p.id})"><div id="btnProgress" class="btn-aceptar-progress"></div><span id="btnAceptarTxt" style="position:relative;z-index:2">ACEPTAR VIAJE <span id="timerTxt">10s</span></span></button></div>`;
+ iniciarTimerPedido();
+ iniciarSonidoPedido();
+ lucide.createIcons();
+}
+function iniciarTimerPedido(){
+ detenerTimerPedido();
+ tiempoRestante=10;
+ let bar=document.getElementById('timerBar');
+ let btnBar=document.getElementById('btnProgress');
+ if(bar) bar.style.width='100%';
+ if(btnBar) btnBar.style.width='100%';
+ timerPedido=setInterval(()=>{
+   tiempoRestante-=0.1;
+   let pct=(tiempoRestante/10)*100;
+   let bar=document.getElementById('timerBar');
+   let btnBar=document.getElementById('btnProgress');
+   let txt=document.getElementById('timerTxt');
+   if(bar) bar.style.width=pct+'%';
+   if(btnBar) btnBar.style.width=pct+'%';
+   if(txt) txt.innerText=Math.ceil(tiempoRestante)+'s';
+   if(tiempoRestante<=0){ clearInterval(timerPedido); tiempoAgotado(); }
+ },100);
+}
 function detenerTimerPedido(){ if(timerPedido){clearInterval(timerPedido);timerPedido=null;} }
-function tiempoAgotado(){ let p=pedidosGlobales[0]; if(!p) return; if(db){ db.ref('asignaciones/'+p.id).remove(); db.ref('conductores').once('value').then(cSnap=>{ let conds=Object.values(cSnap.val()||{}).filter(c=>c.estado==='en_linea').sort((a,b)=>a.nombre.localeCompare(b.nombre)); db.ref('pedidos_disponibles/'+p.id).once('value').then(pSnap=>{ let ped=pSnap.val(); if(!ped){return;} let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; }); if(compatibles.length===0){return;} let idx=compatibles.findIndex(c=>c.id===JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'{}').id); let sigIdx=(idx+1)%compatibles.length; let siguiente=compatibles[sigIdx]; db.ref('asignaciones/'+p.id).set({conductorId:siguiente.id,conductorNombre:siguiente.nombre,expira:Date.now()+10000}); }); }); } pedidosGlobales=[]; renderPedidosConductor(); }
-function aceptarPedido(id){ detenerTimerPedido(); detenerSonidoPedido(); let pedido=pedidosGlobales.find(p=>p.id===id); if(!pedido) return; let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!ses) return; if(db){ db.ref('asignaciones/'+id).once('value').then(snap=>{ let asig=snap.val(); if(asig && asig.conductorId!==ses.id){ alert('Ya paso a otro'); pedidosGlobales=[]; renderPedidosConductor(); return; } ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses)); db.ref('conductores/'+ses.id+'/estado').set('ocupado'); db.ref('pedidos_disponibles/'+id).remove(); db.ref('pedidos/'+id).remove(); db.ref('asignaciones/'+id).remove(); db.ref('pedidos_aceptados/'+id).set({pedido:pedido,conductorId:ses.id,fecha:Date.now()}); pedidosGlobales=[]; let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id}; localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo)); document.getElementById('bloquePedidos').style.display='none'; document.getElementById('bloqueViajeActivo').style.display='block'; document.getElementById('viajeInfo').innerHTML=`<b>${pedido.origen}</b><br>→ ${pedido.destino}<br>$${pedido.precio}`; }); } }
+function tiempoAgotado(){
+ let p=pedidosGlobales[0]; if(!p) return;
+ console.log("Tiempo agotado para", p.id, "pasando al siguiente");
+ if(db){
+   db.ref('asignaciones/'+p.id).remove();
+   db.ref('conductores').once('value').then(cSnap=>{
+     let conds=Object.values(cSnap.val()||{}).filter(c=>c.estado==='en_linea').sort((a,b)=>a.nombre.localeCompare(b.nombre));
+     db.ref('pedidos_disponibles/'+p.id).once('value').then(pSnap=>{
+       let ped=pSnap.val(); if(!ped){return;}
+       let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; });
+       if(compatibles.length===0){console.log("No hay mas conductores");return;}
+       let idx=compatibles.findIndex(c=>c.id===JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'{}').id);
+       let sigIdx=(idx+1)%compatibles.length;
+       let siguiente=compatibles[sigIdx];
+       console.log("Pasando pedido a:", siguiente.nombre);
+       db.ref('asignaciones/'+p.id).set({conductorId:siguiente.id,conductorNombre:siguiente.nombre,expira:Date.now()+10000});
+     });
+   });
+ }
+ pedidosGlobales=[]; renderPedidosConductor();
+}
+function aceptarPedido(id){
+ detenerTimerPedido(); detenerSonidoPedido();
+ let pedido=pedidosGlobales.find(p=>p.id===id); if(!pedido) return;
+ let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!ses) return;
+ if(db){
+   db.ref('asignaciones/'+id).once('value').then(snap=>{
+     let asig=snap.val();
+     if(asig && asig.conductorId!==ses.id){ alert('Este pedido ya pasó a otro conductor'); pedidosGlobales=[]; renderPedidosConductor(); return; }
+     ses.estado='ocupado'; localStorage.setItem('kigo_conductor_sesion', JSON.stringify(ses));
+     db.ref('conductores/'+ses.id+'/estado').set('ocupado');
+     db.ref('pedidos_disponibles/'+id).remove();
+     db.ref('pedidos/'+id).remove();
+     db.ref('asignaciones/'+id).remove();
+     db.ref('pedidos_aceptados/'+id).set({pedido:pedido,conductorId:ses.id,fecha:Date.now()});
+     pedidosGlobales=[];
+     let viajeActivo={id:Date.now(),pedido:pedido,conductorId:ses.id};
+     localStorage.setItem('kigo_viaje_activo', JSON.stringify(viajeActivo));
+     document.getElementById('bloquePedidos').style.display='none';
+     document.getElementById('bloqueViajeActivo').style.display='block';
+     document.getElementById('viajeInfo').innerHTML=`<div style="font-size:11px;color:#666">VIAJE EN CURSO</div><b style="color:#111">${pedido.origen}</b><br>→ ${pedido.destino}<br><span style="color:#E53935;font-weight:900">$${pedido.precio}</span>`;
+     if(routeConductorLayer) mapConductor.removeLayer(routeConductorLayer);
+     trazarRutaConductorARecogida(pedido);
+   });
+ }
+}
 function trazarRutaConductorARecogida(pedido){ if(!mapConductor) return; fetch(`https://router.project-osrm.org/route/v1/driving/${ultimaPosConductor?.lng||CENTRO.lng},${ultimaPosConductor?.lat||CENTRO.lat};${pedido.origenLng},${pedido.origenLat}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{ if(d.routes&&d.routes[0]){ if(routeConductorLayer) mapConductor.removeLayer(routeConductorLayer); routeConductorLayer=L.geoJSON(d.routes[0].geometry,{style:{color:"#16a34a",weight:6}}).addTo(mapConductor); } }); }
 function abrirGoogleMapsRecogida(){ let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null'); if(!viaje) return; let p=viaje.pedido; window.open(`https://www.google.com/maps/dir/${ultimaPosConductor?.lat||''},${ultimaPosConductor?.lng||''}/${p.origenLat},${p.origenLng}/`,'_blank'); }
 function cancelarViaje(){ if(!confirm('¿Cancelar?')) return; let viaje=JSON.parse(localStorage.getItem('kigo_viaje_activo')||'null'); if(viaje&&db){ let pedido=viaje.pedido; db.ref('pedidos/'+pedido.id).set(pedido); db.ref('pedidos_disponibles/'+pedido.id).set(pedido); db.ref('pedidos_aceptados/'+pedido.id).remove(); db.ref('asignaciones/'+pedido.id).remove(); setTimeout(()=>asignarPorOrdenAlfabetico(pedido.id),500); } localStorage.removeItem('kigo_viaje_activo'); document.getElementById('bloquePedidos').style.display='block'; document.getElementById('bloqueViajeActivo').style.display='none'; cambiarEstado('en_linea'); }
@@ -290,13 +393,51 @@ function cambiarEstado(nuevo){ let sesion=JSON.parse(localStorage.getItem('kigo_
 function cerrarSesionAdmin(){ localStorage.removeItem('kigo_admin_sesion'); irInicioForzado(); }
 function cerrarSesionConductor(){ if(watchConductor) navigator.geolocation.clearWatch(watchConductor); localStorage.removeItem('kigo_conductor_sesion'); localStorage.removeItem('kigo_viaje_activo'); irInicioForzado(); }
 function guardarAjustes(){ let cfg2={nombre:document.getElementById('cfgNombre').value,baseMoto:parseInt(document.getElementById('cfgMoto').value),baseCarro:parseInt(document.getElementById('cfgCarro').value)}; localStorage.setItem('kigo_cfg',JSON.stringify({...cfg,...cfg2})); if(db) db.ref('config').set({...cfg,...cfg2}); alert('Guardado'); }
+
+// LISTENERS FIREBASE - ENLAZADO REAL
 if(db){
   db.ref('asignaciones').on('value',snap=>{
-    const data=snap.val()||{}; let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null'); if(!ses) return;
-    let tengo=Object.keys(data).some(pid=>data[pid].conductorId===ses.id && Date.now()<data[pid].expira);
-    if(tengo){ Object.keys(data).forEach(pid=>{ let asig=data[pid]; if(asig.conductorId===ses.id && Date.now()<asig.expira){ db.ref('pedidos_disponibles/'+pid).once('value').then(s=>{ let ped=s.val(); if(ped){ pedidosGlobales=[ped]; renderPedidosConductor(); } }); } }); } else { if(!localStorage.getItem('kigo_viaje_activo')){ pedidosGlobales=[]; renderPedidosConductor(); } }
+    const data=snap.val()||{};
+    let ses=JSON.parse(localStorage.getItem('kigo_conductor_sesion')||'null');
+    if(!ses) return;
+    if(localStorage.getItem('kigo_viaje_activo')) return;
+    let miPedidoId = Object.keys(data).find(pid=>data[pid].conductorId===ses.id && Date.now()<data[pid].expira);
+    if(miPedidoId){
+      db.ref('pedidos_disponibles/'+miPedidoId).once('value').then(s=>{
+        let ped=s.val();
+        if(ped){ pedidosGlobales=[ped]; renderPedidosConductor(); }
+      });
+    } else {
+      if(!localStorage.getItem('kigo_viaje_activo')){
+        let tengoAlguno = Object.keys(data).some(pid=>data[pid].conductorId===ses.id);
+        if(!tengoAlguno){ pedidosGlobales=[]; renderPedidosConductor(); }
+      }
+    }
   });
-  setInterval(()=>{ if(!db) return; db.ref('asignaciones').once('value').then(snap=>{ let data=snap.val()||{}; Object.keys(data).forEach(pid=>{ if(Date.now()>data[pid].expira){ db.ref('conductores').once('value').then(cSnap=>{ let conds=Object.values(cSnap.val()||{}).filter(c=>c.estado==='en_linea').sort((a,b)=>a.nombre.localeCompare(b.nombre)); db.ref('pedidos_disponibles/'+pid).once('value').then(pSnap=>{ let ped=pSnap.val(); if(!ped){db.ref('asignaciones/'+pid).remove();return;} let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; }); if(compatibles.length===0){db.ref('asignaciones/'+pid).remove();return;} let idx=compatibles.findIndex(c=>c.id===data[pid].conductorId); let sigIdx=(idx+1)%compatibles.length; let siguiente=compatibles[sigIdx]; db.ref('asignaciones/'+pid).set({conductorId:siguiente.id,conductorNombre:siguiente.nombre,expira:Date.now()+10000}); }); }); } }); }); },2000);
+  // CRON QUE PASA PEDIDO AL SIGUIENTE SI EXPIRA
+  setInterval(()=>{
+    if(!db) return;
+    db.ref('asignaciones').once('value').then(snap=>{
+      let data=snap.val()||{};
+      Object.keys(data).forEach(pid=>{
+        if(Date.now()>data[pid].expira){
+          db.ref('conductores').once('value').then(cSnap=>{
+            let conds=Object.values(cSnap.val()||{}).filter(c=>c.estado==='en_linea').sort((a,b)=>a.nombre.localeCompare(b.nombre));
+            db.ref('pedidos_disponibles/'+pid).once('value').then(pSnap=>{
+              let ped=pSnap.val(); if(!ped){db.ref('asignaciones/'+pid).remove();return;}
+              let compatibles=conds.filter(c=>{ if(c.tipo==='ambos') return true; return c.tipo===ped.tipo; });
+              if(compatibles.length===0){db.ref('asignaciones/'+pid).remove();return;}
+              let idx=compatibles.findIndex(c=>c.id===data[pid].conductorId);
+              let sigIdx=(idx+1)%compatibles.length;
+              let siguiente=compatibles[sigIdx];
+              console.log("Pasando de", data[pid].conductorNombre, "a", siguiente.nombre);
+              db.ref('asignaciones/'+pid).set({conductorId:siguiente.id,conductorNombre:siguiente.nombre,expira:Date.now()+10000});
+            });
+          });
+        }
+      });
+    });
+  },2000);
 }
 lucide.createIcons(); renderConductores();
 </script>
